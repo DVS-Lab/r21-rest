@@ -1,3 +1,6 @@
+Except for the third-party software identified below, original code in this
+repository is licensed under the MIT License.
+
 MIT License
 
 Copyright (c) 2026 Temple University Neuroeconomics Lab
@@ -19,3 +22,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Third-Party Software
+
+code/dual_regression is derived from FSL dual_regression v0.6 and is not
+covered by the MIT License above. It remains subject to the FSL License
+reproduced in the header of that file. Copyright (C) 2011-2019 University of
+Oxford.

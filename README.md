@@ -156,3 +156,9 @@ After preprocessing/QC:
    and right FPN.
 6. Build run-difference images from the `trial_type` labels in the BIDS events
    files, then pass those images to `randomise`.
+
+## License
+
+Original project code is licensed under the MIT License. `code/dual_regression`
+is derived from FSL and remains subject to the FSL License reproduced in that
+file. See `LICENSE` for details.
