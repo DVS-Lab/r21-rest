@@ -7,12 +7,12 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 usage() {
     cat <<'USAGE'
-Usage: code/list_subjects.sh --config PATH [--output PATH] [--force] [--render-only]
+Usage: code/list_subjects.sh [--config PATH] [--output PATH] [--force] [--render-only]
 
 List BIDS participants from BIDS_DIR in deterministic order.
 
 Options:
-  --config PATH             Shell configuration file to load.
+  --config PATH             Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.
   --output PATH             Write normalized participant IDs to this file.
   --force                   Permit replacing an existing --output file.
   --render-only, --dry-run  Print the BIDS directory that would be scanned without validating it.
@@ -59,4 +59,3 @@ if [[ -n "$output_path" ]]; then
 else
     printf '%s\n' "$participants"
 fi
-

@@ -239,7 +239,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Summarize fMRIPrep and MRIQC participant completion."
     )
-    parser.add_argument("--config", required=True, type=Path, help="Linux shell configuration file.")
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.",
+    )
     parser.add_argument("--subjects", type=Path, help="Optional participant list.")
     parser.add_argument("--output-csv", type=Path, help="Optional CSV summary path.")
     parser.add_argument("--output-json", type=Path, help="Optional JSON summary path.")
@@ -253,7 +257,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    config = parse_shell_config(args.config)
+    repo_root = Path(__file__).resolve().parents[1]
+    config_path = args.config
+    if config_path is None:
+        local_config = repo_root / "config" / "linux.env"
+        config_path = local_config if local_config.exists() else repo_root / "config" / "linux.env.example"
+    config = parse_shell_config(config_path)
     required = ["BIDS_DIR", "FMRIPREP_OUTPUT_DIR", "MRIQC_OUTPUT_DIR", "STATUS_ROOT"]
     missing_config = [key for key in required if not config.get(key)]
     if missing_config:
@@ -267,6 +276,7 @@ def main() -> int:
         raise SystemExit("No participants found.")
 
     rows = [participant_status(config, subject) for subject in subjects]
+    print(f"Using config: {config_path}")
     print(format_table(rows))
 
     if args.output_csv:
@@ -282,4 +292,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

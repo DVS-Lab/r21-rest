@@ -15,81 +15,84 @@ machine, use `--dry-run` or `--render-only`.
 
 Use these steps on the Linux server after pulling the branch.
 
-1. Create a local configuration file:
+1. Check the defaults:
+
+   ```bash
+   code/preflight_linux.sh --render-only
+   ```
+
+   The scripts default to `config/linux.env` if it exists, otherwise
+   `config/linux.env.example`.
+
+2. The tracked defaults assume:
+
+   - project root: `/ZPOOL/data/projects/r21-rest`
+   - BIDS input: `/ZPOOL/data/projects/r21-rest/bids`
+   - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
+   - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
+   - derivatives root: `/ZPOOL/data/projects/r21-rest/derivatives`
+
+   If any of those differ on the Linux server, copy the example to
+   `config/linux.env` and edit only the values that differ:
 
    ```bash
    cp config/linux.env.example config/linux.env
    ```
 
-2. Edit `config/linux.env` and confirm every path and resource setting. The
-   example defaults assume:
-
-   - BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
-   - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
-   - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
-   - derivatives root: `/ZPOOL/data/projects/r21-cardgame/derivatives/r21-rest`
-   - scratch root: `/ZPOOL/data/scratch/${USER}/r21-rest`
-
-3. Run a render-only preflight:
-
-   ```bash
-   code/preflight_linux.sh --config config/linux.env --render-only
-   ```
-
-4. Run the Linux preflight. This validates paths/runtime and checks projected
+3. Run the Linux preflight. This validates paths/runtime and checks projected
    resources without launching fMRIPrep or MRIQC:
 
    ```bash
-   code/preflight_linux.sh --config config/linux.env
+   code/preflight_linux.sh
    ```
 
-5. List BIDS participants:
+4. List BIDS participants:
 
    ```bash
-   code/list_subjects.sh --config config/linux.env --output subjects.txt
+   code/list_subjects.sh --output subjects.txt
    ```
 
-6. Render a one-subject fMRIPrep pilot command:
+5. Render a one-subject fMRIPrep pilot command:
 
    ```bash
-   code/run_fmriprep_batch.sh --config config/linux.env --subjects subjects.txt --pilot-one --dry-run
+   code/run_fmriprep_batch.sh --subjects subjects.txt --pilot-one --dry-run
    ```
 
-7. Launch one fMRIPrep pilot participant:
+6. Launch one fMRIPrep pilot participant:
 
    ```bash
-   code/run_fmriprep_batch.sh --config config/linux.env --subjects subjects.txt --pilot-one
+   code/run_fmriprep_batch.sh --subjects subjects.txt --pilot-one
    ```
 
-8. If the pilot looks good, launch the fMRIPrep batch. Run this inside `tmux`,
+7. If the pilot looks good, launch the fMRIPrep batch. Run this inside `tmux`,
    `screen`, or another persistent shell session:
 
    ```bash
-   code/run_fmriprep_batch.sh --config config/linux.env --subjects subjects.txt
+   code/run_fmriprep_batch.sh --subjects subjects.txt
    ```
 
-9. Summarize fMRIPrep/MRIQC completion at any point:
+8. Summarize fMRIPrep/MRIQC completion at any point:
 
    ```bash
-   code/check_preprocessing_status.py --config config/linux.env --subjects subjects.txt
+   code/check_preprocessing_status.py --subjects subjects.txt
    ```
 
-10. Render MRIQC participant commands:
+9. Render MRIQC participant commands:
 
    ```bash
-   code/run_mriqc_batch.sh --config config/linux.env --subjects subjects.txt --dry-run
+   code/run_mriqc_batch.sh --subjects subjects.txt --dry-run
    ```
 
-11. Run MRIQC participant jobs:
+10. Run MRIQC participant jobs:
 
    ```bash
-   code/run_mriqc_batch.sh --config config/linux.env --subjects subjects.txt
+   code/run_mriqc_batch.sh --subjects subjects.txt
    ```
 
-12. After participant-level MRIQC completes, run the MRIQC group report:
+11. After participant-level MRIQC completes, run the MRIQC group report:
 
    ```bash
-   code/run_mriqc_group.sh --config config/linux.env
+   code/run_mriqc_group.sh
    ```
 
 ## Resource Defaults

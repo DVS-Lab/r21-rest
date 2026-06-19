@@ -7,12 +7,12 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 usage() {
     cat <<'USAGE'
-Usage: code/preflight_linux.sh --config PATH [--render-only] [--allow-oversubscribe]
+Usage: code/preflight_linux.sh [--config PATH] [--render-only] [--allow-oversubscribe]
 
 Validate the Linux preprocessing configuration without running fMRIPrep or MRIQC.
 
 Options:
-  --config PATH             Shell configuration file to load.
+  --config PATH             Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.
   --render-only, --dry-run  Load settings and print projected resources without validating Linux paths.
   --allow-oversubscribe     Warn but do not fail when projected resources exceed Linux resources.
   --help                    Show this help.
@@ -63,4 +63,3 @@ if ! is_truthy "$render_only"; then
 else
     info "Render-only preflight complete. Linux-only paths were not validated."
 fi
-

@@ -7,12 +7,12 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_mriqc_group.sh --config PATH [options]
+Usage: code/run_mriqc_group.sh [--config PATH] [options]
 
 Run or render MRIQC group-level reporting after participant-level MRIQC.
 
 Options:
-  --config PATH             Shell configuration file to load.
+  --config PATH             Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.
   --dry-run, --render-only  Render the command without validating Linux paths or running the container.
   --force                   Run even if a complete status marker already exists.
   --help                    Show this help.
@@ -108,4 +108,3 @@ else
 fi
 
 exit "$rc"
-

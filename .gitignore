@@ -16,6 +16,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+!code/lib/
+!code/lib/common.sh
 parts/
 sdist/
 var/
@@ -217,7 +219,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Local preprocessing configuration and generated neuroimaging outputs
+# Local preprocessing overrides and generated neuroimaging outputs
 config/linux.env
 config/*.local.env
 derivatives/

@@ -7,12 +7,12 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_mriqc_batch.sh --config PATH [options]
+Usage: code/run_mriqc_batch.sh [--config PATH] [options]
 
 Run or render MRIQC participant jobs with bounded concurrency.
 
 Options:
-  --config PATH             Shell configuration file to load.
+  --config PATH             Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.
   --subjects PATH           Participant list, one label per line.
   --participant LABEL       Add one participant label. May be repeated.
   --pilot-one               Run/render only the first selected participant.
@@ -142,4 +142,3 @@ if (( failures )); then
     die "One or more MRIQC participant jobs failed."
 fi
 info "All selected MRIQC participant jobs finished successfully."
-

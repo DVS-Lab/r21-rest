@@ -7,12 +7,12 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_mriqc_subject.sh --config PATH --participant LABEL [options]
+Usage: code/run_mriqc_subject.sh [--config PATH] --participant LABEL [options]
 
 Run or render one MRIQC participant command.
 
 Options:
-  --config PATH             Shell configuration file to load.
+  --config PATH             Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.
   --participant LABEL       Participant label, with or without "sub-".
   --dry-run, --render-only  Render the command without validating Linux paths or running the container.
   --force                   Run even if a complete status marker already exists.
@@ -125,4 +125,3 @@ else
 fi
 
 exit "$rc"
-

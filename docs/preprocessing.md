@@ -10,36 +10,51 @@ the Mac.
 
 ## Configuration
 
-Copy the tracked example configuration to an untracked local file:
+The scripts default to `config/linux.env` if it exists, otherwise to the tracked
+`config/linux.env.example`.
+
+The tracked defaults are intended for the Linux project folder:
+
+```bash
+/ZPOOL/data/projects/r21-rest
+```
+
+The default generated outputs are under:
+
+- derivatives root: `/ZPOOL/data/projects/r21-rest/derivatives`
+- fMRIPrep outputs: `/ZPOOL/data/projects/r21-rest/derivatives/fmriprep-25.2.5`
+- MRIQC outputs: `/ZPOOL/data/projects/r21-rest/derivatives/mriqc-24.0.2`
+- FreeSurfer subjects: `/ZPOOL/data/projects/r21-rest/derivatives/freesurfer`
+- work/log/manifest/status folders: subfolders of `/ZPOOL/data/projects/r21-rest/derivatives`
+
+Other defaults:
+
+- BIDS input: `/ZPOOL/data/projects/r21-rest/bids`
+- fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
+- MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
+
+If a Linux path differs, copy the example to an untracked local override and
+edit only the values that differ:
 
 ```bash
 cp config/linux.env.example config/linux.env
 ```
 
-Review every path and resource value in `config/linux.env` before execution.
-The defaults are examples for the intended Linux layout:
-
-- BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
-- fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
-- MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
-- derivatives root: `/ZPOOL/data/projects/r21-cardgame/derivatives/r21-rest`
-- scratch root: `/ZPOOL/data/scratch/${USER}/r21-rest`
-
-Do not commit the local configuration, derivatives, work directories, logs,
-manifests, status markers, container images, or FreeSurfer license.
+Do not commit local overrides, derivatives, work directories, logs, manifests,
+status markers, container images, or FreeSurfer licenses.
 
 ## Preflight
 
 Render configuration and projected resources without validating Linux paths:
 
 ```bash
-code/preflight_linux.sh --config config/linux.env --render-only
+code/preflight_linux.sh --render-only
 ```
 
 On Linux, validate required paths, runtime availability, and projected resources:
 
 ```bash
-code/preflight_linux.sh --config config/linux.env
+code/preflight_linux.sh
 ```
 
 The default fMRIPrep batch projection is four concurrent jobs with eight
@@ -53,7 +68,7 @@ oversubscription unless `--allow-oversubscribe` is supplied.
 List BIDS participants on Linux:
 
 ```bash
-code/list_subjects.sh --config config/linux.env --output subjects.txt
+code/list_subjects.sh --output subjects.txt
 ```
 
 Participant labels are normalized so `189` and `sub-189` are treated as the same
@@ -65,7 +80,6 @@ Render a one-subject pilot command:
 
 ```bash
 code/run_fmriprep_batch.sh \
-  --config config/linux.env \
   --subjects subjects.txt \
   --pilot-one \
   --dry-run
@@ -75,7 +89,6 @@ Run a one-subject pilot on Linux:
 
 ```bash
 code/run_fmriprep_batch.sh \
-  --config config/linux.env \
   --subjects subjects.txt \
   --pilot-one
 ```
@@ -83,7 +96,7 @@ code/run_fmriprep_batch.sh \
 Run the configured batch:
 
 ```bash
-code/run_fmriprep_batch.sh --config config/linux.env --subjects subjects.txt
+code/run_fmriprep_batch.sh --subjects subjects.txt
 ```
 
 Use `--max-jobs 5` only as an explicit override after checking the host. Five
@@ -101,19 +114,19 @@ behavior.
 Render participant-level MRIQC commands:
 
 ```bash
-code/run_mriqc_batch.sh --config config/linux.env --subjects subjects.txt --dry-run
+code/run_mriqc_batch.sh --subjects subjects.txt --dry-run
 ```
 
 Run participant-level MRIQC on Linux:
 
 ```bash
-code/run_mriqc_batch.sh --config config/linux.env --subjects subjects.txt
+code/run_mriqc_batch.sh --subjects subjects.txt
 ```
 
 Run group-level MRIQC reporting after participant-level MRIQC completes:
 
 ```bash
-code/run_mriqc_group.sh --config config/linux.env
+code/run_mriqc_group.sh
 ```
 
 MRIQC uses the modalities listed in `MRIQC_MODALITIES`, which defaults to
@@ -124,14 +137,13 @@ MRIQC uses the modalities listed in `MRIQC_MODALITIES`, which defaults to
 Summarize expected fMRIPrep and MRIQC outputs:
 
 ```bash
-code/check_preprocessing_status.py --config config/linux.env --subjects subjects.txt
+code/check_preprocessing_status.py --subjects subjects.txt
 ```
 
 Optional machine-readable summaries:
 
 ```bash
 code/check_preprocessing_status.py \
-  --config config/linux.env \
   --subjects subjects.txt \
   --output-csv status/preprocessing-summary.csv \
   --output-json status/preprocessing-summary.json
@@ -140,4 +152,3 @@ code/check_preprocessing_status.py \
 The status checker looks for participant status markers, fMRIPrep subject HTML,
 preprocessed BOLD outputs, fMRIPrep confounds files, and MRIQC participant HTML.
 Missing outputs are flagged for review; they are not silently excluded.
-
