@@ -80,8 +80,8 @@ dual_regression v0.6 (R21 confound modification)
 
 ***NOTE*** ORDER OF COMMAND-LINE ARGUMENTS IS DIFFERENT FROM PREVIOUS VERSION
 
-Usage: dual_regression <group_IC_maps> <des_norm> <design.mat> <design.con> <n_perm> [--thr] <output_directory> <input1> <confounds1> <input2> <confounds2> .........
-e.g.   dual_regression groupICA.gica/groupmelodic.ica/melodic_IC 1 design.mat design.con 500 grot input1.nii.gz confounds1.tsv input2.nii.gz confounds2.tsv
+Usage: dual_regression <group_IC_maps> <des_norm> <design.mat> <design.con> <n_perm> [--thr] <output_directory> <input_list> <confound_list>
+e.g.   dual_regression groupICA.gica/groupmelodic.ica/melodic_IC 1 design.mat design.con 500 grot melodic_filelist.txt confound_filelist.txt
 
 <group_IC_maps_4D>            4D image containing spatial IC maps (melodic_IC) from the whole-group ICA analysis
 <des_norm>                    0 or 1 (1 is recommended). Whether to variance-normalise the timecourses used as the stage-2 regressors
@@ -89,11 +89,12 @@ e.g.   dual_regression groupICA.gica/groupmelodic.ica/melodic_IC 1 design.mat de
 <design.con>                  Design contrasts for final cross-subject modelling with randomise
 <n_perm>                      Number of permutations for randomise; set to 1 for just raw tstat output, set to 0 to not run randomise at all.
 [--thr]                       Perform thresholded dual regression to obtain unbiased timeseries for connectomics analyses (e.g., with FSLnets)
-<output_directory>            This directory will be created to hold all output and logfilesg
-<input1> <input2> ...         Subjects' preprocessed, standard-space 4D datasets
-<confounds1> <confounds2> ... Matching numeric confound matrices (one row per volume, no header)
+<output_directory>            This directory will be created to hold all output and logfiles
+<input_list>                   Text file containing one preprocessed, standard-space 4D dataset per line
+<confound_list>                Text file containing one matching numeric confound matrix per line
 
-Each input dataset must be followed immediately by its matching confound matrix.
+The two lists must have the same number of nonblank lines and matching order.
+Each confound matrix must have one row per volume and no header.
 The confounds are appended to the stage-1 network timecourses for stage 2 only.
 Stage-2 outputs contain only the spatial maps for the original group ICs.
 
@@ -142,18 +143,43 @@ fi
 
 OUTPUT=`${FSLDIR}/bin/remove_ext $1` ; shift
 
-while [ _$1 != _ ] ; do
-  if [ _$2 = _ ] ; then
-    echo "ERROR: each input dataset must be followed by a confound matrix" >&2
-    Usage
-  fi
-  if [ ! -f "$2" ] ; then
-    echo "ERROR: confound matrix not found: $2" >&2
+INPUT_LIST=$1 ; shift
+CONFOUND_LIST=$1 ; shift
+
+if [ _$1 != _ ] ; then
+  echo "ERROR: unexpected arguments after confound list: $*" >&2
+  Usage
+fi
+if [ ! -f "$INPUT_LIST" ] ; then
+  echo "ERROR: input list not found: $INPUT_LIST" >&2
+  exit 1
+fi
+if [ ! -f "$CONFOUND_LIST" ] ; then
+  echo "ERROR: confound list not found: $CONFOUND_LIST" >&2
+  exit 1
+fi
+
+if ! awk 'NF && NF != 1 { exit 1 }' "$INPUT_LIST" || ! awk 'NF && NF != 1 { exit 1 }' "$CONFOUND_LIST" ; then
+  echo "ERROR: list files must contain exactly one path per nonblank line" >&2
+  exit 1
+fi
+
+N_INPUTS=`awk 'NF { n++ } END { print n+0 }' "$INPUT_LIST"`
+N_CONFOUNDS=`awk 'NF { n++ } END { print n+0 }' "$CONFOUND_LIST"`
+if [ $N_INPUTS -ne $N_CONFOUNDS ] || [ $N_INPUTS -eq 0 ] ; then
+  echo "ERROR: input list has $N_INPUTS entries; confound list has $N_CONFOUNDS entries" >&2
+  exit 1
+fi
+
+for i in `cat "$INPUT_LIST"` ; do
+  INPUTS="$INPUTS `${FSLDIR}/bin/remove_ext $i`"
+done
+for c in `cat "$CONFOUND_LIST"` ; do
+  if [ ! -f "$c" ] ; then
+    echo "ERROR: confound matrix not found: $c" >&2
     exit 1
   fi
-  INPUTS="$INPUTS `${FSLDIR}/bin/remove_ext $1`"
-  CONFOUNDS="$CONFOUNDS $2"
-  shift 2
+  CONFOUNDS="$CONFOUNDS $c"
 done
 
 ############################################################################
