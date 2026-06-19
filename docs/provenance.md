@@ -10,6 +10,10 @@ after running on Linux.
 - Container runtime: `apptainer` or `singularity`
 - Runtime selection: `CONTAINER_RUNTIME="auto"` prefers `apptainer` when both
   runtimes are available.
+- fMRIPrep work directory: host `/ZPOOL/data/scratch/$USER`, mounted as
+  `/scratch` inside the container.
+- fMRIPrep output spaces: `fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`
+  with `--cifti-output 91k`.
 
 The scripts are written and syntax-tested on a Mac, but execution mode is
 restricted to Linux. Dry-run/render-only modes deliberately avoid validating
@@ -41,4 +45,3 @@ Batch launchers calculate projected CPU and memory use from configured jobs,
 per-job processes, and per-job memory. Execution mode reports available Linux
 CPUs and memory and refuses obvious oversubscription unless
 `--allow-oversubscribe` is supplied.
-

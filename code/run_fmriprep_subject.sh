@@ -43,51 +43,38 @@ require_fmriprep_config
 participant="$(normalize_participant_id "$participant_input")"
 participant_arg="$(participant_label_no_prefix "$participant")"
 runtime="$(detect_container_runtime "$dry_run")"
-work_dir="${WORK_ROOT}/fmriprep/${participant}"
-
-output_spaces=("MNI152NLin2009cAsym:res-2" "T1w")
-case "$FMRIPREP_PROFILE" in
-    volumetric)
-        ;;
-    surface|cifti)
-        if [[ -n "${SURFACE_OUTPUT_SPACES:-}" ]]; then
-            read -r -a surface_spaces <<< "$SURFACE_OUTPUT_SPACES"
-            output_spaces+=("${surface_spaces[@]}")
-        fi
-        ;;
-    *)
-        die "FMRIPREP_PROFILE must be volumetric, surface, or cifti; got: $FMRIPREP_PROFILE"
-        ;;
-esac
+work_dir="/scratch"
+container_output_dir="/output/$(basename "$FMRIPREP_OUTPUT_DIR")"
+container_fs_subjects_dir="/output/$(basename "$FS_SUBJECTS_DIR")"
+container_license="/opts/$(basename "$FS_LICENSE")"
+read -r -a output_spaces <<< "$FMRIPREP_OUTPUT_SPACES"
+((${#output_spaces[@]})) || die "FMRIPREP_OUTPUT_SPACES produced no output spaces."
 
 cmd=(
     "$runtime" run --cleanenv
-    -B "${BIDS_DIR}:${BIDS_DIR}:ro"
-    -B "${FMRIPREP_OUTPUT_DIR}:${FMRIPREP_OUTPUT_DIR}"
-    -B "${FS_SUBJECTS_DIR}:${FS_SUBJECTS_DIR}"
-    -B "${WORK_ROOT}:${WORK_ROOT}"
-    -B "${TEMPLATEFLOW_DIR}:${TEMPLATEFLOW_DIR}:ro"
-    -B "${FS_LICENSE}:${FS_LICENSE}:ro"
-    --env "TEMPLATEFLOW_HOME=${TEMPLATEFLOW_DIR}"
-    --env "FS_LICENSE=${FS_LICENSE}"
+    -B "${BIDS_DIR}:/input:ro"
+    -B "${DERIVATIVES_ROOT}:/output"
+    -B "${WORK_ROOT}:/scratch"
+    -B "${TEMPLATEFLOW_DIR}:/opt/templateflow:ro"
+    -B "$(dirname "$FS_LICENSE"):/opts:ro"
+    --env "TEMPLATEFLOW_HOME=/opt/templateflow"
+    --env "FS_LICENSE=${container_license}"
     "$FMRIPREP_IMAGE"
-    "$BIDS_DIR"
-    "$FMRIPREP_OUTPUT_DIR"
+    /input
+    "$container_output_dir"
     participant
     --participant-label "$participant_arg"
     --task-id "$TASK_ID"
-    --fs-license-file "$FS_LICENSE"
-    --fs-subjects-dir "$FS_SUBJECTS_DIR"
+    --fs-license-file "$container_license"
+    --fs-subjects-dir "$container_fs_subjects_dir"
     --work-dir "$work_dir"
     --nprocs "$FMRIPREP_NPROCS"
     --omp-nthreads "$FMRIPREP_OMP_NTHREADS"
     --mem-mb "$FMRIPREP_MEM_MB"
     --output-spaces "${output_spaces[@]}"
+    --cifti-output "$CIFTI_DENSITY"
 )
 
-if [[ "$FMRIPREP_PROFILE" == "cifti" ]]; then
-    cmd+=(--cifti-output "$CIFTI_DENSITY")
-fi
 if is_truthy "${FMRIPREP_SKIP_BIDS_VALIDATION:-0}"; then
     cmd+=(--skip-bids-validation)
 fi
@@ -121,7 +108,7 @@ guard_running_marker "fmriprep" "$participant"
 stamp="$(timestamp_file)"
 log_dir="${LOG_ROOT}/fmriprep/${participant}"
 manifest_dir="${MANIFEST_ROOT}/fmriprep/${participant}"
-ensure_dir "$FMRIPREP_OUTPUT_DIR" "$FS_SUBJECTS_DIR" "$work_dir" "$log_dir" "$manifest_dir" "$(status_dir "fmriprep")"
+ensure_dir "$FMRIPREP_OUTPUT_DIR" "$FS_SUBJECTS_DIR" "$WORK_ROOT" "$log_dir" "$manifest_dir" "$(status_dir "fmriprep")"
 
 command_file="${manifest_dir}/${stamp}.command.txt"
 stdout_log="${log_dir}/${stamp}.stdout.log"

@@ -43,18 +43,18 @@ require_mriqc_config
 participant="$(normalize_participant_id "$participant_input")"
 participant_arg="$(participant_label_no_prefix "$participant")"
 runtime="$(detect_container_runtime "$dry_run")"
-work_dir="${WORK_ROOT}/mriqc/${participant}"
+work_dir="/scratch"
 read -r -a modalities <<< "$MRIQC_MODALITIES"
 ((${#modalities[@]})) || die "MRIQC_MODALITIES produced no modalities."
 
 cmd=(
     "$runtime" run --cleanenv
-    -B "${BIDS_DIR}:${BIDS_DIR}:ro"
-    -B "${MRIQC_OUTPUT_DIR}:${MRIQC_OUTPUT_DIR}"
-    -B "${WORK_ROOT}:${WORK_ROOT}"
+    -B "${BIDS_DIR}:/data:ro"
+    -B "${MRIQC_OUTPUT_DIR}:/out"
+    -B "${WORK_ROOT}:/scratch"
     "$MRIQC_IMAGE"
-    "$BIDS_DIR"
-    "$MRIQC_OUTPUT_DIR"
+    /data
+    /out
     participant
     --participant-label "$participant_arg"
     --task-id "$TASK_ID"
@@ -96,7 +96,7 @@ guard_running_marker "mriqc" "$participant"
 stamp="$(timestamp_file)"
 log_dir="${LOG_ROOT}/mriqc/${participant}"
 manifest_dir="${MANIFEST_ROOT}/mriqc/${participant}"
-ensure_dir "$MRIQC_OUTPUT_DIR" "$work_dir" "$log_dir" "$manifest_dir" "$(status_dir "mriqc")"
+ensure_dir "$MRIQC_OUTPUT_DIR" "$WORK_ROOT" "$log_dir" "$manifest_dir" "$(status_dir "mriqc")"
 
 command_file="${manifest_dir}/${stamp}.command.txt"
 stdout_log="${log_dir}/${stamp}.stdout.log"

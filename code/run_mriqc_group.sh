@@ -41,13 +41,15 @@ read -r -a modalities <<< "$MRIQC_MODALITIES"
 
 cmd=(
     "$runtime" run --cleanenv
-    -B "${BIDS_DIR}:${BIDS_DIR}:ro"
-    -B "${MRIQC_OUTPUT_DIR}:${MRIQC_OUTPUT_DIR}"
+    -B "${BIDS_DIR}:/data:ro"
+    -B "${MRIQC_OUTPUT_DIR}:/out"
+    -B "${WORK_ROOT}:/scratch"
     "$MRIQC_IMAGE"
-    "$BIDS_DIR"
-    "$MRIQC_OUTPUT_DIR"
+    /data
+    /out
     group
     --modalities "${modalities[@]}"
+    --work-dir /scratch
 )
 
 if is_truthy "${MRIQC_NO_SUBMISSION:-0}"; then
@@ -64,6 +66,7 @@ if is_truthy "$dry_run"; then
 fi
 
 require_linux_execution
+ensure_dir "$WORK_ROOT"
 validate_dir_exists "BIDS" "$BIDS_DIR"
 validate_file_exists "MRIQC image" "$MRIQC_IMAGE"
 validate_dir_exists "MRIQC output" "$MRIQC_OUTPUT_DIR"

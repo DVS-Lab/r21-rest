@@ -31,6 +31,9 @@ Use these steps on the Linux server after pulling the branch.
    - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
    - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
    - derivatives root: `/ZPOOL/data/projects/r21-rest/derivatives`
+   - scratch/work root: `/ZPOOL/data/scratch/$USER`
+   - fMRIPrep output spaces: `fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`
+   - CIFTI output: `91k`
 
    If any of those differ on the Linux server, copy the example to
    `config/linux.env` and edit only the values that differ:
@@ -68,6 +71,12 @@ Use these steps on the Linux server after pulling the branch.
    source BIDS dataset may not pass the bundled validator cleanly. BIDS issues
    should be reviewed separately; this setting keeps preprocessing from stopping
    before fMRIPrep starts.
+
+   It also uses the lab-standard container layout: BIDS is mounted at `/input`,
+   derivatives at `/output`, scratch at `/scratch`, the FreeSurfer license at
+   `/opts`, and TemplateFlow at `/opt/templateflow`. fMRIPrep receives
+   `--work-dir /scratch`, `--cifti-output 91k`, and
+   `--output-spaces fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`.
 
 7. If the pilot looks good, launch the fMRIPrep batch. Run this inside `tmux`,
    `screen`, or another persistent shell session:

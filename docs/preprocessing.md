@@ -25,13 +25,16 @@ The default generated outputs are under:
 - fMRIPrep outputs: `/ZPOOL/data/projects/r21-rest/derivatives/fmriprep-25.2.5`
 - MRIQC outputs: `/ZPOOL/data/projects/r21-rest/derivatives/mriqc-24.0.2`
 - FreeSurfer subjects: `/ZPOOL/data/projects/r21-rest/derivatives/freesurfer`
-- work/log/manifest/status folders: subfolders of `/ZPOOL/data/projects/r21-rest/derivatives`
+- scratch/work root: `/ZPOOL/data/scratch/$USER`
+- log/manifest/status folders: subfolders of `/ZPOOL/data/projects/r21-rest/derivatives`
 
 Other defaults:
 
 - BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
 - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
 - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
+- fMRIPrep output spaces: `fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`
+- CIFTI output: `91k`
 
 If a Linux path differs, copy the example to an untracked local override and
 edit only the values that differ:

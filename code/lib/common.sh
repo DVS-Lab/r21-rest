@@ -130,7 +130,7 @@ require_fmriprep_config() {
         FS_LICENSE \
         FMRIPREP_OUTPUT_DIR \
         FS_SUBJECTS_DIR \
-        FMRIPREP_PROFILE \
+        FMRIPREP_OUTPUT_SPACES \
         CIFTI_DENSITY \
         FMRIPREP_MAX_JOBS \
         FMRIPREP_NPROCS \
