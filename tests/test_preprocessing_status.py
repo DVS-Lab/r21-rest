@@ -22,7 +22,7 @@ def test_parse_shell_config_expands_prior_values(tmp_path, monkeypatch):
                 'DERIVATIVES_ROOT="/derivatives/r21-rest"',
                 'FMRIPREP_OUTPUT_DIR="${DERIVATIVES_ROOT}/fmriprep-25.2.5"',
                 'WORK_ROOT="/scratch/${USER}/r21-rest"',
-                'MRIQC_MODALITIES="T1w T2w bold"',
+                'MRIQC_MODALITIES="T1w bold"',
             ]
         )
     )
@@ -31,7 +31,7 @@ def test_parse_shell_config_expands_prior_values(tmp_path, monkeypatch):
 
     assert parsed["FMRIPREP_OUTPUT_DIR"] == "/derivatives/r21-rest/fmriprep-25.2.5"
     assert parsed["WORK_ROOT"] == "/scratch/analyst/r21-rest"
-    assert parsed["MRIQC_MODALITIES"] == "T1w T2w bold"
+    assert parsed["MRIQC_MODALITIES"] == "T1w bold"
 
 
 def test_normalize_participant_accepts_prefixed_and_unprefixed_labels():

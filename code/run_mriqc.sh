@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run fMRIPrep for a list of participants.
+# Run MRIQC for a list of participants.
 #
 # Usage:
-#   bash code/run_fmriprep.sh
-#   bash code/run_fmriprep.sh --sublist code/sublist.txt --pilot-one
-#   bash code/run_fmriprep.sh --dry-run
+#   bash code/run_mriqc.sh
+#   bash code/run_mriqc.sh --sublist code/sublist.txt --pilot-one
+#   bash code/run_mriqc.sh --dry-run
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_fmriprep.sh [--sublist PATH] [--max-jobs N] [--pilot-one] [--dry-run]
+Usage: code/run_mriqc.sh [--sublist PATH] [--max-jobs N] [--pilot-one] [--dry-run]
 
-Run fMRIPrep for participants listed one per line. Blank lines and # comments
+Run MRIQC for participants listed one per line. Blank lines and # comments
 are ignored. If --sublist is not provided, the script uses code/sublist.txt,
 falling back to subjects.txt in the project root if it exists.
 USAGE
@@ -22,7 +22,7 @@ scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 maindir="$(dirname "$scriptdir")"
 
 sublist=""
-maxjobs="${FMRIPREP_MAX_JOBS:-4}"
+maxjobs="${MRIQC_MAX_JOBS:-4}"
 pilot_one=0
 dryrun=0
 
@@ -52,7 +52,7 @@ fi
 [[ -f "$sublist" ]] || { echo "ERROR: Sublist not found: $sublist" >&2; exit 1; }
 [[ "$maxjobs" =~ ^[1-9][0-9]*$ ]] || { echo "ERROR: --max-jobs must be a positive integer." >&2; exit 1; }
 if (( maxjobs > 5 )); then
-    echo "ERROR: Refusing more than 5 concurrent fMRIPrep jobs." >&2
+    echo "ERROR: Refusing more than 5 concurrent MRIQC jobs." >&2
     exit 1
 fi
 if (( maxjobs == 5 )); then
@@ -83,12 +83,12 @@ if (( pilot_one )); then
     echo "Pilot mode: ${subjects[0]}" >&2
 fi
 
-logdir="${maindir}/derivatives/logs/fmriprep"
+logdir="${maindir}/derivatives/logs/mriqc"
 if (( ! dryrun )); then
     mkdir -p "$logdir"
 fi
 
-script="${scriptdir}/fmriprep.sh"
+script="${scriptdir}/mriqc.sh"
 failures=0
 pids=()
 
@@ -121,8 +121,8 @@ for pid in "${pids[@]}"; do
 done
 
 if (( failures )); then
-    echo "ERROR: One or more fMRIPrep jobs failed. Check logs in $logdir" >&2
+    echo "ERROR: One or more MRIQC jobs failed. Check logs in $logdir" >&2
     exit 1
 fi
 
-echo "All fMRIPrep jobs completed successfully." >&2
+echo "All MRIQC jobs completed successfully." >&2

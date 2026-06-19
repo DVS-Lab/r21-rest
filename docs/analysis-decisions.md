@@ -1,8 +1,8 @@
 # Analysis Decisions
 
-This preprocessing draft is limited to fMRIPrep execution, MRIQC execution, and
-completion summaries. It does not implement condition contrasts, smoothing,
-MELODIC, network matching, dual regression, or randomise.
+This preprocessing draft currently covers fMRIPrep execution, MRIQC execution,
+and completion summaries. Confound extraction, MELODIC, network matching, dual
+regression, run-difference images, and randomise are the next workflow pieces.
 
 ## Current Study Context
 
@@ -21,13 +21,18 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
 - Volumetric data may later receive minimal 4-mm FWHM SUSAN smoothing.
 - Surface data would require a separate Connectome Workbench smoothing step.
 - Nuisance regression will be incorporated into a modified FSL dual-regression
-  procedure.
+  procedure, using the lab-standard confounds extracted from fMRIPrep.
 - fMRIPrep outputs should not be nuisance-regressed during this preprocessing
   assignment.
 - Group MELODIC will eventually be run both with fixed dimensionality 20 and
   with automatic dimensionality estimation.
 - QA will include motion and MRIQC outlier identification consistent with prior
   lab work, including boxplot/IQR-based flags.
+- Subject exclusions should not be finalized until the stimulation-delivery
+  concern is resolved.
+- Group MELODIC components will be compared with Smith09 PNAS maps. Primary
+  networks are DMN, ECN, and left/right FPN; secondary networks include
+  cerebellum and sensorimotor components.
 - Automated QA should flag observations rather than silently exclude them.
 - Bonferroni correction may eventually be used across the primary inferential
   family.
@@ -40,4 +45,3 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
 
 The meaning of "bidirectional" remains unresolved. It may mean two-sided
 inference, or it may mean explicit positive and negative directional contrasts.
-

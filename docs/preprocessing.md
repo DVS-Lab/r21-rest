@@ -1,70 +1,49 @@
 # Preprocessing Launchers
 
-This repository provides a draft Linux launcher set for fMRIPrep 25.2.5 and
-MRIQC 24.0.2. The scripts are intended to be reviewed on a Mac with
-`--dry-run` or `--render-only`, then executed later on the Linux server after
-paths, containers, FreeSurfer licensing, and host resources are confirmed.
+This repository uses simple Linux launchers for fMRIPrep 25.2.5 and MRIQC
+24.0.2. They are designed to match the organization used in the related lab
+repositories: one script for one subject, and one `run_*` script for a subject
+list.
 
-The scripts do not connect to the Linux server and do not inspect `/ZPOOL` from
-the Mac.
+The scripts do not connect to the Linux server from this machine. Use
+`--dry-run` or `--render-only` locally to inspect commands without validating
+`/ZPOOL` paths.
 
-## Configuration
+## Paths
 
-The scripts default to `config/linux.env` if it exists, otherwise to the tracked
-`config/linux.env.example`.
-
-The tracked defaults are intended for the Linux project folder:
+Default Linux paths:
 
 ```bash
-/ZPOOL/data/projects/r21-rest
+PROJECT_ROOT=/ZPOOL/data/projects/r21-rest
+BIDS_DIR=/ZPOOL/data/projects/r21-cardgame/bids
+DERIVATIVES_ROOT=/ZPOOL/data/projects/r21-rest/derivatives
+WORK_ROOT=/ZPOOL/data/scratch/$USER
 ```
 
-The default generated outputs are under:
+Default outputs:
 
-- derivatives root: `/ZPOOL/data/projects/r21-rest/derivatives`
-- fMRIPrep outputs: `/ZPOOL/data/projects/r21-rest/derivatives/fmriprep-25.2.5`
-- MRIQC outputs: `/ZPOOL/data/projects/r21-rest/derivatives/mriqc-24.0.2`
-- FreeSurfer subjects: `/ZPOOL/data/projects/r21-rest/derivatives/freesurfer`
-- scratch/work root: `/ZPOOL/data/scratch/$USER`
-- log/manifest/status folders: subfolders of `/ZPOOL/data/projects/r21-rest/derivatives`
-
-Other defaults:
-
-- BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
-- fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
-- MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
-- fMRIPrep output spaces: `fsLR MNI152NLin6Asym`
-- CIFTI output: `91k`
-
-If a Linux path differs, copy the example to an untracked local override and
-edit only the values that differ:
-
-```bash
-cp config/linux.env.example config/linux.env
-```
-
-Do not commit local overrides, derivatives, work directories, logs, manifests,
-status markers, container images, or FreeSurfer licenses.
+- fMRIPrep: `derivatives/fmriprep-25.2.5`
+- FreeSurfer: `derivatives/freesurfer`
+- MRIQC: `derivatives/mriqc`
+- logs: `derivatives/logs`
 
 ## Preflight
 
-Render configuration and projected resources without validating Linux paths:
+Render the configuration and resource projection:
 
 ```bash
 code/preflight_linux.sh --render-only
 ```
 
-On Linux, validate required paths, runtime availability, and projected resources:
+On Linux, validate the expected paths, containers, and resource projection:
 
 ```bash
 code/preflight_linux.sh
 ```
 
-The default fMRIPrep batch projection is four concurrent jobs with eight
-processes and 24 GB memory per job, for a projected maximum of 32 CPU threads
-and 96 GB memory. These settings must be compared with the Linux host before
-execution. The scripts warn on oversubscription and refuse obvious
-oversubscription unless `--allow-oversubscribe` is supplied.
+The preflight script reads `config/linux.env` if present, otherwise
+`config/linux.env.example`. The main launchers have the standard Linux defaults
+built in and can be overridden with environment variables when needed.
 
 ## Participant Discovery
 
@@ -74,8 +53,8 @@ List BIDS participants on Linux:
 code/list_subjects.sh --output code/sublist.txt
 ```
 
-Participant labels are normalized so `189` and `sub-189` are treated as the same
-participant. Comments and blank lines are accepted in subject files.
+Participant labels are normalized so `189` and `sub-189` are equivalent.
+Comments and blank lines are accepted in subject lists.
 
 ## fMRIPrep
 
@@ -85,49 +64,71 @@ Render a one-subject pilot command:
 code/run_fmriprep.sh --pilot-one --dry-run
 ```
 
-Run a one-subject pilot on Linux:
+Run a one-subject pilot:
 
 ```bash
 code/run_fmriprep.sh --pilot-one
 ```
 
-Run the configured batch:
+Run the full list:
 
 ```bash
 code/run_fmriprep.sh
 ```
 
-Use `--max-jobs 5` only as an explicit override after checking the host. Five
-jobs are not assumed safe merely because the flag was requested; resource checks
-still apply.
-
 `code/fmriprep.sh` runs one participant. `code/run_fmriprep.sh` reads
-`code/sublist.txt` by default, limits concurrent jobs to four unless
-`--max-jobs` is supplied, and writes one log per subject under
+`code/sublist.txt` by default and writes one log per subject under
 `derivatives/logs/fmriprep`.
+
+fMRIPrep uses:
+
+```bash
+--skip-bids-validation
+--cifti-output 91k
+--output-spaces fsLR MNI152NLin6Asym
+--work-dir /scratch
+```
 
 ## MRIQC
 
-Render participant-level MRIQC commands:
+Render a one-subject MRIQC pilot command:
 
 ```bash
-code/run_mriqc_batch.sh --subjects subjects.txt --dry-run
+code/run_mriqc.sh --pilot-one --dry-run
 ```
 
-Run participant-level MRIQC on Linux:
+Run a one-subject MRIQC pilot:
 
 ```bash
-code/run_mriqc_batch.sh --subjects subjects.txt
+code/run_mriqc.sh --pilot-one
 ```
 
-Run group-level MRIQC reporting after participant-level MRIQC completes:
+Run MRIQC for the full list:
 
 ```bash
-code/run_mriqc_group.sh
+code/run_mriqc.sh
 ```
 
-MRIQC uses the modalities listed in `MRIQC_MODALITIES`, which defaults to
-`T1w T2w bold`.
+Run the group report after participant reports complete:
+
+```bash
+code/mriqc_group.sh
+```
+
+`code/mriqc.sh` runs one participant. `code/run_mriqc.sh` reads
+`code/sublist.txt` by default and writes one log per subject under
+`derivatives/logs/mriqc`.
+
+MRIQC uses:
+
+```bash
+--modalities T1w bold
+--task-id rest
+--no-datalad-get
+--no-sub
+```
+
+This project is not treated as multi-echo data.
 
 ## Status Summary
 
@@ -142,10 +143,11 @@ Optional machine-readable summaries:
 ```bash
 code/check_preprocessing_status.py \
   --subjects code/sublist.txt \
-  --output-csv status/preprocessing-summary.csv \
-  --output-json status/preprocessing-summary.json
+  --output-csv derivatives/status/preprocessing-summary.csv \
+  --output-json derivatives/status/preprocessing-summary.json
 ```
 
-The status checker looks for participant status markers, fMRIPrep subject HTML,
-preprocessed BOLD outputs, fMRIPrep confounds files, and MRIQC participant HTML.
-Missing outputs are flagged for review; they are not silently excluded.
+The status checker looks for fMRIPrep subject HTML, preprocessed BOLD outputs,
+fMRIPrep confounds files, and MRIQC participant HTML. Marker columns are kept
+for compatibility with older launcher drafts and may remain `missing` with the
+simplified scripts.

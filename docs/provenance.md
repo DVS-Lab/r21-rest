@@ -1,47 +1,55 @@
 # Provenance
 
-This draft records commands and execution state so preprocessing can be audited
-after running on Linux.
+This repository records the intended software versions, paths, and launch
+commands for the R21 resting-state preprocessing workflow.
 
 ## Software Targets
 
 - fMRIPrep: 25.2.5
 - MRIQC: 24.0.2
 - Container runtime: `apptainer` or `singularity`
-- Runtime selection: `CONTAINER_RUNTIME="auto"` prefers `apptainer` when both
-  runtimes are available.
-- fMRIPrep work directory: host `/ZPOOL/data/scratch/$USER`, mounted as
-  `/scratch` inside the container.
-- fMRIPrep output spaces: `fsLR MNI152NLin6Asym`
-  with `--cifti-output 91k`.
+- Runtime selection: prefer `apptainer` when both runtimes are available
 
-The scripts are written and syntax-tested on a Mac, but execution mode is
-restricted to Linux. Dry-run/render-only modes deliberately avoid validating
-server-only paths such as `/ZPOOL`.
+## fMRIPrep
 
-## Recorded Artifacts
+`code/fmriprep.sh` runs one participant and `code/run_fmriprep.sh` runs a
+subject list. The fMRIPrep container receives:
 
-Each participant launcher writes:
+```bash
+/input        BIDS input, read-only
+/output       project derivatives
+/scratch      /ZPOOL/data/scratch/$USER
+/opts         FreeSurfer license directory
+/opt/templateflow
+```
 
-- a timestamped shell-quoted command file under `MANIFEST_ROOT`
-- timestamped stdout and stderr logs under `LOG_ROOT`
-- status markers under `STATUS_ROOT`
+The command uses `--cifti-output 91k`, `--output-spaces fsLR
+MNI152NLin6Asym`, and `--work-dir /scratch`.
 
-Running markers include the host and process ID. When a launcher sees an
-existing running marker, it checks whether the process appears active on the
-same host. Active runs are left alone; stale running markers are archived before
-restart.
+## MRIQC
 
-## Resume Behavior
+`code/mriqc.sh` runs one participant, `code/run_mriqc.sh` runs a subject list,
+and `code/mriqc_group.sh` runs the group report. The MRIQC container receives:
 
-The launchers do not remove fMRIPrep, MRIQC, FreeSurfer, or work directories.
-Participants with complete status markers are skipped unless `--force` is used.
-Incomplete participants can be restarted, allowing fMRIPrep and MRIQC to reuse
-their normal output and work directories where supported.
+```bash
+/data         BIDS input, read-only
+/out          derivatives/mriqc
+/workdir      /ZPOOL/data/scratch/$USER/mriqc/...
+/templateflow TemplateFlow cache
+/mplconfigdir Matplotlib cache
+```
 
-## Resource Accounting
+MRIQC uses `--modalities T1w bold`; no multi-echo options are used.
 
-Batch launchers calculate projected CPU and memory use from configured jobs,
-per-job processes, and per-job memory. Execution mode reports available Linux
-CPUs and memory and refuses obvious oversubscription unless
-`--allow-oversubscribe` is supplied.
+## Logs
+
+Batch launchers write one timestamped log per subject:
+
+```bash
+derivatives/logs/fmriprep/sub-*_YYYYMMDDTHHMMSSZ.log
+derivatives/logs/mriqc/sub-*_YYYYMMDDTHHMMSSZ.log
+```
+
+The launchers do not remove derivatives, FreeSurfer subjects, or scratch
+directories. Failed or incomplete subjects can be rerun, allowing the container
+tools to reuse their normal outputs and work directories where supported.
