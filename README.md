@@ -4,9 +4,9 @@ Code for preprocessing, quality assessment, and later dual-regression analyses
 of resting-state stimulation data from the R21 grant.
 
 The current draft focuses on Linux launchers for fMRIPrep 25.2.5 and MRIQC
-24.0.2. The scripts are configuration-driven, render transparent container
-commands, write logs/manifests/status markers, and avoid deleting work
-directories so incomplete fMRIPrep work can be resumed.
+24.0.2. The fMRIPrep scripts follow the lab pattern used in related projects:
+`code/fmriprep.sh` runs one subject, and `code/run_fmriprep.sh` loops over a
+simple subject list with bounded concurrency.
 
 Execution mode is intended for the Linux server only. On a Mac or other review
 machine, use `--dry-run` or `--render-only`.
@@ -52,19 +52,19 @@ Use these steps on the Linux server after pulling the branch.
 4. List BIDS participants:
 
    ```bash
-   code/list_subjects.sh --output subjects.txt
+   code/list_subjects.sh --output code/sublist.txt
    ```
 
 5. Render a one-subject fMRIPrep pilot command:
 
    ```bash
-   code/run_fmriprep_batch.sh --subjects subjects.txt --pilot-one --dry-run
+   code/run_fmriprep.sh --pilot-one --dry-run
    ```
 
 6. Launch one fMRIPrep pilot participant:
 
    ```bash
-   code/run_fmriprep_batch.sh --subjects subjects.txt --pilot-one
+   code/run_fmriprep.sh --pilot-one
    ```
 
    The default fMRIPrep command includes `--skip-bids-validation` because the
@@ -82,13 +82,13 @@ Use these steps on the Linux server after pulling the branch.
    `screen`, or another persistent shell session:
 
    ```bash
-   code/run_fmriprep_batch.sh --subjects subjects.txt
+   code/run_fmriprep.sh
    ```
 
 8. Summarize fMRIPrep/MRIQC completion at any point:
 
    ```bash
-   code/check_preprocessing_status.py --subjects subjects.txt
+   code/check_preprocessing_status.py --subjects code/sublist.txt
    ```
 
 9. Render MRIQC participant commands:
@@ -133,7 +133,7 @@ and refuse obvious oversubscription unless `--allow-oversubscribe` is supplied.
 `--max-jobs 5` is allowed only as an explicit override:
 
 ```bash
-code/run_fmriprep_batch.sh --config config/linux.env --subjects subjects.txt --max-jobs 5
+code/run_fmriprep.sh --max-jobs 5
 ```
 
 Five jobs are not assumed safe just because they were requested; resource checks

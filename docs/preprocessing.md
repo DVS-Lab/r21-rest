@@ -71,7 +71,7 @@ oversubscription unless `--allow-oversubscribe` is supplied.
 List BIDS participants on Linux:
 
 ```bash
-code/list_subjects.sh --output subjects.txt
+code/list_subjects.sh --output code/sublist.txt
 ```
 
 Participant labels are normalized so `189` and `sub-189` are treated as the same
@@ -82,35 +82,29 @@ participant. Comments and blank lines are accepted in subject files.
 Render a one-subject pilot command:
 
 ```bash
-code/run_fmriprep_batch.sh \
-  --subjects subjects.txt \
-  --pilot-one \
-  --dry-run
+code/run_fmriprep.sh --pilot-one --dry-run
 ```
 
 Run a one-subject pilot on Linux:
 
 ```bash
-code/run_fmriprep_batch.sh \
-  --subjects subjects.txt \
-  --pilot-one
+code/run_fmriprep.sh --pilot-one
 ```
 
 Run the configured batch:
 
 ```bash
-code/run_fmriprep_batch.sh --subjects subjects.txt
+code/run_fmriprep.sh
 ```
 
 Use `--max-jobs 5` only as an explicit override after checking the host. Five
 jobs are not assumed safe merely because the flag was requested; resource checks
 still apply.
 
-The fMRIPrep subject launcher writes a shell-quoted command manifest, stdout
-log, stderr log, and status marker. It skips participants with an existing
-complete marker unless `--force` is supplied. It never deletes work directories,
-allowing fMRIPrep to resume incomplete work through its normal work directory
-behavior.
+`code/fmriprep.sh` runs one participant. `code/run_fmriprep.sh` reads
+`code/sublist.txt` by default, limits concurrent jobs to four unless
+`--max-jobs` is supplied, and writes one log per subject under
+`derivatives/logs/fmriprep`.
 
 ## MRIQC
 
@@ -140,14 +134,14 @@ MRIQC uses the modalities listed in `MRIQC_MODALITIES`, which defaults to
 Summarize expected fMRIPrep and MRIQC outputs:
 
 ```bash
-code/check_preprocessing_status.py --subjects subjects.txt
+code/check_preprocessing_status.py --subjects code/sublist.txt
 ```
 
 Optional machine-readable summaries:
 
 ```bash
 code/check_preprocessing_status.py \
-  --subjects subjects.txt \
+  --subjects code/sublist.txt \
   --output-csv status/preprocessing-summary.csv \
   --output-json status/preprocessing-summary.json
 ```
