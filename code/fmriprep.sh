@@ -55,7 +55,7 @@ nthreads="${FMRIPREP_NPROCS:-8}"
 omp_nthreads="${FMRIPREP_OMP_NTHREADS:-4}"
 mem_mb="${FMRIPREP_MEM_MB:-24000}"
 cifti_density="${CIFTI_DENSITY:-91k}"
-output_spaces="${FMRIPREP_OUTPUT_SPACES:-fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym}"
+output_spaces="${FMRIPREP_OUTPUT_SPACES:-fsLR MNI152NLin6Asym}"
 read -r -a output_spaces_array <<< "$output_spaces"
 
 if command -v apptainer >/dev/null 2>&1; then
@@ -74,7 +74,7 @@ cmd=(
     -B "${bidsdir}:/input:ro"
     -B "${derivdir}:/output"
     -B "${scratchdir}:/scratch"
-    -B "${templateflow_dir}:/opt/templateflow:ro"
+    -B "${templateflow_dir}:/opt/templateflow"
     -B "$(dirname "$fs_license"):/opts:ro"
     --env "TEMPLATEFLOW_HOME=/opt/templateflow"
     --env "FS_LICENSE=/opts/$(basename "$fs_license")"
@@ -114,6 +114,7 @@ fi
 [[ -d "$bidsdir" ]] || { echo "ERROR: BIDS directory not found: $bidsdir" >&2; exit 1; }
 [[ -f "$fmriprep_image" ]] || { echo "ERROR: fMRIPrep image not found: $fmriprep_image" >&2; exit 1; }
 [[ -d "$templateflow_dir" ]] || { echo "ERROR: TemplateFlow directory not found: $templateflow_dir" >&2; exit 1; }
+[[ -w "$templateflow_dir" ]] || { echo "ERROR: TemplateFlow directory is not writable: $templateflow_dir" >&2; exit 1; }
 [[ -f "$fs_license" ]] || { echo "ERROR: FreeSurfer license not found: $fs_license" >&2; exit 1; }
 
 mkdir -p "$outputdir" "${derivdir}/freesurfer" "$scratchdir"

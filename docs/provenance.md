@@ -12,7 +12,7 @@ after running on Linux.
   runtimes are available.
 - fMRIPrep work directory: host `/ZPOOL/data/scratch/$USER`, mounted as
   `/scratch` inside the container.
-- fMRIPrep output spaces: `fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`
+- fMRIPrep output spaces: `fsLR MNI152NLin6Asym`
   with `--cifti-output 91k`.
 
 The scripts are written and syntax-tested on a Mac, but execution mode is

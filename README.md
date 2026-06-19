@@ -32,7 +32,7 @@ Use these steps on the Linux server after pulling the branch.
    - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
    - derivatives root: `/ZPOOL/data/projects/r21-rest/derivatives`
    - scratch/work root: `/ZPOOL/data/scratch/$USER`
-   - fMRIPrep output spaces: `fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`
+   - fMRIPrep output spaces: `fsLR MNI152NLin6Asym`
    - CIFTI output: `91k`
 
    If any of those differ on the Linux server, copy the example to
@@ -74,9 +74,10 @@ Use these steps on the Linux server after pulling the branch.
 
    It also uses the lab-standard container layout: BIDS is mounted at `/input`,
    derivatives at `/output`, scratch at `/scratch`, the FreeSurfer license at
-   `/opts`, and TemplateFlow at `/opt/templateflow`. fMRIPrep receives
+   `/opts`, and TemplateFlow at `/opt/templateflow`. TemplateFlow is mounted
+   writable so fMRIPrep can populate missing fsLR files. fMRIPrep receives
    `--work-dir /scratch`, `--cifti-output 91k`, and
-   `--output-spaces fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`.
+   `--output-spaces fsLR MNI152NLin6Asym`.
 
 7. If the pilot looks good, launch the fMRIPrep batch. Run this inside `tmux`,
    `screen`, or another persistent shell session:

@@ -33,7 +33,7 @@ Other defaults:
 - BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
 - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
 - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
-- fMRIPrep output spaces: `fsLR fsaverage MNI152NLin6Asym MNI152NLin2009cAsym`
+- fMRIPrep output spaces: `fsLR MNI152NLin6Asym`
 - CIFTI output: `91k`
 
 If a Linux path differs, copy the example to an untracked local override and
