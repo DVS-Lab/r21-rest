@@ -64,6 +64,11 @@ Use these steps on the Linux server after pulling the branch.
    code/run_fmriprep_batch.sh --subjects subjects.txt --pilot-one
    ```
 
+   The default fMRIPrep command includes `--skip-bids-validation` because the
+   source BIDS dataset may not pass the bundled validator cleanly. BIDS issues
+   should be reviewed separately; this setting keeps preprocessing from stopping
+   before fMRIPrep starts.
+
 7. If the pilot looks good, launch the fMRIPrep batch. Run this inside `tmux`,
    `screen`, or another persistent shell session:
 
