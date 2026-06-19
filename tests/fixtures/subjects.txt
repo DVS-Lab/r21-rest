@@ -1,0 +1,5 @@
+# Fixture participant list for status-script tests.
+sub-001
+002
+sub-001  # duplicate with inline comment
+

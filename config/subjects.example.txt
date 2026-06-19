@@ -1,0 +1,6 @@
+# Optional participant list, one label per line.
+# Labels may be written with or without "sub-"; comments and blank lines are ignored.
+#
+# sub-001
+# 002
+

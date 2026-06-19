@@ -216,3 +216,16 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local preprocessing configuration and generated neuroimaging outputs
+config/linux.env
+config/*.local.env
+derivatives/
+work/
+logs/
+manifests/
+status/
+*.sif
+*.img
+*.sqsh
+fs_license.txt
