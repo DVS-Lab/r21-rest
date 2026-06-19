@@ -1,61 +1,51 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-# shellcheck source=code/lib/common.sh
-source "${SCRIPT_DIR}/lib/common.sh"
-
 usage() {
     cat <<'USAGE'
-Usage: code/list_subjects.sh [--config PATH] [--output PATH] [--force] [--render-only]
+Usage: code/list_subjects.sh [--output PATH] [--force]
 
-List BIDS participants from BIDS_DIR in deterministic order.
-
-Options:
-  --config PATH             Optional shell configuration file. Defaults to config/linux.env, then config/linux.env.example.
-  --output PATH             Write normalized participant IDs to this file.
-  --force                   Permit replacing an existing --output file.
-  --render-only, --dry-run  Print the BIDS directory that would be scanned without validating it.
-  --help                    Show this help.
+Write task-rest BIDS participant labels to code/sublist.txt in deterministic order.
+Set BIDS_DIR to override /ZPOOL/data/projects/r21-cardgame/bids.
 USAGE
 }
 
-config_path=""
-output_path=""
+scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+bidsdir="${BIDS_DIR:-/ZPOOL/data/projects/r21-cardgame/bids}"
+task="${TASK_ID:-rest}"
+output="${scriptdir}/sublist.txt"
 force=0
-render_only=0
 
 while (($#)); do
     case "$1" in
-        --config) config_path="${2:-}"; shift 2 ;;
-        --output) output_path="${2:-}"; shift 2 ;;
+        --output) output="${2:-}"; shift 2 ;;
         --force) force=1; shift ;;
-        --render-only|--dry-run) render_only=1; shift ;;
         --help|-h) usage; exit 0 ;;
-        *) die "Unknown argument: $1" ;;
+        *) echo "ERROR: Unknown argument: $1" >&2; usage >&2; exit 1 ;;
     esac
 done
 
-load_config "$config_path"
-require_common_config
-
-if is_truthy "$render_only"; then
-    info "Render-only: would scan BIDS participant directories matching: ${BIDS_DIR}/sub-*"
-    exit 0
+[[ -d "$bidsdir" ]] || { echo "ERROR: BIDS directory not found: $bidsdir" >&2; exit 1; }
+if [[ -e "$output" && "$force" -ne 1 ]]; then
+    echo "ERROR: Output already exists: $output (use --force to replace it)" >&2
+    exit 1
 fi
 
-participants="$(list_bids_subjects)"
-if [[ -z "$participants" ]]; then
-    die "No BIDS participants found in: $BIDS_DIR"
+mkdir -p "$(dirname "$output")"
+shopt -s nullglob
+participants=("$bidsdir"/sub-*)
+subjects=()
+for participant in "${participants[@]}"; do
+    [[ -d "$participant" ]] || continue
+    sub="$(basename "$participant")"
+    bold_jsons=("$participant"/func/"${sub}_task-${task}_"*_bold.json)
+    ((${#bold_jsons[@]})) && subjects+=("$sub")
+done
+if ((${#subjects[@]} == 0)); then
+    echo "ERROR: No task-${task} participants found in: $bidsdir" >&2
+    exit 1
 fi
 
-if [[ -n "$output_path" ]]; then
-    if [[ -e "$output_path" ]] && ! is_truthy "$force"; then
-        die "Output file already exists: $output_path. Use --force to replace it."
-    fi
-    ensure_dir "$(dirname "$output_path")"
-    printf '%s\n' "$participants" > "$output_path"
-    info "Wrote participant list: $output_path"
-else
-    printf '%s\n' "$participants"
-fi
+printf '%s\n' "${subjects[@]}" | LC_ALL=C sort -u > "$output"
+
+printf 'Wrote %s participants to %s\n' "$(wc -l < "$output" | tr -d ' ')" "$output"

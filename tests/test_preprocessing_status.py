@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
+import unittest
 from pathlib import Path
 
 
@@ -13,93 +15,110 @@ sys.modules[SPEC.name] = status
 SPEC.loader.exec_module(status)
 
 
-def test_parse_shell_config_expands_prior_values(tmp_path, monkeypatch):
-    monkeypatch.setenv("USER", "analyst")
-    config = tmp_path / "linux.env"
-    config.write_text(
-        "\n".join(
-            [
-                'DERIVATIVES_ROOT="/derivatives/r21-rest"',
-                'FMRIPREP_OUTPUT_DIR="${DERIVATIVES_ROOT}/fmriprep-25.2.5"',
-                'WORK_ROOT="/scratch/${USER}/r21-rest"',
-                'MRIQC_MODALITIES="T1w bold"',
+def touch(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("ok\n")
+
+
+class PreprocessingStatusTests(unittest.TestCase):
+    def test_read_subjects_normalizes_comments_and_sorts(self):
+        fixture = Path(__file__).resolve().parent / "fixtures" / "subjects.txt"
+        self.assertEqual(status.read_subjects(fixture), ["sub-001", "sub-002"])
+
+    def test_list_bids_subjects_keeps_only_requested_task(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bids = Path(tmp) / "bids"
+            touch(bids / "sub-001" / "func" / "sub-001_task-rest_run-01_bold.json")
+            touch(
+                bids
+                / "sub-002"
+                / "func"
+                / "sub-002_task-cardgame_run-01_bold.json"
+            )
+            self.assertEqual(status.list_bids_subjects(bids, "rest"), ["sub-001"])
+
+    def test_complete_participant_and_group_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bids = root / "bids"
+            fmriprep = root / "fmriprep"
+            mriqc = root / "mriqc"
+            freesurfer = root / "freesurfer"
+            participant = "sub-001"
+            bold_stems = [
+                "sub-001_task-rest_run-01",
+                "sub-001_task-rest_run-02",
             ]
-        )
-    )
 
-    parsed = status.parse_shell_config(config)
+            touch(bids / participant / "anat" / "sub-001_T1w.json")
+            for stem in bold_stems:
+                touch(bids / participant / "func" / f"{stem}_bold.json")
+                touch(
+                    fmriprep
+                    / participant
+                    / "func"
+                    / f"{stem}_space-MNI152NLin6Asym_desc-preproc_bold.nii.gz"
+                )
+                touch(
+                    fmriprep
+                    / participant
+                    / "func"
+                    / f"{stem}_space-fsLR_den-91k_bold.dtseries.nii"
+                )
+                touch(
+                    fmriprep
+                    / participant
+                    / "func"
+                    / f"{stem}_desc-confounds_timeseries.tsv"
+                )
+                touch(mriqc / "reports" / f"{stem}_bold.html")
+                touch(mriqc / "derivatives" / participant / "func" / f"{stem}_bold.json")
 
-    assert parsed["FMRIPREP_OUTPUT_DIR"] == "/derivatives/r21-rest/fmriprep-25.2.5"
-    assert parsed["WORK_ROOT"] == "/scratch/analyst/r21-rest"
-    assert parsed["MRIQC_MODALITIES"] == "T1w bold"
+            touch(fmriprep / f"{participant}.html")
+            touch(fmriprep / participant / "anat" / "sub-001_desc-preproc_T1w.nii.gz")
+            touch(freesurfer / participant / "scripts" / "recon-all.done")
+            touch(mriqc / "reports" / "sub-001_T1w.html")
+            touch(mriqc / "derivatives" / participant / "anat" / "sub-001_T1w.json")
+            for group_file in ("bold.csv", "T1w.csv", "group_bold.html", "group_T1w.html"):
+                touch(mriqc / group_file)
+
+            row = status.participant_status(
+                bids, fmriprep, mriqc, freesurfer, participant
+            )
+            self.assertTrue(row.complete)
+            self.assertEqual(row.expected_bold, 2)
+            self.assertEqual(row.fmriprep_mni_bold, 2)
+            self.assertEqual(row.fmriprep_cifti_bold, 2)
+            self.assertEqual(row.fmriprep_confounds, 2)
+            self.assertEqual(row.mriqc_bold_reports, 2)
+            self.assertEqual(row.missing, "none")
+            self.assertTrue(status.mriqc_group_status(mriqc).complete)
+
+    def test_missing_outputs_are_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bids = root / "bids"
+            participant = "sub-002"
+            touch(bids / participant / "anat" / "sub-002_T1w.json")
+            touch(
+                bids
+                / participant
+                / "func"
+                / "sub-002_task-rest_run-01_bold.json"
+            )
+
+            row = status.participant_status(
+                bids,
+                root / "fmriprep",
+                root / "mriqc",
+                root / "freesurfer",
+                participant,
+            )
+            self.assertFalse(row.complete)
+            self.assertIn("fmriprep_report", row.missing)
+            self.assertIn("fmriprep_mni=0/1", row.missing)
+            self.assertIn("mriqc_bold_reports=0/1", row.missing)
 
 
-def test_normalize_participant_accepts_prefixed_and_unprefixed_labels():
-    assert status.normalize_participant("189") == "sub-189"
-    assert status.normalize_participant("sub-189") == "sub-189"
-
-
-def test_read_subjects_file_uses_comments_and_sorts_fixture():
-    fixture = Path(__file__).resolve().parent / "fixtures" / "subjects.txt"
-
-    assert status.read_subjects_file(fixture) == ["sub-001", "sub-002"]
-
-
-def test_participant_status_detects_expected_outputs(tmp_path):
-    fmriprep_root = tmp_path / "derivatives" / "fmriprep"
-    mriqc_root = tmp_path / "derivatives" / "mriqc"
-    status_root = tmp_path / "derivatives" / "status"
-    func_dir = fmriprep_root / "sub-001" / "func"
-    func_dir.mkdir(parents=True)
-    mriqc_root.mkdir(parents=True)
-    (status_root / "fmriprep").mkdir(parents=True)
-    (status_root / "mriqc").mkdir(parents=True)
-
-    (fmriprep_root / "sub-001.html").write_text("ok")
-    (func_dir / "sub-001_task-rest_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz").write_text("ok")
-    (func_dir / "sub-001_task-rest_desc-confounds_timeseries.tsv").write_text("ok")
-    (mriqc_root / "sub-001_task-rest_bold.html").write_text("ok")
-    (status_root / "fmriprep" / "sub-001.complete").write_text("STATE=complete\n")
-    (status_root / "mriqc" / "sub-001.complete").write_text("STATE=complete\n")
-
-    row = status.participant_status(
-        {
-            "TASK_ID": "rest",
-            "STATUS_ROOT": str(status_root),
-            "FMRIPREP_OUTPUT_DIR": str(fmriprep_root),
-            "MRIQC_OUTPUT_DIR": str(mriqc_root),
-        },
-        "sub-001",
-    )
-
-    assert row.fmriprep_marker == "complete"
-    assert row.fmriprep_html is True
-    assert row.fmriprep_preproc_bold == 1
-    assert row.fmriprep_confounds == 1
-    assert row.mriqc_marker == "complete"
-    assert row.mriqc_html == 1
-    assert row.missing == "none"
-
-
-def test_participant_status_reports_missing_outputs(tmp_path):
-    fmriprep_root = tmp_path / "derivatives" / "fmriprep"
-    mriqc_root = tmp_path / "derivatives" / "mriqc"
-    status_root = tmp_path / "derivatives" / "status"
-    fmriprep_root.mkdir(parents=True)
-    mriqc_root.mkdir(parents=True)
-    status_root.mkdir(parents=True)
-
-    row = status.participant_status(
-        {
-            "TASK_ID": "rest",
-            "STATUS_ROOT": str(status_root),
-            "FMRIPREP_OUTPUT_DIR": str(fmriprep_root),
-            "MRIQC_OUTPUT_DIR": str(mriqc_root),
-        },
-        "sub-002",
-    )
-
-    assert row.fmriprep_marker == "missing"
-    assert "fmriprep_html" in row.missing
-    assert "fmriprep_preproc_bold" in row.missing
-    assert "mriqc_html" in row.missing
+if __name__ == "__main__":
+    unittest.main()
