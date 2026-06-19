@@ -29,7 +29,7 @@ The default generated outputs are under:
 
 Other defaults:
 
-- BIDS input: `/ZPOOL/data/projects/r21-rest/bids`
+- BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
 - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
 - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
 

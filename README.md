@@ -27,7 +27,7 @@ Use these steps on the Linux server after pulling the branch.
 2. The tracked defaults assume:
 
    - project root: `/ZPOOL/data/projects/r21-rest`
-   - BIDS input: `/ZPOOL/data/projects/r21-rest/bids`
+   - BIDS input: `/ZPOOL/data/projects/r21-cardgame/bids`
    - fMRIPrep image: `/ZPOOL/data/tools/fmriprep-25.2.5.sif`
    - MRIQC image: `/ZPOOL/data/tools/mriqc-24.0.2.sif`
    - derivatives root: `/ZPOOL/data/projects/r21-rest/derivatives`
