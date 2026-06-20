@@ -58,6 +58,28 @@ code/mriqc_group.sh
 `code/mriqc.sh SUBJECT` runs one participant. Batch logs are written under
 `derivatives/logs/mriqc`.
 
+## MRIQC Outliers
+
+Summarize the completed task-rest MRIQC outputs:
+
+```bash
+python3 code/OutlierID.py
+```
+
+The script follows the lab's existing `OutlierID.py` approach while making the
+rules directional: only unusually low tSNR and unusually high mean framewise
+displacement are flagged. Tukey 1.5-IQR fences are calculated across all
+task-rest runs; mean FD above 0.5 mm is also flagged. No participant or run is
+excluded automatically.
+
+Review the three output tables in `derivatives/qc`:
+
+```text
+task-rest_mriqc_outliers.tsv
+task-rest_mriqc_bounds.tsv
+task-rest_mriqc_subject_summary.tsv
+```
+
 ## Verify Outputs
 
 Check expected outputs for every BIDS run and T1w image:
@@ -109,12 +131,31 @@ To use an inclusion list after QA:
 python3 code/MakeConfounds.py --subjects code/included_sublist.txt
 ```
 
+This also restricts the two ordered FSL input lists to the reviewed sample.
+
+## Smooth To 5 mm
+
+After extracting confounds, smooth every run in the ordered MELODIC list to a
+final 5-mm FWHM with AFNI `3dBlurToFWHM`:
+
+```bash
+code/run_smooth-3dBlurToFWHM.sh --dry-run
+code/run_smooth-3dBlurToFWHM.sh
+```
+
+`code/smooth-3dBlurToFWHM.sh SUBJECT RUN` handles one run. It uses the matching
+fMRIPrep brain mask and an isolated work directory under
+`/ZPOOL/data/scratch/$USER/r21-rest/smoothing`, avoiding conflicts from AFNI's
+temporary `3dFWHMx.1D` files. Smoothed images are written beside their original
+fMRIPrep images with a `_5mm.nii.gz` suffix. The batch script writes the ordered
+list `derivatives/fsl/melodic_filelist_5mm.txt` only after all requested outputs
+exist.
+
 ## Group MELODIC
 
-Review the inclusion list and smoothing decision before the final group ICA.
-The generated MELODIC list currently points to the native-resolution
-MNI152NLin6Asym fMRIPrep volumes. If 4-mm smoothing is adopted, point
-`MELODIC_FILELIST` to the corresponding smoothed-volume list instead.
+`code/melodic.sh` uses `derivatives/fsl/melodic_filelist_5mm.txt` by default.
+Run temporal-concatenation MELODIC both with automatic dimensionality and with
+20 fixed components:
 
 Render or run automatic dimensionality estimation:
 
@@ -136,6 +177,28 @@ derivatives/fsl/melodic-concat_dim-00_task-rest.ica
 derivatives/fsl/melodic-concat_dim-20_task-rest.ica
 ```
 
+Set `MELODIC_FILELIST` only when intentionally testing a different ordered
+image list.
+
+## Match Smith09 Networks
+
+The original Smith09 10-network image is stored in `masks`. For each completed
+MELODIC analysis, resample those maps to the exact MELODIC grid and calculate
+signed spatial correlations with `fslcc`:
+
+```bash
+code/match_smith09.sh 0 --dry-run
+code/match_smith09.sh 0
+code/match_smith09.sh 20
+```
+
+Results are written to `derivatives/fsl/smith09_dim-00_task-rest` and
+`derivatives/fsl/smith09_dim-20_task-rest`. Each directory contains the raw
+`fslcc` output, the resampled 10-network image, a complete labeled correlation
+matrix, and `smith09_best_matches.tsv`. The best-match table marks DMN, ECN,
+and left/right FPN as primary networks and cerebellar and sensorimotor maps as
+secondary networks. Component selection still requires visual review.
+
 ## Dual Regression
 
 The modified FSL script takes ordered image and confound lists. For a
@@ -146,7 +209,7 @@ code/dual_regression \
   derivatives/fsl/melodic-concat_dim-20_task-rest.ica/melodic_IC \
   1 -1 0 \
   derivatives/fsl/melodic-concat_dim-20_task-rest.dr \
-  derivatives/fsl/melodic_filelist.txt \
+  derivatives/fsl/melodic_filelist_5mm.txt \
   derivatives/fsl/confound_filelist.txt
 ```
 
@@ -155,10 +218,10 @@ original network maps.
 
 ## Remaining Work
 
-1. Review MRIQC and motion summaries and finalize participant/run exclusions.
-2. Decide whether the volumetric MELODIC inputs receive 4-mm smoothing.
-3. Match MELODIC components to Smith09, prioritizing DMN, ECN, and left/right
-   FPN; cerebellar and sensorimotor networks are secondary.
+1. Review MRIQC flags, the fMRIPrep reports, and the stimulation-delivery note;
+   then create `code/included_sublist.txt`.
+2. Extract confounds, smooth to 5 mm, and run both group MELODIC analyses.
+3. Review the Smith09 correlations and component spatial maps.
 4. Build run-difference images from BIDS `trial_type` labels.
 5. Create the final `randomise` designs and contrasts.
 
