@@ -200,20 +200,31 @@ def participant_status(
 
 @dataclass
 class MRIQCGroupStatus:
-    bold_csv: bool
-    t1w_csv: bool
+    bold_table: bool
+    t1w_table: bool
     bold_report: bool
     t1w_report: bool
 
     @property
     def complete(self) -> bool:
-        return self.bold_csv and self.t1w_csv and self.bold_report and self.t1w_report
+        return (
+            self.bold_table
+            and self.t1w_table
+            and self.bold_report
+            and self.t1w_report
+        )
 
 
 def mriqc_group_status(mriqc_dir: Path) -> MRIQCGroupStatus:
     return MRIQCGroupStatus(
-        bold_csv=has_output(mriqc_dir, "bold.csv"),
-        t1w_csv=has_output(mriqc_dir, "T1w.csv"),
+        bold_table=(
+            has_output(mriqc_dir, "group_bold.tsv")
+            or has_output(mriqc_dir, "bold.csv")
+        ),
+        t1w_table=(
+            has_output(mriqc_dir, "group_T1w.tsv")
+            or has_output(mriqc_dir, "T1w.csv")
+        ),
         bold_report=has_output(mriqc_dir, "group_bold.html"),
         t1w_report=has_output(mriqc_dir, "group_T1w.html"),
     )
@@ -364,8 +375,8 @@ def main() -> int:
     group = mriqc_group_status(args.mriqc_dir)
     print(
         "MRIQC group outputs: "
-        f"bold.csv={'yes' if group.bold_csv else 'no'}, "
-        f"T1w.csv={'yes' if group.t1w_csv else 'no'}, "
+        f"bold table={'yes' if group.bold_table else 'no'}, "
+        f"T1w table={'yes' if group.t1w_table else 'no'}, "
         f"group_bold.html={'yes' if group.bold_report else 'no'}, "
         f"group_T1w.html={'yes' if group.t1w_report else 'no'}"
     )

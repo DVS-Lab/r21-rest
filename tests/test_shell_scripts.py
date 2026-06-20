@@ -14,6 +14,7 @@ class ShellScriptTests(unittest.TestCase):
     def test_smoothing_dry_runs_use_expected_input_mask_and_output(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            bids = root / "bids"
             derivatives = root / "derivatives"
             func = derivatives / "fmriprep-25.2.5" / "sub-001" / "func"
             func.mkdir(parents=True)
@@ -22,11 +23,19 @@ class ShellScriptTests(unittest.TestCase):
             mask = func / f"{stem}_desc-brain_mask.nii.gz"
             bold.touch()
             mask.touch()
+            events = bids / "sub-001" / "func" / "sub-001_task-rest_run-01_events.tsv"
+            events.parent.mkdir(parents=True)
+            events.write_text("onset\tduration\ttrial_type\n0\t1\tRTPJ\n")
 
             fsldir = derivatives / "fsl"
             fsldir.mkdir()
-            (fsldir / "melodic_filelist.txt").write_text(f"{bold}\n")
+            manifest = fsldir / "task-rest_run_manifest.tsv"
+            manifest.write_text(
+                "participant\tacquired_run\tcondition\tcondition_order\tevents\tbold\tconfounds\n"
+                f"sub-001\t01\trtpj\t2\t{events}\t{bold}\t{root / 'confounds.tsv'}\n"
+            )
             env = os.environ | {
+                "BIDS_DIR": str(bids),
                 "DERIVATIVES_ROOT": str(derivatives),
                 "WORK_ROOT": str(root / "scratch"),
             }
@@ -45,7 +54,13 @@ class ShellScriptTests(unittest.TestCase):
                 check=True,
             )
             self.assertIn(str(mask), single.stderr)
-            self.assertIn(f"{stem}_desc-preproc_bold_5mm.nii.gz", single.stderr)
+            self.assertIn("Condition: rtpj (order 02)", single.stderr)
+            self.assertIn(
+                f"{stem}_condition-rtpj_order-02_desc-preproc_bold_5mm.nii.gz",
+                single.stderr,
+            )
+            self.assertIn("fslmaths", single.stderr)
+            self.assertIn("-mas", single.stderr)
 
             batch = subprocess.run(
                 [

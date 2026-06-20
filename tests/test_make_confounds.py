@@ -20,12 +20,16 @@ class MakeConfoundsTests(unittest.TestCase):
     def test_extracts_lab_columns_and_builds_parallel_lists(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            bids = root / "bids"
             fmriprep = root / "derivatives" / "fmriprep-25.2.5"
             func = fmriprep / "sub-001" / "func"
             func.mkdir(parents=True)
             source = func / "sub-001_task-rest_run-01_desc-confounds_timeseries.tsv"
             bold = func / "sub-001_task-rest_run-01_space-MNI152NLin6Asym_desc-preproc_bold.nii.gz"
             bold.write_text("image\n")
+            events = bids / "sub-001" / "func" / "sub-001_task-rest_run-01_events.tsv"
+            events.parent.mkdir(parents=True)
+            events.write_text("onset\tduration\ttrial_type\n0\t1\tRTPJ\n")
 
             columns = (
                 ["cosine00", "non_steady_state_outlier00"]
@@ -41,9 +45,17 @@ class MakeConfoundsTests(unittest.TestCase):
 
             output_dir = root / "derivatives" / "fsl" / "confounds"
             runs = confounds.find_runs(
-                fmriprep, output_dir, "rest", "MNI152NLin6Asym", {"sub-001"}
+                bids,
+                fmriprep,
+                output_dir,
+                "rest",
+                "MNI152NLin6Asym",
+                {"sub-001"},
             )
             self.assertEqual(len(runs), 1)
+            self.assertEqual(runs[0].condition, "rtpj")
+            self.assertEqual(runs[0].condition_order, 2)
+            self.assertIn("condition-rtpj", runs[0].fsl_confounds.name)
             selected = confounds.extract_confounds(
                 runs[0].source_confounds, runs[0].fsl_confounds
             )
@@ -65,10 +77,54 @@ class MakeConfoundsTests(unittest.TestCase):
             confound_list = output_dir.parent / "confound_filelist.txt"
             confounds.write_filelist(melodic_list, [runs[0].bold])
             confounds.write_filelist(confound_list, [runs[0].fsl_confounds])
+            manifest = output_dir.parent / "task-rest_run_manifest.tsv"
+            confounds.write_manifest(manifest, runs)
             self.assertEqual(melodic_list.read_text().strip(), str(bold.resolve()))
             self.assertEqual(
                 confound_list.read_text().strip(), str(runs[0].fsl_confounds.resolve())
             )
+            with manifest.open() as stream:
+                manifest_rows = list(csv.DictReader(stream, delimiter="\t"))
+            self.assertEqual(manifest_rows[0]["acquired_run"], "01")
+            self.assertEqual(manifest_rows[0]["condition"], "rtpj")
+
+    def test_condition_parser_rejects_empty_events(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            events = Path(tmp) / "events.tsv"
+            events.write_text("onset\tduration\ttrial_type\n")
+            with self.assertRaisesRegex(ValueError, "found none"):
+                confounds.condition_from_events(events)
+
+    def test_run_lists_follow_condition_order_not_acquisition_order(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bids = root / "bids"
+            fmriprep = root / "fmriprep"
+            output = root / "fsl" / "confounds"
+            for run, condition in (("01", "VLPFC"), ("02", "SHAM")):
+                prefix = f"sub-001_task-rest_run-{run}"
+                func = fmriprep / "sub-001" / "func"
+                func.mkdir(parents=True, exist_ok=True)
+                (func / f"{prefix}{confounds.CONFOUND_SUFFIX}").touch()
+                (
+                    func
+                    / f"{prefix}_space-MNI152NLin6Asym_desc-preproc_bold.nii.gz"
+                ).touch()
+                events = bids / "sub-001" / "func" / f"{prefix}_events.tsv"
+                events.parent.mkdir(parents=True, exist_ok=True)
+                events.write_text(
+                    f"onset\tduration\ttrial_type\n0\t1\t{condition}\n"
+                )
+
+            runs = confounds.find_runs(
+                bids, fmriprep, output, "rest", "MNI152NLin6Asym", None
+            )
+            self.assertEqual(
+                [(run.condition, run.acquired_run) for run in runs],
+                [("sham", "02"), ("vlpfc", "01")],
+            )
+            with self.assertRaisesRegex(ValueError, "Incomplete condition sets"):
+                confounds.validate_condition_sets(runs)
 
 
 if __name__ == "__main__":

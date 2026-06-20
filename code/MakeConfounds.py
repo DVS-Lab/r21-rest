@@ -20,13 +20,19 @@ MOTION = ["trans_x", "trans_y", "trans_z", "rot_x", "rot_y", "rot_z"]
 ACOMPCOR = [f"a_comp_cor_{index:02d}" for index in range(6)]
 REQUIRED = MOTION + ACOMPCOR + ["framewise_displacement"]
 MISSING_VALUES = {"", "n/a", "nan", "na"}
+CONDITION_ORDER = {"sham": 1, "rtpj": 2, "vlpfc": 3, "both": 4}
 
 
 @dataclass(frozen=True)
 class RunFiles:
     source_confounds: Path
+    events: Path
     bold: Path
     fsl_confounds: Path
+    participant: str
+    acquired_run: str
+    condition: str
+    condition_order: int
 
 
 def normalize_subject(label: str) -> str:
@@ -54,6 +60,46 @@ def subject_from_name(path: Path) -> str:
     if not match:
         raise ValueError(f"Cannot determine participant from: {path}")
     return match.group(1)
+
+
+def entity_from_name(path: Path, entity: str) -> str:
+    match = re.search(rf"(?:^|_){re.escape(entity)}-([^_]+)", path.name)
+    if not match:
+        raise ValueError(f"Cannot determine {entity} from: {path}")
+    return match.group(1)
+
+
+def find_events(source: Path, bids_dir: Path) -> Path:
+    prefix = source.name.removesuffix(CONFOUND_SUFFIX)
+    subject = subject_from_name(source)
+    matches = sorted((bids_dir / subject).rglob(f"{prefix}_events.tsv"))
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected one events file for {source.name}; found {len(matches)}"
+        )
+    return matches[0]
+
+
+def condition_from_events(path: Path) -> str:
+    with path.open(newline="") as stream:
+        reader = csv.DictReader(stream, delimiter="\t")
+        if reader.fieldnames is None or "trial_type" not in reader.fieldnames:
+            raise ValueError(f"{path}: missing trial_type column")
+        conditions = {
+            (row.get("trial_type") or "").strip().lower()
+            for row in reader
+            if (row.get("trial_type") or "").strip()
+        }
+    if len(conditions) != 1:
+        found = ", ".join(sorted(conditions)) if conditions else "none"
+        raise ValueError(f"{path}: expected one trial_type; found {found}")
+    condition = conditions.pop()
+    if condition not in CONDITION_ORDER:
+        raise ValueError(
+            f"{path}: unknown trial_type {condition}; expected "
+            + ", ".join(CONDITION_ORDER)
+        )
+    return condition
 
 
 def find_preproc_bold(source: Path, fmriprep_dir: Path, space: str) -> Path:
@@ -117,6 +163,7 @@ def extract_confounds(source: Path, output: Path) -> list[str]:
 
 
 def find_runs(
+    bids_dir: Path,
     fmriprep_dir: Path,
     output_dir: Path,
     task: str,
@@ -127,7 +174,9 @@ def find_runs(
         fmriprep_dir.glob(f"sub-*/**/*_task-{task}_*{CONFOUND_SUFFIX}")
     )
     if subjects is not None:
-        sources = [source for source in sources if subject_from_name(source) in subjects]
+        sources = [
+            source for source in sources if subject_from_name(source) in subjects
+        ]
         found_subjects = {subject_from_name(source) for source in sources}
         missing_subjects = sorted(subjects - found_subjects)
         if missing_subjects:
@@ -140,15 +189,47 @@ def find_runs(
     runs = []
     for source in sources:
         subject = subject_from_name(source)
-        output_name = source.name.removesuffix(CONFOUND_SUFFIX) + "_desc-fslConfounds.tsv"
+        events = find_events(source, bids_dir)
+        condition = condition_from_events(events)
+        acquired_run = entity_from_name(source, "run")
+        output_name = (
+            source.name.removesuffix(CONFOUND_SUFFIX)
+            + f"_condition-{condition}_desc-fslConfounds.tsv"
+        )
         runs.append(
             RunFiles(
                 source_confounds=source,
+                events=events,
                 bold=find_preproc_bold(source, fmriprep_dir, space),
                 fsl_confounds=output_dir / subject / output_name,
+                participant=subject,
+                acquired_run=acquired_run,
+                condition=condition,
+                condition_order=CONDITION_ORDER[condition],
             )
         )
-    return runs
+    return sorted(
+        runs,
+        key=lambda run: (run.participant, run.condition_order, run.acquired_run),
+    )
+
+
+def validate_condition_sets(runs: list[RunFiles]) -> None:
+    by_subject: dict[str, list[RunFiles]] = {}
+    for run in runs:
+        by_subject.setdefault(run.participant, []).append(run)
+
+    errors = []
+    expected = set(CONDITION_ORDER)
+    for participant, participant_runs in sorted(by_subject.items()):
+        conditions = [run.condition for run in participant_runs]
+        if len(conditions) != len(expected) or set(conditions) != expected:
+            found = ", ".join(conditions) if conditions else "none"
+            errors.append(
+                f"{participant}: expected sham, rtpj, vlpfc, both; found {found}"
+            )
+    if errors:
+        raise ValueError("Incomplete condition sets:\n  " + "\n  ".join(errors))
 
 
 def write_filelist(path: Path, files: list[Path]) -> None:
@@ -156,10 +237,49 @@ def write_filelist(path: Path, files: list[Path]) -> None:
     path.write_text("".join(f"{file.resolve()}\n" for file in files))
 
 
+def write_manifest(path: Path, runs: list[RunFiles]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "participant",
+        "acquired_run",
+        "condition",
+        "condition_order",
+        "events",
+        "bold",
+        "confounds",
+    ]
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=fieldnames, delimiter="\t", lineterminator="\n"
+        )
+        writer.writeheader()
+        for run in runs:
+            writer.writerow(
+                {
+                    "participant": run.participant,
+                    "acquired_run": run.acquired_run,
+                    "condition": run.condition,
+                    "condition_order": run.condition_order,
+                    "events": run.events.resolve(),
+                    "bold": run.bold.resolve(),
+                    "confounds": run.fsl_confounds.resolve(),
+                }
+            )
+
+
 def parse_args() -> argparse.Namespace:
     repo_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
         description="Extract lab-standard fMRIPrep confounds and write FSL file lists."
+    )
+    parser.add_argument(
+        "--bidsDir",
+        "--bids-dir",
+        dest="bids_dir",
+        type=Path,
+        default=Path(
+            os.environ.get("BIDS_DIR", "/ZPOOL/data/projects/r21-cardgame/bids")
+        ),
     )
     parser.add_argument(
         "--fmriprepDir",
@@ -195,7 +315,10 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     repo_root = Path(__file__).resolve().parents[1]
+    bids_dir = args.bids_dir.expanduser().resolve()
     fmriprep_dir = args.fmriprep_dir.expanduser().resolve()
+    if not bids_dir.is_dir():
+        raise SystemExit(f"BIDS directory not found: {bids_dir}")
     if not fmriprep_dir.is_dir():
         raise SystemExit(f"fMRIPrep directory not found: {fmriprep_dir}")
 
@@ -210,7 +333,10 @@ def main() -> int:
         subjects_file = default_subjects
     try:
         subjects = read_subjects(subjects_file) if subjects_file else None
-        runs = find_runs(fmriprep_dir, output_dir, args.task, args.space, subjects)
+        runs = find_runs(
+            bids_dir, fmriprep_dir, output_dir, args.task, args.space, subjects
+        )
+        validate_condition_sets(runs)
         for run in runs:
             columns = extract_confounds(run.source_confounds, run.fsl_confounds)
             print(f"Wrote {run.fsl_confounds} ({len(columns)} regressors)")
@@ -220,10 +346,13 @@ def main() -> int:
     fsl_dir = output_dir.parent
     melodic_filelist = fsl_dir / "melodic_filelist.txt"
     confound_filelist = fsl_dir / "confound_filelist.txt"
+    manifest = fsl_dir / f"task-{args.task}_run_manifest.tsv"
     write_filelist(melodic_filelist, [run.bold for run in runs])
     write_filelist(confound_filelist, [run.fsl_confounds for run in runs])
+    write_manifest(manifest, runs)
     print(f"Wrote {melodic_filelist} ({len(runs)} runs)")
     print(f"Wrote {confound_filelist} ({len(runs)} runs)")
+    print(f"Wrote {manifest} ({len(runs)} runs)")
     return 0
 
 

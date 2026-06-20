@@ -79,7 +79,12 @@ class PreprocessingStatusTests(unittest.TestCase):
             touch(freesurfer / participant / "scripts" / "recon-all.done")
             touch(mriqc / "reports" / "sub-001_T1w.html")
             touch(mriqc / "derivatives" / participant / "anat" / "sub-001_T1w.json")
-            for group_file in ("bold.csv", "T1w.csv", "group_bold.html", "group_T1w.html"):
+            for group_file in (
+                "group_bold.tsv",
+                "group_T1w.tsv",
+                "group_bold.html",
+                "group_T1w.html",
+            ):
                 touch(mriqc / group_file)
 
             row = status.participant_status(
