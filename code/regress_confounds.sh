@@ -96,6 +96,11 @@ done
 [[ -s "$smoothed" ]] || { echo "ERROR: Smoothed input not found: $smoothed" >&2; exit 1; }
 [[ -s "$mask" ]] || { echo "ERROR: Mask not found: $mask" >&2; exit 1; }
 [[ -s "$confounds" ]] || { echo "ERROR: Confounds not found: $confounds" >&2; exit 1; }
+[[ "$confounds" == *.1D ]] || {
+    echo "ERROR: AFNI requires this headerless matrix to use a .1D extension: $confounds" >&2
+    echo "Re-run: python3 code/MakeConfounds.py" >&2
+    exit 1
+}
 
 nvolumes="$(fslnvols "$smoothed")"
 if ! confound_shape="$(
@@ -121,6 +126,11 @@ read -r confound_rows confound_columns <<< "$confound_shape"
 }
 ((confound_columns < nvolumes)) || {
     echo "ERROR: Confound design has $confound_columns columns for $nvolumes volumes" >&2
+    exit 1
+}
+((confound_columns >= 31)) || {
+    echo "ERROR: Stale confound matrix has $confound_columns columns; expected at least 31: $confounds" >&2
+    echo "Re-run: python3 code/MakeConfounds.py" >&2
     exit 1
 }
 printf 'Design: %d volumes x %d confounds (%d residual dimensions before rank adjustment)\n' \

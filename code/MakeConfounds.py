@@ -206,7 +206,7 @@ def find_runs(
         acquired_run = entity_from_name(source, "run")
         output_name = (
             source.name.removesuffix(CONFOUND_SUFFIX)
-            + f"_condition-{condition}_desc-fslConfounds.tsv"
+            + f"_condition-{condition}_desc-confounds_timeseries.1D"
         )
         runs.append(
             RunFiles(

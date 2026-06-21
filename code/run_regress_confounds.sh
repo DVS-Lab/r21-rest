@@ -43,8 +43,9 @@ done
 subjects=()
 runs=()
 conditions=()
+confound_files=()
 outputs=()
-while IFS=$'\t' read -r participant acquired_run condition condition_order _events bold _confounds; do
+while IFS=$'\t' read -r participant acquired_run condition condition_order _events bold confounds; do
     [[ "$participant" == "participant" ]] && continue
     [[ -z "$participant" ]] && continue
     order_padded="$(printf '%02d' "$condition_order")"
@@ -54,9 +55,41 @@ while IFS=$'\t' read -r participant acquired_run condition condition_order _even
     subjects+=("${participant#sub-}")
     runs+=("$acquired_run")
     conditions+=("$condition")
+    confound_files+=("$confounds")
 done < "$manifest"
 
 ((${#subjects[@]} > 0)) || { echo "ERROR: Run manifest is empty: $manifest" >&2; exit 1; }
+
+for confounds in "${confound_files[@]}"; do
+    [[ -s "$confounds" ]] || { echo "ERROR: Confounds not found: $confounds" >&2; exit 1; }
+    [[ "$confounds" == *.1D ]] || {
+        echo "ERROR: Stale .tsv confound path in run manifest: $confounds" >&2
+        echo "AFNI treats the first row of every .tsv as a header." >&2
+        echo "Re-run: python3 code/MakeConfounds.py" >&2
+        exit 1
+    }
+    if ! confound_columns="$(
+        awk '
+            NF {
+                if (!columns) columns = NF
+                if (NF != columns) exit 1
+            }
+            END {
+                if (!columns) exit 1
+                print columns
+            }
+        ' "$confounds"
+    )"; then
+        echo "ERROR: Confound matrix is empty or has inconsistent columns: $confounds" >&2
+        exit 1
+    fi
+    ((confound_columns >= 31)) || {
+        echo "ERROR: Stale confound matrix has $confound_columns columns; expected at least 31: $confounds" >&2
+        echo "Re-run: python3 code/MakeConfounds.py" >&2
+        exit 1
+    }
+done
+
 printf 'Runs: %d\n' "${#subjects[@]}" >&2
 printf 'Maximum concurrent jobs: %d\n' "$maxjobs" >&2
 printf 'Output list: %s\n' "$outputlist" >&2

@@ -145,11 +145,13 @@ one omnibus nuisance matrix per run containing:
 - `a_comp_cor_00` through `a_comp_cor_05`;
 - continuous framewise displacement.
 
-Missing values are replaced with zero. Headerless numeric matrices are written
-to `derivatives/fsl/confounds`. Each run's condition is read from the unique
-`trial_type` in its BIDS events file. Runs are ordered within subject as sham,
-RTPJ, VLPFC, and both, while retaining the acquired run number. The image and
-confound lists are written in exactly the same order:
+Missing values are replaced with zero. Headerless numeric `.1D` matrices are
+written to `derivatives/fsl/confounds`. The `.1D` extension is required because
+AFNI interprets the first row of every `.tsv` file as a header. Each run's
+condition is read from the unique `trial_type` in its BIDS events file. Runs are
+ordered within subject as sham, RTPJ, VLPFC, and both, while retaining the
+acquired run number. The image and confound lists are written in exactly the
+same order:
 
 ```text
 derivatives/fsl/melodic_filelist.txt
@@ -209,7 +211,8 @@ code/run_regress_confounds.sh
 `3dTproject` with the matching fMRIPrep brain mask and a single joint design
 containing all extracted confounds plus a constant. No censoring or additional
 temporal filtering is applied. The cosine columns already implement the
-fMRIPrep high-pass model.
+fMRIPrep high-pass model. The batch launcher rejects old `.tsv` matrices and
+matrices with fewer than the 31 required base regressors before launching jobs.
 
 The cleaned files are written under `derivatives/fsl/denoised`. The batch
 script writes the canonical ordered input list only after every output exists:

@@ -56,6 +56,7 @@ class MakeConfoundsTests(unittest.TestCase):
             self.assertEqual(runs[0].condition, "rtpj")
             self.assertEqual(runs[0].condition_order, 2)
             self.assertIn("condition-rtpj", runs[0].fsl_confounds.name)
+            self.assertEqual(runs[0].fsl_confounds.suffix, ".1D")
             selected = confounds.extract_confounds(
                 runs[0].source_confounds, runs[0].fsl_confounds
             )

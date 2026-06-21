@@ -30,8 +30,9 @@ class ShellScriptTests(unittest.TestCase):
             mask.touch()
             smoothed = func / f"{stem}_condition-rtpj_order-02_desc-preproc_bold_5mm.nii.gz"
             smoothed.touch()
-            confound_file = root / "confounds.tsv"
-            confound_file.write_text("0\t0\n0\t0\n")
+            confound_file = root / "confounds.1D"
+            confound_row = "\t".join(["0"] * 31)
+            confound_file.write_text(f"{confound_row}\n{confound_row}\n")
             events = bids / "sub-001" / "func" / "sub-001_task-rest_run-01_events.tsv"
             events.parent.mkdir(parents=True)
             events.write_text("onset\tduration\ttrial_type\n0\t1\tRTPJ\n")
@@ -116,6 +117,24 @@ class ShellScriptTests(unittest.TestCase):
             )
             self.assertIn("Runs: 1", regression_batch.stderr)
             self.assertIn("melodic_filelist_5mm_denoised.txt", regression_batch.stderr)
+
+            stale_confounds = root / "confounds.tsv"
+            stale_confounds.write_text(confound_file.read_text())
+            manifest.write_text(
+                manifest.read_text().replace(str(confound_file), str(stale_confounds))
+            )
+            stale_batch = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "run_regress_confounds.sh"),
+                    "--dry-run",
+                ],
+                env=env,
+                text=True,
+                capture_output=True,
+            )
+            self.assertNotEqual(stale_batch.returncode, 0)
+            self.assertIn("AFNI treats the first row", stale_batch.stderr)
 
     def test_analysis_scripts_render_expected_defaults(self):
         melodic = subprocess.run(
