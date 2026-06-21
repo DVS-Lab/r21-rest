@@ -16,12 +16,16 @@ from pathlib import Path
 CONDITIONS = {"sham", "rtpj", "vlpfc", "both"}
 CONTRASTS = (
     ("both_minus_sham", {"both": 1.0}, {"sham": 1.0}),
+    ("both_minus_rtpj", {"both": 1.0}, {"rtpj": 1.0}),
+    ("both_minus_vlpfc", {"both": 1.0}, {"vlpfc": 1.0}),
+    ("rtpj_minus_vlpfc", {"rtpj": 1.0}, {"vlpfc": 1.0}),
+    ("rtpj_minus_sham", {"rtpj": 1.0}, {"sham": 1.0}),
+    ("vlpfc_minus_sham", {"vlpfc": 1.0}, {"sham": 1.0}),
     (
         "both_minus_mean_rtpj_vlpfc",
         {"both": 1.0},
         {"rtpj": 0.5, "vlpfc": 0.5},
     ),
-    ("rtpj_minus_vlpfc", {"rtpj": 1.0}, {"vlpfc": 1.0}),
 )
 CONTRAST_METRICS = ("tsnr", "fd_mean", "fd_perc")
 

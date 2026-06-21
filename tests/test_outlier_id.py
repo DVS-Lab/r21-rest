@@ -185,6 +185,7 @@ class OutlierIDTests(unittest.TestCase):
                 )
 
         contrasts = outliers.calculate_condition_contrasts(runs)
+        self.assertEqual(len(contrasts), 35)
         bounds = outliers.condition_contrast_bounds(contrasts)
         with tempfile.TemporaryDirectory() as tmp:
             rows = outliers.write_condition_contrast_report(
@@ -199,6 +200,10 @@ class OutlierIDTests(unittest.TestCase):
         self.assertEqual(flagged["delta_fd_mean_outlier"], "true")
         self.assertEqual(flagged["delta_fd_perc_outlier"], "true")
         self.assertEqual(flagged["review"], "true")
+        self.assertIn(("both_minus_rtpj", "fd_mean"), bounds)
+        self.assertIn(("both_minus_vlpfc", "fd_mean"), bounds)
+        self.assertIn(("rtpj_minus_sham", "fd_mean"), bounds)
+        self.assertIn(("vlpfc_minus_sham", "fd_mean"), bounds)
 
     def test_condition_contrasts_mark_missing_conditions_for_review(self):
         runs = [
@@ -218,6 +223,7 @@ class OutlierIDTests(unittest.TestCase):
             )
         ]
         contrasts = outliers.calculate_condition_contrasts(runs)
+        self.assertEqual(len(contrasts), 7)
         self.assertTrue(all(not contrast.complete for contrast in contrasts))
 
 

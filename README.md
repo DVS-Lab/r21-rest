@@ -77,13 +77,23 @@ but no participant or run is excluded automatically.
 
 The condition-contrast table provides a separate differential-QC screen. It
 reads each run's condition from the BIDS `trial_type` column and calculates the
-planned paired differences `BOTH - SHAM`, `BOTH - mean(RTPJ, VLPFC)`, and
-`RTPJ - VLPFC` for tSNR, mean FD, and FD percentage. A positive motion
-difference means condition A had more motion; a negative tSNR difference means
-condition A had lower tSNR. Two-sided Tukey 1.5-IQR fences are calculated
-separately for every contrast and metric. These flags identify possible
-condition-dependent QC bias and require review; they do not automatically
-exclude a participant.
+seven planned paired differences:
+
+- `BOTH - SHAM`
+- `BOTH - RTPJ`
+- `BOTH - VLPFC`
+- `RTPJ - VLPFC`
+- `RTPJ - SHAM`
+- `VLPFC - SHAM`
+- `BOTH - mean(RTPJ, VLPFC)`
+
+Each difference is calculated for tSNR, mean FD, and FD percentage. A positive
+motion difference means condition A had more motion; a negative tSNR difference
+means condition A had lower tSNR. Two-sided Tukey 1.5-IQR boxplot fences are
+calculated separately for every comparison and metric. Because the comparisons
+share runs, their flags are correlated and must not be counted as independent
+reasons for exclusion. They identify subjects and runs for visual review; they
+do not automatically exclude a participant.
 
 Review the five output tables in `derivatives/qc`:
 
