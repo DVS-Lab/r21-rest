@@ -42,7 +42,9 @@ code/run_fmriprep.sh
 ```
 
 `code/fmriprep.sh SUBJECT` runs one participant. Batch logs are written under
-`derivatives/logs/fmriprep`.
+`derivatives/logs/fmriprep`. The batch launcher checks the expected report,
+MNI, CIFTI, confound, T1w, and FreeSurfer outputs and skips complete
+participants. Use `--rerun-complete` only for an intentional full rerun.
 
 ## MRIQC
 

@@ -10,11 +10,12 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_fmriprep.sh [--sublist PATH] [--max-jobs N] [--pilot-one] [--dry-run]
+Usage: code/run_fmriprep.sh [--sublist PATH] [--max-jobs N] [--pilot-one] [--rerun-complete] [--dry-run]
 
 Run fMRIPrep for participants listed one per line. Blank lines and # comments
 are ignored. If --sublist is not provided, the script uses code/sublist.txt,
 falling back to subjects.txt in the project root if it exists.
+Participants with complete fMRIPrep outputs are skipped by default.
 USAGE
 }
 
@@ -24,6 +25,7 @@ maindir="$(dirname "$scriptdir")"
 sublist=""
 maxjobs="${FMRIPREP_MAX_JOBS:-4}"
 pilot_one=0
+rerun_complete=0
 dryrun=0
 
 while (($#)); do
@@ -31,6 +33,7 @@ while (($#)); do
         --sublist|--subjects) sublist="${2:-}"; shift 2 ;;
         --max-jobs) maxjobs="${2:-}"; shift 2 ;;
         --pilot-one) pilot_one=1; shift ;;
+        --rerun-complete) rerun_complete=1; shift ;;
         --dry-run|--render-only) dryrun=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -76,6 +79,31 @@ done < <(
 if ((${#subjects[@]} == 0)); then
     echo "ERROR: No participants found in $sublist" >&2
     exit 1
+fi
+
+if (( ! rerun_complete )); then
+    bidsdir="${BIDS_DIR:-/ZPOOL/data/projects/r21-cardgame/bids}"
+    if [[ -d "$bidsdir" ]]; then
+        incomplete_subjects=()
+        while IFS= read -r sub; do
+            [[ -n "$sub" ]] && incomplete_subjects+=("${sub#sub-}")
+        done < <(
+            python3 "${scriptdir}/check_preprocessing_status.py" \
+                --subjects "$sublist" \
+                --print-incomplete-fmriprep
+        )
+        subjects=("${incomplete_subjects[@]}")
+        if ((${#subjects[@]} == 0)); then
+            echo "All listed participants have complete fMRIPrep outputs; nothing to run." >&2
+            exit 0
+        fi
+        echo "Participants requiring fMRIPrep: ${#subjects[@]}" >&2
+    elif (( dryrun )); then
+        echo "WARNING: BIDS directory unavailable; dry run cannot skip complete participants." >&2
+    else
+        echo "ERROR: BIDS directory not found: $bidsdir" >&2
+        exit 1
+    fi
 fi
 
 if (( pilot_one )); then

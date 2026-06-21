@@ -114,6 +114,19 @@ class ParticipantStatus:
     complete: bool
     missing: str
 
+    @property
+    def fmriprep_complete(self) -> bool:
+        return (
+            self.expected_bold > 0
+            and self.expected_t1w > 0
+            and self.fmriprep_report
+            and self.fmriprep_mni_bold == self.expected_bold
+            and self.fmriprep_cifti_bold == self.expected_bold
+            and self.fmriprep_confounds == self.expected_bold
+            and self.fmriprep_t1w == self.expected_t1w
+            and self.freesurfer_complete
+        )
+
 
 def participant_status(
     bids_dir: Path,
@@ -328,6 +341,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--output-csv", type=Path)
     parser.add_argument("--fail-on-missing", action="store_true")
+    parser.add_argument(
+        "--print-incomplete-fmriprep",
+        action="store_true",
+        help="Print only participant labels with missing fMRIPrep outputs.",
+    )
     return parser.parse_args()
 
 
@@ -363,6 +381,12 @@ def main() -> int:
         )
         for subject in subjects
     ]
+    if args.print_incomplete_fmriprep:
+        for row in rows:
+            if not row.fmriprep_complete:
+                print(row.participant)
+        return 0
+
     print(format_table(rows))
     complete = sum(row.complete for row in rows)
     print(f"\nParticipants complete: {complete}/{len(rows)}")

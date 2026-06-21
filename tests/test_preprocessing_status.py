@@ -97,6 +97,7 @@ class PreprocessingStatusTests(unittest.TestCase):
             self.assertEqual(row.fmriprep_confounds, 2)
             self.assertEqual(row.mriqc_bold_reports, 2)
             self.assertEqual(row.missing, "none")
+            self.assertTrue(row.fmriprep_complete)
             self.assertTrue(status.mriqc_group_status(mriqc).complete)
 
     def test_missing_outputs_are_reported(self):
@@ -120,6 +121,7 @@ class PreprocessingStatusTests(unittest.TestCase):
                 participant,
             )
             self.assertFalse(row.complete)
+            self.assertFalse(row.fmriprep_complete)
             self.assertIn("fmriprep_report", row.missing)
             self.assertIn("fmriprep_mni=0/1", row.missing)
             self.assertIn("mriqc_bold_reports=0/1", row.missing)
