@@ -28,6 +28,10 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   dimensionality estimation.
 - QA will include motion and MRIQC outlier identification consistent with prior
   lab work, including boxplot/IQR-based flags.
+- Differential QA will test whether tSNR, mean FD, or FD percentage differences
+  are outliers for the planned `BOTH - SHAM`, `BOTH - mean(RTPJ, VLPFC)`, and
+  `RTPJ - VLPFC` comparisons. These flags supplement absolute subject-level QA
+  and do not automatically exclude participants.
 - Subject exclusions should not be finalized until the stimulation-delivery
   concern is resolved.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary

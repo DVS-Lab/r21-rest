@@ -13,6 +13,19 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 
+CONDITIONS = {"sham", "rtpj", "vlpfc", "both"}
+CONTRASTS = (
+    ("both_minus_sham", {"both": 1.0}, {"sham": 1.0}),
+    (
+        "both_minus_mean_rtpj_vlpfc",
+        {"both": 1.0},
+        {"rtpj": 0.5, "vlpfc": 0.5},
+    ),
+    ("rtpj_minus_vlpfc", {"rtpj": 1.0}, {"vlpfc": 1.0}),
+)
+CONTRAST_METRICS = ("tsnr", "fd_mean", "fd_perc")
+
+
 @dataclass(frozen=True)
 class RunIQM:
     participant: str
@@ -26,6 +39,7 @@ class RunIQM:
     fd_num: int
     fd_perc: float
     source: str
+    condition: str = ""
 
 
 @dataclass(frozen=True)
@@ -39,6 +53,24 @@ class SubjectIQM:
     total_fd_num: int
     mean_fd_perc: float
     max_fd_perc: float
+
+
+@dataclass(frozen=True)
+class ContrastIQM:
+    participant: str
+    contrast: str
+    condition_a: str
+    condition_b: str
+    complete: bool
+    a_tsnr: float | None
+    b_tsnr: float | None
+    delta_tsnr: float | None
+    a_fd_mean: float | None
+    b_fd_mean: float | None
+    delta_fd_mean: float | None
+    a_fd_perc: float | None
+    b_fd_perc: float | None
+    delta_fd_perc: float | None
 
 
 def percentile(values: list[float], quantile: float) -> float:
@@ -83,7 +115,48 @@ def required_number(data: dict[str, object], key: str, path: Path) -> float:
     return number
 
 
-def read_iqms(mriqc_dir: Path, task: str) -> list[RunIQM]:
+def find_events(iqm_path: Path, bids_dir: Path) -> Path:
+    entities = entities_from_name(iqm_path)
+    participant = f"sub-{entities['sub']}"
+    events_name = iqm_path.name.removesuffix("_bold.json") + "_events.tsv"
+    matches = sorted((bids_dir / participant).rglob(events_name))
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected one events file for {iqm_path.name}; found {len(matches)}"
+        )
+    return matches[0]
+
+
+def condition_from_events(path: Path) -> str:
+    with path.open(newline="") as stream:
+        reader = csv.DictReader(stream, delimiter="\t")
+        if reader.fieldnames is None or "trial_type" not in reader.fieldnames:
+            raise ValueError(f"{path}: missing trial_type column")
+        conditions = {
+            (row.get("trial_type") or "").strip().lower()
+            for row in reader
+            if (row.get("trial_type") or "").strip()
+        }
+    if not conditions:
+        return ""
+    if len(conditions) != 1:
+        raise ValueError(
+            f"{path}: expected one trial_type; found {', '.join(sorted(conditions))}"
+        )
+    condition = conditions.pop()
+    if condition not in CONDITIONS:
+        raise ValueError(
+            f"{path}: unknown trial_type {condition}; expected "
+            + ", ".join(sorted(CONDITIONS))
+        )
+    return condition
+
+
+def read_iqms(
+    mriqc_dir: Path,
+    task: str,
+    bids_dir: Path | None = None,
+) -> list[RunIQM]:
     paths = sorted(mriqc_dir.glob(f"sub-*/**/*_task-{task}_*_bold.json"))
     if not paths:
         raise ValueError(f"No task-{task} BOLD IQM files found in: {mriqc_dir}")
@@ -108,6 +181,11 @@ def read_iqms(mriqc_dir: Path, task: str) -> list[RunIQM]:
                 fd_num=int(required_number(data, "fd_num", path)),
                 fd_perc=required_number(data, "fd_perc", path),
                 source=str(path.resolve()),
+                condition=(
+                    condition_from_events(find_events(path, bids_dir))
+                    if bids_dir is not None
+                    else ""
+                ),
             )
         )
     return runs
@@ -115,6 +193,10 @@ def read_iqms(mriqc_dir: Path, task: str) -> list[RunIQM]:
 
 def fmt(value: float) -> str:
     return f"{value:.6g}"
+
+
+def fmt_optional(value: float | None) -> str:
+    return "n/a" if value is None else fmt(value)
 
 
 def write_run_report(
@@ -212,6 +294,173 @@ def summarize_subjects(runs: list[RunIQM]) -> list[SubjectIQM]:
     return subjects
 
 
+def weighted_metric(
+    condition_runs: dict[str, RunIQM], weights: dict[str, float], metric: str
+) -> float:
+    return sum(
+        weight * float(getattr(condition_runs[condition], metric))
+        for condition, weight in weights.items()
+    )
+
+
+def condition_label(weights: dict[str, float]) -> str:
+    if len(weights) == 1:
+        return next(iter(weights))
+    return "mean_" + "_".join(weights)
+
+
+def calculate_condition_contrasts(runs: list[RunIQM]) -> list[ContrastIQM]:
+    grouped: dict[str, list[RunIQM]] = defaultdict(list)
+    for run in runs:
+        grouped[run.participant].append(run)
+
+    contrasts = []
+    for participant, participant_runs in sorted(grouped.items()):
+        condition_runs: dict[str, RunIQM] = {}
+        for run in participant_runs:
+            if not run.condition:
+                continue
+            if run.condition in condition_runs:
+                raise ValueError(
+                    f"{participant}: more than one run labeled {run.condition}"
+                )
+            condition_runs[run.condition] = run
+
+        for contrast, a_weights, b_weights in CONTRASTS:
+            required = set(a_weights) | set(b_weights)
+            complete = required <= set(condition_runs)
+            values: dict[str, float | None] = {}
+            for metric in CONTRAST_METRICS:
+                if complete:
+                    a_value = weighted_metric(condition_runs, a_weights, metric)
+                    b_value = weighted_metric(condition_runs, b_weights, metric)
+                    values[f"a_{metric}"] = a_value
+                    values[f"b_{metric}"] = b_value
+                    values[f"delta_{metric}"] = a_value - b_value
+                else:
+                    values[f"a_{metric}"] = None
+                    values[f"b_{metric}"] = None
+                    values[f"delta_{metric}"] = None
+            contrasts.append(
+                ContrastIQM(
+                    participant=participant,
+                    contrast=contrast,
+                    condition_a=condition_label(a_weights),
+                    condition_b=condition_label(b_weights),
+                    complete=complete,
+                    **values,
+                )
+            )
+    return contrasts
+
+
+def condition_contrast_bounds(
+    contrasts: list[ContrastIQM],
+) -> dict[tuple[str, str], tuple[float, float, float, float, float]]:
+    bounds = {}
+    for contrast, _, _ in CONTRASTS:
+        for metric in CONTRAST_METRICS:
+            values = [
+                float(getattr(row, f"delta_{metric}"))
+                for row in contrasts
+                if row.contrast == contrast
+                and getattr(row, f"delta_{metric}") is not None
+            ]
+            if values:
+                bounds[(contrast, metric)] = tukey_bounds(values)
+    return bounds
+
+
+def write_condition_contrast_report(
+    path: Path,
+    contrasts: list[ContrastIQM],
+    bounds: dict[tuple[str, str], tuple[float, float, float, float, float]],
+) -> list[dict[str, str]]:
+    output = []
+    for contrast in contrasts:
+        flags = {}
+        for metric in CONTRAST_METRICS:
+            delta = getattr(contrast, f"delta_{metric}")
+            metric_bounds = bounds.get((contrast.contrast, metric))
+            flags[metric] = bool(
+                delta is not None
+                and metric_bounds is not None
+                and (delta < metric_bounds[3] or delta > metric_bounds[4])
+            )
+        n_outliers = sum(flags.values())
+        output.append(
+            {
+                "participant": contrast.participant,
+                "contrast": contrast.contrast,
+                "condition_a": contrast.condition_a,
+                "condition_b": contrast.condition_b,
+                "complete": str(contrast.complete).lower(),
+                "a_tsnr": fmt_optional(contrast.a_tsnr),
+                "b_tsnr": fmt_optional(contrast.b_tsnr),
+                "delta_tsnr": fmt_optional(contrast.delta_tsnr),
+                "a_fd_mean": fmt_optional(contrast.a_fd_mean),
+                "b_fd_mean": fmt_optional(contrast.b_fd_mean),
+                "delta_fd_mean": fmt_optional(contrast.delta_fd_mean),
+                "a_fd_perc": fmt_optional(contrast.a_fd_perc),
+                "b_fd_perc": fmt_optional(contrast.b_fd_perc),
+                "delta_fd_perc": fmt_optional(contrast.delta_fd_perc),
+                "delta_tsnr_outlier": str(flags["tsnr"]).lower(),
+                "delta_fd_mean_outlier": str(flags["fd_mean"]).lower(),
+                "delta_fd_perc_outlier": str(flags["fd_perc"]).lower(),
+                "n_delta_outliers": str(n_outliers),
+                "review": str(not contrast.complete or n_outliers > 0).lower(),
+            }
+        )
+
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(
+            stream,
+            fieldnames=list(output[0]),
+            delimiter="\t",
+            lineterminator="\n",
+        )
+        writer.writeheader()
+        writer.writerows(output)
+    return output
+
+
+def write_condition_contrast_bounds(
+    path: Path,
+    contrasts: list[ContrastIQM],
+    bounds: dict[tuple[str, str], tuple[float, float, float, float, float]],
+) -> None:
+    rows = []
+    for contrast, _, _ in CONTRASTS:
+        for metric in CONTRAST_METRICS:
+            metric_bounds = bounds.get((contrast, metric))
+            if metric_bounds is None:
+                continue
+            n_complete = sum(
+                row.contrast == contrast
+                and getattr(row, f"delta_{metric}") is not None
+                for row in contrasts
+            )
+            rows.append(
+                {
+                    "contrast": contrast,
+                    "metric": metric,
+                    "n_complete": str(n_complete),
+                    "q1": fmt(metric_bounds[0]),
+                    "q3": fmt(metric_bounds[1]),
+                    "iqr": fmt(metric_bounds[2]),
+                    "lower_fence": fmt(metric_bounds[3]),
+                    "upper_fence": fmt(metric_bounds[4]),
+                    "review_rule": "condition A minus condition B outside fences",
+                }
+            )
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=list(rows[0]), delimiter="\t", lineterminator="\n"
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def write_subject_report(
     path: Path,
     subjects: list[SubjectIQM],
@@ -299,6 +548,16 @@ def parse_args() -> argparse.Namespace:
         default=Path(os.environ.get("MRIQC_OUTPUT_DIR", derivatives / "mriqc")),
     )
     parser.add_argument(
+        "--bidsDir",
+        "--bids-dir",
+        dest="bids_dir",
+        type=Path,
+        default=Path(
+            os.environ.get("BIDS_DIR", "/ZPOOL/data/projects/r21-cardgame/bids")
+        ),
+        help="BIDS directory used to read run conditions from events files.",
+    )
+    parser.add_argument(
         "--outDir",
         "--output-dir",
         dest="output_dir",
@@ -334,9 +593,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     mriqc_dir = args.mriqc_dir.expanduser().resolve()
+    bids_dir = args.bids_dir.expanduser().resolve()
     output_dir = args.output_dir.expanduser().resolve()
     if not mriqc_dir.is_dir():
         raise SystemExit(f"MRIQC directory not found: {mriqc_dir}")
+    if not bids_dir.is_dir():
+        raise SystemExit(f"BIDS directory not found: {bids_dir}")
     if args.fd_threshold <= 0:
         raise SystemExit("--fd-threshold must be greater than zero")
     if not 0 < args.fd_perc_threshold <= 100:
@@ -347,7 +609,7 @@ def main() -> int:
         raise SystemExit("--tsnr-threshold must be greater than zero")
 
     try:
-        runs = read_iqms(mriqc_dir, args.task)
+        runs = read_iqms(mriqc_dir, args.task, bids_dir)
         tsnr = tukey_bounds([run.tsnr for run in runs])
         fd_mean = tukey_bounds([run.fd_mean for run in runs])
         subjects = summarize_subjects(runs)
@@ -358,6 +620,8 @@ def main() -> int:
         subject_fd_perc = tukey_bounds(
             [subject.mean_fd_perc for subject in subjects]
         )
+        condition_contrasts = calculate_condition_contrasts(runs)
+        contrast_bounds = condition_contrast_bounds(condition_contrasts)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         raise SystemExit(f"ERROR: {error}") from error
 
@@ -365,6 +629,12 @@ def main() -> int:
     run_report = output_dir / f"task-{args.task}_mriqc_outliers.tsv"
     bounds_report = output_dir / f"task-{args.task}_mriqc_bounds.tsv"
     subject_report = output_dir / f"task-{args.task}_mriqc_subject_summary.tsv"
+    contrast_report = (
+        output_dir / f"task-{args.task}_mriqc_condition_contrasts.tsv"
+    )
+    contrast_bounds_report = (
+        output_dir / f"task-{args.task}_mriqc_condition_contrast_bounds.tsv"
+    )
     rows = write_run_report(
         run_report,
         runs,
@@ -383,6 +653,12 @@ def main() -> int:
         args.fd_threshold,
         args.fd_perc_threshold,
         args.tsnr_threshold,
+    )
+    contrast_rows = write_condition_contrast_report(
+        contrast_report, condition_contrasts, contrast_bounds
+    )
+    write_condition_contrast_bounds(
+        contrast_bounds_report, condition_contrasts, contrast_bounds
     )
     write_bounds(
         bounds_report,
@@ -417,10 +693,12 @@ def main() -> int:
 
     review_count = sum(row["review"] == "true" for row in rows)
     subject_review_count = sum(row["review"] == "true" for row in subject_rows)
+    contrast_review_count = sum(row["review"] == "true" for row in contrast_rows)
     print(f"Runs reviewed: {len(runs)}")
     print(f"Runs flagged: {review_count}")
     print(f"Subjects reviewed: {len(subjects)}")
     print(f"Subjects flagged: {subject_review_count}")
+    print(f"Condition contrasts flagged: {contrast_review_count}")
     print(f"Low-tSNR fence: {fmt(tsnr[3])}")
     print(f"High-FD fence: {fmt(fd_mean[4])}; absolute threshold: {args.fd_threshold:g}")
     print(
@@ -430,6 +708,8 @@ def main() -> int:
     print(f"Wrote {run_report}")
     print(f"Wrote {bounds_report}")
     print(f"Wrote {subject_report}")
+    print(f"Wrote {contrast_report}")
+    print(f"Wrote {contrast_bounds_report}")
     return 0
 
 
