@@ -693,12 +693,27 @@ def main() -> int:
 
     review_count = sum(row["review"] == "true" for row in rows)
     subject_review_count = sum(row["review"] == "true" for row in subject_rows)
-    contrast_review_count = sum(row["review"] == "true" for row in contrast_rows)
+    differential_rows = [
+        row
+        for row in contrast_rows
+        if row["complete"] == "true" and int(row["n_delta_outliers"]) > 0
+    ]
+    differential_subjects = {row["participant"] for row in differential_rows}
+    incomplete_contrast_subjects = {
+        row["participant"]
+        for row in contrast_rows
+        if row["complete"] == "false"
+    }
     print(f"Runs reviewed: {len(runs)}")
     print(f"Runs flagged: {review_count}")
     print(f"Subjects reviewed: {len(subjects)}")
     print(f"Subjects flagged: {subject_review_count}")
-    print(f"Condition contrasts flagged: {contrast_review_count}")
+    print(f"Complete contrast rows with QC outliers: {len(differential_rows)}")
+    print(f"Subjects with differential-QC outliers: {len(differential_subjects)}")
+    print(
+        "Subjects with incomplete condition contrasts: "
+        f"{len(incomplete_contrast_subjects)}"
+    )
     print(f"Low-tSNR fence: {fmt(tsnr[3])}")
     print(f"High-FD fence: {fmt(fd_mean[4])}; absolute threshold: {args.fd_threshold:g}")
     print(
