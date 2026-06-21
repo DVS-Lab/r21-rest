@@ -126,6 +126,55 @@ class MakeConfoundsTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Incomplete condition sets"):
                 confounds.validate_condition_sets(runs)
 
+    def test_skips_participants_without_complete_condition_labels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bids = root / "bids"
+            fmriprep = root / "fmriprep"
+            output = root / "fsl" / "confounds"
+
+            for participant in ("sub-001", "sub-002"):
+                for index, condition in enumerate(
+                    ("SHAM", "RTPJ", "VLPFC", "BOTH"), start=1
+                ):
+                    run = f"{index:02d}"
+                    prefix = f"{participant}_task-rest_run-{run}"
+                    func = fmriprep / participant / "func"
+                    func.mkdir(parents=True, exist_ok=True)
+                    (func / f"{prefix}{confounds.CONFOUND_SUFFIX}").touch()
+                    (
+                        func
+                        / f"{prefix}_space-MNI152NLin6Asym_desc-preproc_bold.nii.gz"
+                    ).touch()
+                    events = bids / participant / "func" / f"{prefix}_events.tsv"
+                    events.parent.mkdir(parents=True, exist_ok=True)
+                    if participant == "sub-002":
+                        events.write_text("onset\tduration\ttrial_type\n")
+                    else:
+                        events.write_text(
+                            f"onset\tduration\ttrial_type\n0\t1\t{condition}\n"
+                        )
+
+            runs, skipped = confounds.find_eligible_runs(
+                bids,
+                fmriprep,
+                output,
+                "rest",
+                "MNI152NLin6Asym",
+                None,
+            )
+
+            self.assertEqual(len(runs), 4)
+            self.assertEqual({run.participant for run in runs}, {"sub-001"})
+            self.assertIn("sub-002", skipped)
+            self.assertIn("found none", skipped["sub-002"])
+
+            report = root / "skipped.tsv"
+            confounds.write_skipped_subjects(report, skipped)
+            with report.open() as stream:
+                rows = list(csv.DictReader(stream, delimiter="\t"))
+            self.assertEqual(rows[0]["participant"], "sub-002")
+
 
 if __name__ == "__main__":
     unittest.main()

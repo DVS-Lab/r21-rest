@@ -159,11 +159,15 @@ condition, canonical condition order, events, BOLD, and confound paths. This is
 the provenance table for later condition contrasts.
 
 `MakeConfounds.py` requires every included subject to have exactly one run from
-each condition. At present, `sub-212` has only sham and VLPFC runs, while the
-four `sub-233` task-rest events files contain placeholder headers and no
-`trial_type` rows. The script will stop rather than admit an incomplete subject
-or guess counterbalancing. Correct the source data or omit those subjects from
-the reviewed inclusion list before extraction.
+each condition. Participants with missing labels or incomplete condition sets
+are skipped as a unit; the script never guesses counterbalancing. At present,
+`sub-212` has only sham and VLPFC runs, while the four `sub-233` task-rest events
+files contain placeholder headers and no `trial_type` rows. Their exclusion
+reasons are recorded in:
+
+```text
+derivatives/fsl/task-rest_skipped_subjects.tsv
+```
 
 The reviewed inclusion list restricts both ordered FSL input lists to complete
 subjects approved for analysis.

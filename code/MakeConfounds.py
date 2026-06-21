@@ -11,6 +11,7 @@ import argparse
 import csv
 import os
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -232,6 +233,48 @@ def validate_condition_sets(runs: list[RunFiles]) -> None:
         raise ValueError("Incomplete condition sets:\n  " + "\n  ".join(errors))
 
 
+def find_eligible_runs(
+    bids_dir: Path,
+    fmriprep_dir: Path,
+    output_dir: Path,
+    task: str,
+    space: str,
+    subjects: set[str] | None,
+) -> tuple[list[RunFiles], dict[str, str]]:
+    sources = sorted(
+        fmriprep_dir.glob(f"sub-*/**/*_task-{task}_*{CONFOUND_SUFFIX}")
+    )
+    available = {subject_from_name(source) for source in sources}
+    selected = subjects if subjects is not None else available
+    if not selected:
+        raise ValueError(f"No task-{task} fMRIPrep confounds found in: {fmriprep_dir}")
+
+    eligible = []
+    skipped = {}
+    for participant in sorted(selected):
+        try:
+            participant_runs = find_runs(
+                bids_dir,
+                fmriprep_dir,
+                output_dir,
+                task,
+                space,
+                {participant},
+            )
+            validate_condition_sets(participant_runs)
+        except ValueError as error:
+            skipped[participant] = " ".join(str(error).split())
+            continue
+        eligible.extend(participant_runs)
+
+    if not eligible:
+        raise ValueError("No participants have a complete labeled condition set")
+    return sorted(
+        eligible,
+        key=lambda run: (run.participant, run.condition_order, run.acquired_run),
+    ), skipped
+
+
 def write_filelist(path: Path, files: list[Path]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(f"{file.resolve()}\n" for file in files))
@@ -265,6 +308,20 @@ def write_manifest(path: Path, runs: list[RunFiles]) -> None:
                     "confounds": run.fsl_confounds.resolve(),
                 }
             )
+
+
+def write_skipped_subjects(path: Path, skipped: dict[str, str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(
+            stream,
+            fieldnames=["participant", "reason"],
+            delimiter="\t",
+            lineterminator="\n",
+        )
+        writer.writeheader()
+        for participant, reason in sorted(skipped.items()):
+            writer.writerow({"participant": participant, "reason": reason})
 
 
 def parse_args() -> argparse.Namespace:
@@ -333,10 +390,11 @@ def main() -> int:
         subjects_file = default_subjects
     try:
         subjects = read_subjects(subjects_file) if subjects_file else None
-        runs = find_runs(
+        runs, skipped = find_eligible_runs(
             bids_dir, fmriprep_dir, output_dir, args.task, args.space, subjects
         )
-        validate_condition_sets(runs)
+        for participant, reason in sorted(skipped.items()):
+            print(f"WARNING: Skipping {participant}: {reason}", file=sys.stderr)
         for run in runs:
             columns = extract_confounds(run.source_confounds, run.fsl_confounds)
             print(f"Wrote {run.fsl_confounds} ({len(columns)} regressors)")
@@ -347,12 +405,18 @@ def main() -> int:
     melodic_filelist = fsl_dir / "melodic_filelist.txt"
     confound_filelist = fsl_dir / "confound_filelist.txt"
     manifest = fsl_dir / f"task-{args.task}_run_manifest.tsv"
+    skipped_report = fsl_dir / f"task-{args.task}_skipped_subjects.tsv"
     write_filelist(melodic_filelist, [run.bold for run in runs])
     write_filelist(confound_filelist, [run.fsl_confounds for run in runs])
     write_manifest(manifest, runs)
+    write_skipped_subjects(skipped_report, skipped)
+    participants = {run.participant for run in runs}
+    print(f"Included participants: {len(participants)}")
+    print(f"Skipped participants: {len(skipped)}")
     print(f"Wrote {melodic_filelist} ({len(runs)} runs)")
     print(f"Wrote {confound_filelist} ({len(runs)} runs)")
     print(f"Wrote {manifest} ({len(runs)} runs)")
+    print(f"Wrote {skipped_report}")
     return 0
 
 
