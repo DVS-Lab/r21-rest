@@ -135,19 +135,21 @@ After fMRIPrep is complete:
 python3 code/MakeConfounds.py --subjects code/included_sublist.txt
 ```
 
-The script follows the lab's existing `MakeConfounds.py` convention. It keeps:
+The script follows the lab's existing `MakeConfounds.py` convention. It writes
+one omnibus nuisance matrix per run containing:
 
 - cosine high-pass terms;
 - non-steady-state regressors;
-- six translation/rotation parameters;
+- 24 extended motion terms: the six rigid-body parameters, their temporal
+  derivatives, their squares, and the squared derivatives;
 - `a_comp_cor_00` through `a_comp_cor_05`;
-- framewise displacement.
+- continuous framewise displacement.
 
-Missing values are replaced with zero. FSL-ready matrices are written without
-headers to `derivatives/fsl/confounds`. Each run's condition is read from the
-unique `trial_type` in its BIDS events file. Runs are ordered within subject as
-sham, RTPJ, VLPFC, and both, while retaining the acquired run number. The image
-and confound lists are written in exactly the same order:
+Missing values are replaced with zero. Headerless numeric matrices are written
+to `derivatives/fsl/confounds`. Each run's condition is read from the unique
+`trial_type` in its BIDS events file. Runs are ordered within subject as sham,
+RTPJ, VLPFC, and both, while retaining the acquired run number. The image and
+confound lists are written in exactly the same order:
 
 ```text
 derivatives/fsl/melodic_filelist.txt
@@ -194,11 +196,59 @@ order, for example
 script writes `derivatives/fsl/melodic_filelist_5mm.txt` in canonical condition
 order only after every requested output exists.
 
+## Regress Confounds
+
+After smoothing, regress all nuisance terms together from each run:
+
+```bash
+code/run_regress_confounds.sh --dry-run
+code/run_regress_confounds.sh
+```
+
+`code/regress_confounds.sh SUBJECT RUN` handles one run. It uses AFNI
+`3dTproject` with the matching fMRIPrep brain mask and a single joint design
+containing all extracted confounds plus a constant. No censoring or additional
+temporal filtering is applied. The cosine columns already implement the
+fMRIPrep high-pass model.
+
+The cleaned files are written under `derivatives/fsl/denoised`. The batch
+script writes the canonical ordered input list only after every output exists:
+
+```text
+derivatives/fsl/melodic_filelist_5mm_denoised.txt
+```
+
+This is intentionally an omnibus regression. `fsl_glm --out_res` could produce
+the same kind of residuals with an equivalent full-rank design, while
+`fsl_regfilt` is primarily convenient when selected design columns, such as
+classified ICA components, are to be removed. Running separate nuisance steps
+is avoided because sequential projections can reintroduce previously removed
+variance; see [Lindquist et al. (2019)](https://doi.org/10.1002/hbm.24528).
+
+## Check MELODIC Inputs
+
+Audit every cleaned input before starting group ICA:
+
+```bash
+code/check_melodic_inputs.sh
+```
+
+The check verifies that all paths are present and unique, every subject has one
+run for each of the four conditions, run lengths and image grids agree, and
+each image matches its original fMRIPrep mask. It also checks signal outside
+the mask, spatial coverage, finite intensity summaries, and nonzero temporal
+variance. Run-level values are written to:
+
+```text
+derivatives/qc/task-rest_melodic_input_qc.tsv
+```
+
 ## Group MELODIC
 
-`code/melodic.sh` uses `derivatives/fsl/melodic_filelist_5mm.txt` by default.
-Run temporal-concatenation MELODIC both with automatic dimensionality and with
-20 fixed components:
+`code/melodic.sh` uses the checked
+`derivatives/fsl/melodic_filelist_5mm_denoised.txt` by default. Run
+temporal-concatenation MELODIC both with automatic dimensionality and with 20
+fixed components:
 
 Render or run automatic dimensionality estimation:
 
@@ -216,8 +266,8 @@ code/melodic.sh 20
 Outputs are written to:
 
 ```text
-derivatives/fsl/melodic-concat_dim-00_task-rest.ica
-derivatives/fsl/melodic-concat_dim-20_task-rest.ica
+derivatives/fsl/melodic-concat_denoised_dim-00_task-rest.ica
+derivatives/fsl/melodic-concat_denoised_dim-20_task-rest.ica
 ```
 
 Set `MELODIC_FILELIST` only when intentionally testing a different ordered
@@ -235,37 +285,40 @@ code/match_smith09.sh 0
 code/match_smith09.sh 20
 ```
 
-Results are written to `derivatives/fsl/smith09_dim-00_task-rest` and
-`derivatives/fsl/smith09_dim-20_task-rest`. Each directory contains the raw
-`fslcc` output, the resampled 10-network image, a complete labeled correlation
-matrix, and `smith09_best_matches.tsv`. The best-match table marks DMN, ECN,
-and left/right FPN as primary networks and cerebellar and sensorimotor maps as
-secondary networks. Component selection still requires visual review.
+Results are written to `derivatives/fsl/smith09_denoised_dim-00_task-rest` and
+`derivatives/fsl/smith09_denoised_dim-20_task-rest`. Each directory contains
+the raw `fslcc` output, the resampled 10-network image, a complete labeled
+correlation matrix, and `smith09_best_matches.tsv`. The best-match table marks
+DMN, ECN, and left/right FPN as primary networks and cerebellar and
+sensorimotor maps as secondary networks. Component selection still requires
+visual review.
 
 ## Dual Regression
 
-The modified FSL script takes ordered image and confound lists. For a
-stage-1/stage-2 group-mean run without `randomise`:
+`code/dual_regression` is restored to the unmodified FSL v0.6 script. It takes
+the cleaned images as ordinary positional inputs; confounds are not entered a
+second time. For a stage-1/stage-2 group-mean run without `randomise`:
 
 ```bash
 code/dual_regression \
-  derivatives/fsl/melodic-concat_dim-20_task-rest.ica/melodic_IC \
+  derivatives/fsl/melodic-concat_denoised_dim-20_task-rest.ica/melodic_IC \
   1 -1 0 \
-  derivatives/fsl/melodic-concat_dim-20_task-rest.dr \
-  derivatives/fsl/melodic_filelist_5mm.txt \
-  derivatives/fsl/confound_filelist.txt
+  derivatives/fsl/melodic-concat_denoised_dim-20_task-rest.dr \
+  $(cat derivatives/fsl/melodic_filelist_5mm_denoised.txt)
 ```
 
-Confounds enter stage 2 only. The normal stage-2 outputs retain only the
-original network maps. Both file lists follow the same within-subject condition
-order recorded in `task-rest_run_manifest.tsv`.
+The input list follows the same within-subject condition order recorded in
+`task-rest_run_manifest.tsv`. Using the same cleaned data for MELODIC and both
+dual-regression stages prevents nuisance variance removed before ICA from being
+reintroduced later.
 
 ## Remaining Work
 
 1. Review MRIQC flags, the fMRIPrep reports, and the stimulation-delivery note;
    exclude incomplete `sub-212`, resolve or exclude unlabeled `sub-233`, then
    create `code/included_sublist.txt`.
-2. Extract confounds, smooth to 5 mm, and run both group MELODIC analyses.
+2. Extract confounds, smooth to 5 mm, regress the omnibus nuisance model, audit
+   the cleaned inputs, and run both group MELODIC analyses.
 3. Review the Smith09 correlations and component spatial maps.
 4. Build run-difference images from BIDS `trial_type` labels.
 5. Create the final `randomise` designs and contrasts.

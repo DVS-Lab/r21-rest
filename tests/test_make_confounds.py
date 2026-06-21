@@ -33,7 +33,7 @@ class MakeConfoundsTests(unittest.TestCase):
 
             columns = (
                 ["cosine00", "non_steady_state_outlier00"]
-                + confounds.MOTION
+                + confounds.MOTION_24
                 + confounds.ACOMPCOR
                 + ["framewise_displacement", "dvars"]
             )
@@ -62,7 +62,7 @@ class MakeConfoundsTests(unittest.TestCase):
             self.assertEqual(
                 selected,
                 ["cosine00", "non_steady_state_outlier00"]
-                + confounds.MOTION
+                + confounds.MOTION_24
                 + confounds.ACOMPCOR
                 + ["framewise_displacement"],
             )
@@ -94,6 +94,11 @@ class MakeConfoundsTests(unittest.TestCase):
             events.write_text("onset\tduration\ttrial_type\n")
             with self.assertRaisesRegex(ValueError, "found none"):
                 confounds.condition_from_events(events)
+
+    def test_numeric_value_rejects_nonfinite_values(self):
+        source = Path("confounds.tsv")
+        with self.assertRaisesRegex(ValueError, "non-finite value"):
+            confounds.numeric_value("inf", source, 2, "framewise_displacement")
 
     def test_run_lists_follow_condition_order_not_acquisition_order(self):
         with tempfile.TemporaryDirectory() as tmp:

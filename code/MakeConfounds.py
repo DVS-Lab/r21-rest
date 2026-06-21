@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Extract the lab-standard fMRIPrep confounds for FSL.
+"""Extract the lab-standard fMRIPrep confounds for joint nuisance regression.
 
 Adapted from MakeConfounds.py in the lab's existing repositories. The script
-also writes parallel image and confound lists for MELODIC and dual_regression.
+also writes parallel image and confound lists plus an ordered run manifest.
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import math
 import os
 import re
 import sys
@@ -18,8 +19,14 @@ from pathlib import Path
 
 CONFOUND_SUFFIX = "_desc-confounds_timeseries.tsv"
 MOTION = ["trans_x", "trans_y", "trans_z", "rot_x", "rot_y", "rot_z"]
+MOTION_24 = (
+    MOTION
+    + [f"{name}_derivative1" for name in MOTION]
+    + [f"{name}_power2" for name in MOTION]
+    + [f"{name}_derivative1_power2" for name in MOTION]
+)
 ACOMPCOR = [f"a_comp_cor_{index:02d}" for index in range(6)]
-REQUIRED = MOTION + ACOMPCOR + ["framewise_displacement"]
+REQUIRED = MOTION_24 + ACOMPCOR + ["framewise_displacement"]
 MISSING_VALUES = {"", "n/a", "nan", "na"}
 CONDITION_ORDER = {"sham": 1, "rtpj": 2, "vlpfc": 3, "both": 4}
 
@@ -125,7 +132,7 @@ def confound_columns(fieldnames: list[str], source: Path) -> list[str]:
     nonsteady = [
         name for name in fieldnames if name.startswith("non_steady_state")
     ]
-    return cosine + nonsteady + MOTION + ACOMPCOR + ["framewise_displacement"]
+    return cosine + nonsteady + MOTION_24 + ACOMPCOR + ["framewise_displacement"]
 
 
 def numeric_value(value: str | None, source: Path, row: int, column: str) -> str:
@@ -133,11 +140,15 @@ def numeric_value(value: str | None, source: Path, row: int, column: str) -> str
     if cleaned.lower() in MISSING_VALUES:
         return "0"
     try:
-        float(cleaned)
+        numeric = float(cleaned)
     except ValueError as error:
         raise ValueError(
             f"{source}: nonnumeric value in row {row}, column {column}: {cleaned}"
         ) from error
+    if not math.isfinite(numeric):
+        raise ValueError(
+            f"{source}: non-finite value in row {row}, column {column}: {cleaned}"
+        )
     return cleaned
 
 
@@ -327,7 +338,7 @@ def write_skipped_subjects(path: Path, skipped: dict[str, str]) -> None:
 def parse_args() -> argparse.Namespace:
     repo_root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
-        description="Extract lab-standard fMRIPrep confounds and write FSL file lists."
+        description="Extract fMRIPrep confounds for joint nuisance regression."
     )
     parser.add_argument(
         "--bidsDir",

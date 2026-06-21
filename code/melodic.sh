@@ -7,7 +7,7 @@ usage() {
     cat <<'USAGE'
 Usage: code/melodic.sh {0|20} [--dry-run]
 
-Run group MELODIC using derivatives/fsl/melodic_filelist_5mm.txt.
+Run group MELODIC using derivatives/fsl/melodic_filelist_5mm_denoised.txt.
   0   Automatically estimate dimensionality
   20  Use a fixed dimensionality of 20
 USAGE
@@ -40,8 +40,8 @@ maindir="$(dirname "$scriptdir")"
 derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 task="${TASK_ID:-rest}"
-inputlist="${MELODIC_FILELIST:-${fsldir}/melodic_filelist_5mm.txt}"
-outputdir="${MELODIC_OUTPUT_DIR:-${fsldir}/melodic-concat_dim-${dimension_label}_task-${task}.ica}"
+inputlist="${MELODIC_FILELIST:-${fsldir}/melodic_filelist_5mm_denoised.txt}"
+outputdir="${MELODIC_OUTPUT_DIR:-${fsldir}/melodic-concat_denoised_dim-${dimension_label}_task-${task}.ica}"
 
 cmd=(
     melodic

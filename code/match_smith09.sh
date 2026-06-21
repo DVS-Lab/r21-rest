@@ -40,11 +40,11 @@ maindir="$(dirname "$scriptdir")"
 derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 task="${TASK_ID:-rest}"
-melodicdir="${MELODIC_OUTPUT_DIR:-${fsldir}/melodic-concat_dim-${dimension_label}_task-${task}.ica}"
+melodicdir="${MELODIC_OUTPUT_DIR:-${fsldir}/melodic-concat_denoised_dim-${dimension_label}_task-${task}.ica}"
 melodic_ic="${melodicdir}/melodic_IC.nii.gz"
 melodic_mask="${MELODIC_MASK:-${melodicdir}/mask.nii.gz}"
 smith_maps="${SMITH09_MAPS:-${maindir}/masks/PNAS_Smith09_rsn10.nii.gz}"
-outputdir="${SMITH09_OUTPUT_DIR:-${fsldir}/smith09_dim-${dimension_label}_task-${task}}"
+outputdir="${SMITH09_OUTPUT_DIR:-${fsldir}/smith09_denoised_dim-${dimension_label}_task-${task}}"
 scratchroot="${WORK_ROOT:-/ZPOOL/data/scratch/${USER:-$(whoami)}}"
 
 printf 'MELODIC components: %s\n' "$melodic_ic" >&2

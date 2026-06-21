@@ -9,6 +9,8 @@ commands for the R21 resting-state preprocessing workflow.
 - MRIQC: 24.0.2
 - Container runtime: `apptainer` or `singularity`
 - Runtime selection: prefer `apptainer` when both runtimes are available
+- AFNI: server installation providing `3dBlurToFWHM` and `3dTproject`
+- FSL: server installation providing MELODIC, dual regression, and image tools
 
 ## fMRIPrep
 
@@ -40,6 +42,19 @@ and `code/mriqc_group.sh` runs the group report. The MRIQC container receives:
 ```
 
 MRIQC uses `--modalities T1w bold`; no multi-echo options are used.
+
+## Resting-State Analysis Inputs
+
+`code/MakeConfounds.py` extracts the 24 extended motion parameters, continuous
+FD, six aCompCor components, non-steady-state indicators, and cosine regressors
+from each fMRIPrep confounds TSV. Missing initial values are written as zero.
+
+After 5-mm smoothing and masking, `code/regress_confounds.sh` uses one AFNI
+`3dTproject` invocation per run with `-ort` for the full nuisance matrix and
+`-polort 0` for the constant. `code/check_melodic_inputs.sh` records image,
+mask, coverage, intensity, and temporal-variance checks before group MELODIC.
+The exact same denoised file list is used for MELODIC and the unmodified FSL
+v0.6 `code/dual_regression` script.
 
 ## Logs
 

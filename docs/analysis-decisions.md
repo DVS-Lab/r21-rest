@@ -1,8 +1,9 @@
 # Analysis Decisions
 
-The repository covers fMRIPrep, MRIQC, confound extraction, group-MELODIC
-launching, completion checks, and confound-aware dual regression. Network
-matching, QA exclusions, run-difference images, and randomise remain.
+The repository covers fMRIPrep, MRIQC, confound extraction, joint nuisance
+regression, MELODIC input checks, group-MELODIC launching, completion checks,
+network matching, and standard dual regression. Final QA exclusions,
+run-difference images, and randomise designs remain.
 
 ## Current Study Context
 
@@ -16,14 +17,17 @@ conditions:
 
 The project is not currently being treated as a simple 2 x 2 factorial design.
 
-## Deferred Methodological Decisions
+## Analysis Decisions
 
-- Volumetric data may later receive minimal 4-mm FWHM SUSAN smoothing.
+- Volumetric MNI152NLin6Asym data are smoothed and masked to a final 5-mm FWHM
+  with AFNI `3dBlurToFWHM`.
 - Surface data would require a separate Connectome Workbench smoothing step.
-- Nuisance regressors are included in stage 2 of the modified FSL
-  `dual_regression` procedure.
-- fMRIPrep outputs should not be nuisance-regressed during this preprocessing
-  assignment.
+- The 24 extended motion parameters, continuous FD, six aCompCor components,
+  non-steady-state regressors, cosine terms, and a constant are projected from
+  each run in one joint `3dTproject` model before group ICA.
+- Group MELODIC and both stages of the original FSL `dual_regression` use the
+  same cleaned data. Nuisance regression and temporal filtering are not
+  repeated later.
 - Group MELODIC will be run with fixed dimensionality 20 and with automatic
   dimensionality estimation.
 - QA will include motion and MRIQC outlier identification consistent with prior
@@ -43,11 +47,15 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
 - Bonferroni correction may eventually be used across the primary inferential
   family.
 
-## Provisional Comparisons for Later Discussion
+## Planned Comparisons
 
 - `BOTH` versus `SHAM`
-- `BOTH` versus the average of `RTPJ` and `VLPFC`
+- `BOTH` versus `RTPJ`
+- `BOTH` versus `VLPFC`
 - `RTPJ` versus `VLPFC`
+- `RTPJ` versus `SHAM`
+- `VLPFC` versus `SHAM`
+- `BOTH` versus the average of `RTPJ` and `VLPFC`
 
 The meaning of "bidirectional" remains unresolved. It may mean two-sided
 inference, or it may mean explicit positive and negative directional contrasts.
