@@ -23,6 +23,12 @@ derivatives/fsl/diagnostics/*
 !derivatives/fsl/diagnostics/*.csv
 !derivatives/fsl/diagnostics/*.txt
 !derivatives/fsl/diagnostics/*.md
+!derivatives/fsl/randomise_summary/
+derivatives/fsl/randomise_summary/*
+!derivatives/fsl/randomise_summary/*.tsv
+!derivatives/fsl/randomise_summary/*.md
+!derivatives/fsl/randomise_summary/*.nii.gz
+!derivatives/fsl/randomise_summary/*.json
 work/
 logs/
 *.log

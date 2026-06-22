@@ -421,8 +421,29 @@ The primary plan contains seven unique ICA components and 49 jobs, with at
 most 24 active processes. Automatic dimensionality contributes separate DMN,
 ECN, right-FPN, and left-FPN components. Dim-20 contributes DMN, ECN, and one
 bilateral FPN component because both lateralized Smith09 maps select component
-8. Completion markers prevent the primary batch from repeating finished DMN
+`8`. Completion markers prevent the primary batch from repeating finished DMN
 tests. Logs are written under `derivatives/logs/randomise`.
+
+Audit the finished primary batch with:
+
+```bash
+python3 code/check_randomise_results.py --network-set primary --fail-on-missing
+```
+
+The checker verifies that every component uses C1=`1` and C2=`-1`, confirms
+the participant count in each merged input, and expects 49 jobs, 98 t-stat
+images, and 196 corrected-p images (two directions by TFCE and cluster extent).
+Because FSL corrp images contain `1-p`, a peak above 0.95 indicates corrected
+`p < 0.05`. Results are written to the GitHub-tracked directory:
+
+```text
+derivatives/fsl/randomise_summary/task-rest_randomise_peak_summary.tsv
+```
+
+Complete significant corrp images are copied into the same directory using
+`task-rest_space-MNI152NLin6Asym_desc-..._stat-corrp_statmap.nii.gz` names,
+with JSON sidecars documenting the analysis, network, component, contrast,
+direction, inference method, permutation count, threshold, peak, and source.
 
 `code/randomise.sh` runs one network/contrast job when a targeted rerun is
 needed. See [`code/README.md`](code/README.md) for concise input/output notes on

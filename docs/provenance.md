@@ -74,6 +74,12 @@ cluster-extent inference (`-T -c 3.1`); `code/run_randomise.sh` reads the
 committed Smith09 comparison table and launches DMN or all primary-network
 tests with at most 24 concurrent processes.
 
+`code/check_randomise_results.py` verifies C1=`1` and C2=`-1`, checks merged
+input volume counts, and audits the expected t-stat and corrected-p outputs for
+both TFCE and cluster extent. It writes a tracked TSV under
+`derivatives/fsl/randomise_summary` and copies complete corrp maps with peak
+`1-p > 0.95` into that directory with JSON provenance sidecars.
+
 ## Logs
 
 Batch launchers write one timestamped log per subject:
