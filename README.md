@@ -400,12 +400,35 @@ the recorded order, then writes `subject_order.tsv`, one-sample `design.mat`,
 `design.con`, `design.grp`, and a `run_randomise.sh` launcher. The design
 contains positive and negative rows for two-sided interpretation.
 
-After reviewing the generated input and participant order, run all seven tests
-for that component with:
+The stable batch launcher in `code` reads the committed Smith09 matching table,
+prepares missing component contrasts, and runs 5,000 permutations with TFCE
+and cluster-extent inference at a cluster-forming t threshold of 3.1 (`-T -c
+3.1`). Start with the two DMN components:
 
 ```bash
-N_PERM=5000 derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0010_stat-beta/run_randomise.sh
+code/run_randomise.sh dmn --dry-run
+code/run_randomise.sh dmn
 ```
+
+This launches 14 jobs: two ICA solutions by seven condition contrasts. Expand
+to all primary networks after that batch completes:
+
+```bash
+code/run_randomise.sh primary
+```
+
+The primary plan contains seven unique ICA components and 49 jobs, with at
+most 24 active processes. Automatic dimensionality contributes separate DMN,
+ECN, right-FPN, and left-FPN components. Dim-20 contributes DMN, ECN, and one
+bilateral FPN component because both lateralized Smith09 maps select component
+8. Completion markers prevent the primary batch from repeating finished DMN
+tests. Logs are written under `derivatives/logs/randomise`.
+
+`code/randomise.sh` runs one network/contrast job when a targeted rerun is
+needed. See [`code/README.md`](code/README.md) for concise input/output notes on
+every script. FSL documents `-T` and `-c` as simultaneous TFCE and
+cluster-extent inference options in its
+[randomise guide](https://fsl.fmrib.ox.ac.uk/fsl/docs/statistics/randomise.html).
 
 For an explicitly secondary Z-map analysis, add `--map-type z`. Processing one
 selected component at a time avoids materializing every contrast for all 144

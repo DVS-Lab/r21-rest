@@ -239,6 +239,54 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("dr_stage2_subjectNNNNN_Z.nii.gz", z_contrasts.stderr)
         self.assertIn("Z maps are a sensitivity analysis", z_contrasts.stderr)
 
+        one_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "randomise.sh"),
+                "20",
+                "dmn",
+                "10",
+                "both-minus-sham",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Permutations: 5000; TFCE: yes; cluster threshold: 3.1", one_randomise.stderr)
+        self.assertIn("-T -c 3.1", one_randomise.stderr)
+
+        dmn_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_randomise.sh"),
+                "dmn",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Unique ICA components: 2", dmn_randomise.stderr)
+        self.assertIn("Randomise jobs: 14; maximum concurrent: 24", dmn_randomise.stderr)
+        self.assertIn("dim=0 network=dmn component=23", dmn_randomise.stderr)
+        self.assertIn("dim=20 network=dmn component=10", dmn_randomise.stderr)
+
+        primary_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_randomise.sh"),
+                "primary",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Unique ICA components: 7", primary_randomise.stderr)
+        self.assertIn("Randomise jobs: 49; maximum concurrent: 24", primary_randomise.stderr)
+        self.assertIn("dim=20 network=bilateral-fpn component=8", primary_randomise.stderr)
+
         qa = subprocess.run(
             ["bash", str(REPO_ROOT / "code" / "check_melodic_inputs.sh"), "--help"],
             text=True,
@@ -306,7 +354,7 @@ class ShellScriptTests(unittest.TestCase):
             self.assertIn("/ContrastName2\tNegative", (output / "design.con").read_text())
             randomise = (output / "run_randomise.sh").read_text()
             self.assertEqual(randomise.count("randomise -i"), 7)
-            self.assertIn('-n "$nperm" -T', randomise)
+            self.assertIn('-n "$nperm" -T -c "$cluster_threshold"', randomise)
             for contrast in (
                 "both-minus-sham",
                 "both-minus-rtpj",
@@ -321,6 +369,65 @@ class ShellScriptTests(unittest.TestCase):
                     f"contrast-{contrast}.nii.gz"
                 )
                 self.assertTrue(group_input.exists())
+
+    def test_single_randomise_job_uses_requested_inference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fakebin = root / "bin"
+            fakebin.mkdir()
+            capture = root / "randomise_args.txt"
+            self.write_command(fakebin / "randomise", 'printf "%s\\n" "$*" > "$RANDOMISE_CAPTURE"\n')
+
+            drdir = root / "dual-regression_denoised_dim-20_task-rest.dr"
+            component = drdir / "contrasts" / "component-0010_stat-beta"
+            contrast = "both-minus-sham"
+            contrast_dir = component / contrast
+            contrast_dir.mkdir(parents=True)
+            (drdir / "mask.nii.gz").write_text("x")
+            (component / "design.mat").write_text("design")
+            (component / "design.con").write_text("contrast")
+            (component / "design.grp").write_text("group")
+            (contrast_dir / (
+                "group_task-rest_component-0010_stat-beta_"
+                f"contrast-{contrast}.nii.gz"
+            )).write_text("x")
+
+            command = [
+                "bash",
+                str(REPO_ROOT / "code" / "randomise.sh"),
+                "20",
+                "dmn",
+                "10",
+                contrast,
+                "--n-perm",
+                "17",
+            ]
+            env = os.environ | {
+                "PATH": f"{fakebin}:{os.environ['PATH']}",
+                "DUAL_REGRESSION_DIR": str(drdir),
+                "RANDOMISE_CAPTURE": str(capture),
+            }
+            first = subprocess.run(
+                command,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            args = capture.read_text()
+            self.assertIn("-n 17 -T -c 3.1", args)
+            self.assertIn("Completed:", first.stderr)
+            markers = list((component / "randomise" / "network-dmn").glob("*.complete"))
+            self.assertEqual(len(markers), 1)
+
+            second = subprocess.run(
+                command,
+                env=env,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn("Already complete:", second.stderr)
 
     def test_melodic_input_qa_accepts_consistent_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:

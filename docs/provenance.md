@@ -69,7 +69,10 @@ uses that table to locate each participant's four conditions, extracts one
 requested component from the raw stage-2 coefficient maps, constructs the seven
 planned paired differences, and records the participant order used in the
 merged `randomise` inputs. Generated one-sample designs include positive and
-negative contrasts and use TFCE when their `run_randomise.sh` is launched.
+negative contrasts. `code/randomise.sh` runs one test with 3D TFCE and
+cluster-extent inference (`-T -c 3.1`); `code/run_randomise.sh` reads the
+committed Smith09 comparison table and launches DMN or all primary-network
+tests with at most 24 concurrent processes.
 
 ## Logs
 

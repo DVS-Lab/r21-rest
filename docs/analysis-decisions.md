@@ -60,6 +60,12 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   one `SHAM`, `RTPJ`, `VLPFC`, and `BOTH` run per participant. Missing or
   duplicate conditions stop the analysis rather than silently changing the
   sample.
+- Primary one-sample permutation tests use 5,000 permutations, 3D TFCE, and
+  cluster-extent inference with a cluster-forming t threshold of 3.1 (`-T -c
+  3.1`). Both positive and negative condition-difference contrasts are tested.
+- The first randomise pass includes DMN from both denoised ICA solutions. The
+  expanded primary pass adds ECN and FPN, while running dim-20 component 8 only
+  once because it is the best match for both left and right FPN.
 - Automated QA should flag observations rather than silently exclude them.
 - Bonferroni correction may eventually be used across the primary inferential
   family.
