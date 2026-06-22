@@ -1,0 +1,23 @@
+{
+  "AnalysisDimension": "0",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 15,
+  "ConditionContrast": "vlpfc-minus-sham",
+  "Description": "FSL randomise FWE-corrected 1-p statistical map",
+  "DesignContrast": "C2",
+  "Direction": "negative",
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "tfce",
+  "Network": "right-fpn",
+  "NumberOfPermutations": 5000,
+  "PeakOneMinusP": 0.9878,
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_denoised_dim-00_task-rest.dr/contrasts/component-0015_stat-beta/randomise/network-right-fpn/task-rest_network-right-fpn_component-0015_stat-beta_contrast-vlpfc-minus-sham_tfce_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest"
+}
