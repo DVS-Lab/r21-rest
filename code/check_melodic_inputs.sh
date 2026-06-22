@@ -35,7 +35,7 @@ done
 
 [[ -f "$inputlist" ]] || { echo "ERROR: Input list not found: $inputlist" >&2; exit 1; }
 [[ -f "$manifest" ]] || { echo "ERROR: Run manifest not found: $manifest" >&2; exit 1; }
-for command in fslmaths fslorient fslstats fslval fslnvols; do
+for command in 3dinfo fslmaths fslstats fslval fslnvols; do
     command -v "$command" >/dev/null 2>&1 || {
         echo "ERROR: $command is not on PATH." >&2
         exit 1
@@ -69,7 +69,7 @@ append_status() {
 mkdir -p "$(dirname "$outputtsv")"
 printf 'participant\trun\tcondition\tvolumes\tdim1\tdim2\tdim3\tpixdim1\tpixdim2\tpixdim3\tbrain_mask_voxels\tvarying_voxels\tvarying_fraction\toutside_mask_abs_max\tconfound_columns\tpre_mean_temporal_sd\tpost_mean_temporal_sd\ttemporal_sd_ratio\tdata_min\tdata_max\tdata_mean\tdata_sd\tstatus\tfile\n' >"$outputtsv"
 
-reference_grid=""
+reference_input=""
 reference_volumes=""
 failures=0
 index=0
@@ -129,29 +129,20 @@ for input in "${inputs[@]}"; do
     pixdim1="$(fslval "$input" pixdim1 | tr -d ' ')"
     pixdim2="$(fslval "$input" pixdim2 | tr -d ' ')"
     pixdim3="$(fslval "$input" pixdim3 | tr -d ' ')"
-    sform="$(fslorient -getsform "$input" | tr '\n' ' ' | tr -s ' ' | sed 's/^ //; s/ $//')"
-    grid="$dim1,$dim2,$dim3,$pixdim1,$pixdim2,$pixdim3,$sform"
-
-    mask_dim1="$(fslval "$mask" dim1 | tr -d ' ')"
-    mask_dim2="$(fslval "$mask" dim2 | tr -d ' ')"
-    mask_dim3="$(fslval "$mask" dim3 | tr -d ' ')"
-    mask_pixdim1="$(fslval "$mask" pixdim1 | tr -d ' ')"
-    mask_pixdim2="$(fslval "$mask" pixdim2 | tr -d ' ')"
-    mask_pixdim3="$(fslval "$mask" pixdim3 | tr -d ' ')"
-    mask_sform="$(fslorient -getsform "$mask" | tr '\n' ' ' | tr -s ' ' | sed 's/^ //; s/ $//')"
-    mask_grid="$mask_dim1,$mask_dim2,$mask_dim3,$mask_pixdim1,$mask_pixdim2,$mask_pixdim3,$mask_sform"
-    if [[ "$grid" != "$mask_grid" ]]; then
+    mask_grid_match="$(3dinfo -same_grid "$input" "$mask" | tr -d '[:space:]')"
+    if [[ "$mask_grid_match" != "11" ]]; then
         append_status "mask_grid_mismatch"
     fi
     if [[ "$condition" != "$manifest_condition" ]]; then
         append_status "condition_mismatch"
     fi
 
-    if [[ -z "$reference_grid" ]]; then
-        reference_grid="$grid"
+    if [[ -z "$reference_input" ]]; then
+        reference_input="$input"
         reference_volumes="$volumes"
     else
-        if [[ "$grid" != "$reference_grid" ]]; then
+        input_grid_match="$(3dinfo -same_grid "$input" "$reference_input" | tr -d '[:space:]')"
+        if [[ "$input_grid_match" != "11" ]]; then
             append_status "grid_mismatch"
         fi
         if [[ "$volumes" != "$reference_volumes" ]]; then

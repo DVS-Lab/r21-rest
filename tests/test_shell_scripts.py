@@ -173,14 +173,11 @@ class ShellScriptTests(unittest.TestCase):
             root = Path(tmp)
             fakebin = root / "bin"
             fakebin.mkdir()
+            self.write_command(fakebin / "3dinfo", "printf '1\\n1\\n'\n")
             self.write_command(fakebin / "fslnvols", "echo 240\n")
             self.write_command(
                 fakebin / "fslval",
                 'case "$2" in dim1) echo 64;; dim2) echo 64;; dim3) echo 48;; *) echo 3.0;; esac\n',
-            )
-            self.write_command(
-                fakebin / "fslorient",
-                "printf '1 0 0 0\\n0 1 0 0\\n0 0 1 0\\n0 0 0 1\\n'\n",
             )
             self.write_command(
                 fakebin / "fslmaths",
@@ -267,6 +264,7 @@ class ShellScriptTests(unittest.TestCase):
                 '*brain_mask*) echo "100 1000";; '
                 '*) echo "-2 2 0 1";; esac\n',
             )
+            self.write_command(fakebin / "3dinfo", "printf '0\\n0\\n'\n")
             failed_result = subprocess.run(
                 [
                     "bash",
@@ -284,6 +282,7 @@ class ShellScriptTests(unittest.TestCase):
             )
             self.assertNotEqual(failed_result.returncode, 0)
             self.assertIn("Failure counts:", failed_result.stderr)
+            self.assertIn("mask_grid_mismatch: 4", failed_result.stderr)
             self.assertIn("no_variance_removed: 4", failed_result.stderr)
 
 
