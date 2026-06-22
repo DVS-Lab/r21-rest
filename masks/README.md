@@ -14,7 +14,9 @@ dc0e5213014476e460f7badd8f027c28177186c8346717ddc1b740f42c54fca7
 
 The maps are kept in their original grid here. `code/match_smith09.sh`
 resamples each map to the corresponding group MELODIC grid before running
-`fslcc`; previously resliced maps from other projects should not be reused.
+`fslcc`. `code/run_dual_regression_smith09.sh` independently resamples the
+same ordered maps to the input-data grid. Previously resliced maps from other
+projects should not be reused.
 
 The volume order used by the matching summary is:
 

@@ -94,8 +94,11 @@ def write_best_matches(
         "analysis_priority",
         "best_component",
         "correlation",
+        "absolute_correlation",
+        "sign",
         "next_component",
         "next_correlation",
+        "next_absolute_correlation",
         "other_mean",
         "other_sd",
         "other_min",
@@ -105,17 +108,26 @@ def write_best_matches(
     for network, label, priority in NETWORKS:
         ordered = sorted(
             (
-                (correlations[(component, network)], component)
+                (
+                    abs(correlations[(component, network)]),
+                    correlations[(component, network)],
+                    component,
+                )
                 for component in components
             ),
+            key=lambda match: (match[0], match[1], match[2]),
             reverse=True,
         )
-        best_correlation, best_component = ordered[0]
+        best_absolute, best_correlation, best_component = ordered[0]
         if len(ordered) > 1:
-            next_correlation, next_component = ordered[1]
-            other = [correlation for correlation, _ in ordered[1:]]
+            next_absolute, next_correlation, next_component = ordered[1]
+            other = [correlation for _, correlation, _ in ordered[1:]]
         else:
-            next_correlation, next_component = float("nan"), ""
+            next_absolute, next_correlation, next_component = (
+                float("nan"),
+                float("nan"),
+                "",
+            )
             other = []
         rows.append(
             {
@@ -124,8 +136,17 @@ def write_best_matches(
                 "analysis_priority": priority,
                 "best_component": best_component,
                 "correlation": f"{best_correlation:.8g}",
+                "absolute_correlation": f"{best_absolute:.8g}",
+                "sign": (
+                    "positive"
+                    if best_correlation > 0
+                    else "negative"
+                    if best_correlation < 0
+                    else "zero"
+                ),
                 "next_component": next_component,
                 "next_correlation": f"{next_correlation:.8g}",
+                "next_absolute_correlation": f"{next_absolute:.8g}",
                 "other_mean": f"{statistics.mean(other):.8g}" if other else "",
                 "other_sd": f"{statistics.stdev(other):.8g}" if len(other) > 1 else "",
                 "other_min": f"{min(other):.8g}" if other else "",

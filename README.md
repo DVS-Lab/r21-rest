@@ -288,23 +288,32 @@ image list.
 
 ## Match Smith09 Networks
 
-The original Smith09 10-network image is stored in `masks`. For each completed
-MELODIC analysis, resample those maps to the exact MELODIC grid and calculate
-signed spatial correlations with `fslcc`:
+The original Smith09 10-network image is stored in `masks`. Match all four
+completed MELODIC analyses in one pass:
 
 ```bash
-code/match_smith09.sh 0 --dry-run
-code/match_smith09.sh 0
-code/match_smith09.sh 20
+code/run_match_smith09.sh --dry-run
+code/run_match_smith09.sh
 ```
 
-Results are written to `derivatives/fsl/smith09_denoised_dim-00_task-rest` and
-`derivatives/fsl/smith09_denoised_dim-20_task-rest`. Each directory contains
-the raw `fslcc` output, the resampled 10-network image, a complete labeled
-correlation matrix, and `smith09_best_matches.tsv`. The best-match table marks
-DMN, ECN, and left/right FPN as primary networks and cerebellar and
-sensorimotor maps as secondary networks. Component selection still requires
-visual review.
+This runs `code/match_smith09.sh DATA_SET DIMENSION` for smoothed and denoised
+data at automatic and fixed-20 dimensionality. Smith09 maps are resampled to
+each exact MELODIC grid before calculating signed spatial correlations with
+`fslcc`. Because ICA component polarity is arbitrary, matches are ranked by
+absolute correlation while retaining the sign.
+
+Each `derivatives/fsl/smith09*_task-rest` directory contains raw `fslcc`
+output, the resampled 10-network image, a complete labeled correlation matrix,
+and `smith09_best_matches.tsv`. The four analyses are combined in:
+
+```text
+derivatives/fsl/diagnostics/smith09_ica_comparison.tsv
+```
+
+The table reports the best and next-best component, signed and absolute
+correlations, and their absolute-correlation margin. DMN, ECN, and left/right
+FPN are marked primary; cerebellar and sensorimotor maps are secondary. Final
+component selection still requires visual review.
 
 ## Dual Regression
 
@@ -325,6 +334,30 @@ The input list follows the same within-subject condition order recorded in
 dual-regression stages prevents nuisance variance removed before ICA from being
 reintroduced later.
 
+### Smith09 Sensitivity Analysis
+
+Run stages 1 and 2 using the original Smith09 maps instead of data-derived
+MELODIC maps:
+
+```bash
+code/run_dual_regression_smith09.sh denoised --dry-run
+code/run_dual_regression_smith09.sh denoised
+```
+
+The launcher resamples all 10 Smith09 maps to the exact input grid, preserves
+their published order, and calls the unmodified FSL script with `1 -1 0`, so
+no `randomise` permutations are launched. Outputs are written to
+`derivatives/fsl/dual-regression_smith09_denoised.dr`. Its `input_order.tsv`
+maps FSL's `subject00000` labels back to participant, acquired run, condition,
+and canonical condition order.
+
+Run the same sensitivity analysis on the smoothed but not nuisance-regressed
+data with:
+
+```bash
+code/run_dual_regression_smith09.sh smoothed
+```
+
 ## Remaining Work
 
 1. Review MRIQC flags, the fMRIPrep reports, and the stimulation-delivery note;
@@ -332,9 +365,10 @@ reintroduced later.
    create `code/included_sublist.txt`.
 2. Extract confounds, smooth to 5 mm, regress the omnibus nuisance model, audit
    the cleaned inputs, and run both group MELODIC analyses.
-3. Review the Smith09 correlations and component spatial maps.
-4. Build run-difference images from BIDS `trial_type` labels.
-5. Create the final `randomise` designs and contrasts.
+3. Compare all four ICA solutions with Smith09 and run Smith09 dual regression.
+4. Review the Smith09 correlations and component spatial maps.
+5. Build run-difference images from BIDS `trial_type` labels.
+6. Create the final `randomise` designs and contrasts.
 
 ## License
 

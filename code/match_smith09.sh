@@ -5,26 +5,33 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/match_smith09.sh {0|20} [--dry-run]
+Usage: code/match_smith09.sh {smoothed|denoised} {0|20} [--dry-run]
 
-Match a completed automatic-dimension or 20-component group MELODIC analysis
-to the original Smith09 10-network maps using signed spatial correlations.
+Match one completed group MELODIC analysis to the original Smith09 10-network
+maps. Signed correlations are retained; matches are ranked by absolute value.
 USAGE
 }
 
-dimension="${1:-}"
-if [[ -z "$dimension" || "$dimension" == "--help" || "$dimension" == "-h" ]]; then
+data_set="${1:-}"
+dimension="${2:-}"
+if [[ -z "$data_set" || "$data_set" == "--help" || "$data_set" == "-h" ]]; then
     usage
-    [[ "$dimension" == "--help" || "$dimension" == "-h" ]] && exit 0
+    [[ "$data_set" == "--help" || "$data_set" == "-h" ]] && exit 0
     exit 1
 fi
-shift
+
+case "$data_set" in
+    smoothed) melodic_label=""; output_label="" ;;
+    denoised) melodic_label="_denoised"; output_label="_denoised" ;;
+    *) echo "ERROR: Data set must be smoothed or denoised." >&2; usage >&2; exit 1 ;;
+esac
 
 case "$dimension" in
     0) dimension_label="00" ;;
     20) dimension_label="20" ;;
     *) echo "ERROR: Dimensionality must be 0 or 20." >&2; usage >&2; exit 1 ;;
 esac
+shift 2
 
 dryrun=0
 while (($#)); do
@@ -40,13 +47,14 @@ maindir="$(dirname "$scriptdir")"
 derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 task="${TASK_ID:-rest}"
-melodicdir="${MELODIC_OUTPUT_DIR:-${fsldir}/melodic-concat_denoised_dim-${dimension_label}_task-${task}.ica}"
+melodicdir="${MELODIC_OUTPUT_DIR:-${fsldir}/melodic-concat${melodic_label}_dim-${dimension_label}_task-${task}.ica}"
 melodic_ic="${melodicdir}/melodic_IC.nii.gz"
 melodic_mask="${MELODIC_MASK:-${melodicdir}/mask.nii.gz}"
 smith_maps="${SMITH09_MAPS:-${maindir}/masks/PNAS_Smith09_rsn10.nii.gz}"
-outputdir="${SMITH09_OUTPUT_DIR:-${fsldir}/smith09_denoised_dim-${dimension_label}_task-${task}}"
+outputdir="${SMITH09_OUTPUT_DIR:-${fsldir}/smith09${output_label}_dim-${dimension_label}_task-${task}}"
 scratchroot="${WORK_ROOT:-/ZPOOL/data/scratch/${USER:-$(whoami)}}"
 
+printf 'Data set: %s\n' "$data_set" >&2
 printf 'MELODIC components: %s\n' "$melodic_ic" >&2
 printf 'MELODIC mask: %s\n' "$melodic_mask" >&2
 printf 'Smith09 maps: %s\n' "$smith_maps" >&2
@@ -68,7 +76,7 @@ done
 [[ -f "$smith_maps" ]] || { echo "ERROR: Smith09 maps not found: $smith_maps" >&2; exit 1; }
 
 mkdir -p "$outputdir" "${scratchroot}/r21-rest"
-workdir="$(mktemp -d "${scratchroot}/r21-rest/smith09_dim-${dimension_label}.XXXXXX")"
+workdir="$(mktemp -d "${scratchroot}/r21-rest/smith09_${data_set}_dim-${dimension_label}.XXXXXX")"
 cleanup() {
     rm -rf "$workdir"
 }

@@ -56,6 +56,12 @@ mask, coverage, intensity, and temporal-variance checks before group MELODIC.
 The exact same denoised file list is used for MELODIC and the unmodified FSL
 v0.6 `code/dual_regression` script.
 
+`code/run_match_smith09.sh` compares the smoothed/denoised automatic and
+fixed-20 ICA solutions with the original Smith09 10-network image. The same
+source maps are resampled to the analysis grid for the atlas-based sensitivity
+analysis launched by `code/run_dual_regression_smith09.sh`; map order is never
+changed.
+
 ## Logs
 
 Batch launchers write one timestamped log per subject:

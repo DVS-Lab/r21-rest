@@ -43,6 +43,10 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary
   networks are DMN, ECN, and left/right FPN; secondary networks include
   cerebellum and sensorimotor components.
+- ICA matches are ranked by absolute spatial correlation because component
+  polarity is arbitrary; the signed correlation remains in the output table.
+- Dual regression with resampled Smith09 maps will provide an atlas-based
+  sensitivity analysis independent of the data-derived ICA solutions.
 - Automated QA should flag observations rather than silently exclude them.
 - Bonferroni correction may eventually be used across the primary inferential
   family.

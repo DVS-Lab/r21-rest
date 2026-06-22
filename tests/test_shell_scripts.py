@@ -149,6 +149,7 @@ class ShellScriptTests(unittest.TestCase):
             [
                 "bash",
                 str(REPO_ROOT / "code" / "match_smith09.sh"),
+                "denoised",
                 "20",
                 "--dry-run",
             ],
@@ -159,6 +160,35 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("PNAS_Smith09_rsn10.nii.gz", smith.stderr)
         self.assertIn("fslcc -t -1 --noabs", smith.stderr)
         self.assertIn("smith09_denoised_dim-20", smith.stderr)
+
+        all_smith = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_match_smith09.sh"),
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("melodic-concat_dim-00", all_smith.stderr)
+        self.assertIn("melodic-concat_denoised_dim-20", all_smith.stderr)
+        self.assertIn("summarize_smith09_analyses.py", all_smith.stderr)
+
+        smith_dual = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_dual_regression_smith09.sh"),
+                "denoised",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("melodic_filelist_5mm_denoised.txt", smith_dual.stderr)
+        self.assertIn("PNAS_Smith09_rsn10_resampled.nii.gz", smith_dual.stderr)
+        self.assertIn("1 -1 0", smith_dual.stderr)
 
         qa = subprocess.run(
             ["bash", str(REPO_ROOT / "code" / "check_melodic_inputs.sh"), "--help"],
