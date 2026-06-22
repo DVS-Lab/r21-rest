@@ -62,6 +62,15 @@ source maps are resampled to the analysis grid for the atlas-based sensitivity
 analysis launched by `code/run_dual_regression_smith09.sh`; map order is never
 changed.
 
+`code/run_dual_regression.sh` launches the denoised automatic or fixed-20
+data-derived ICA solution with design normalization and writes an
+`input_order.tsv` beside the FSL outputs. `code/make_dual_regression_contrasts.sh`
+uses that table to locate each participant's four conditions, extracts one
+requested component from the raw stage-2 coefficient maps, constructs the seven
+planned paired differences, and records the participant order used in the
+merged `randomise` inputs. Generated one-sample designs include positive and
+negative contrasts and use TFCE when their `run_randomise.sh` is launched.
+
 ## Logs
 
 Batch launchers write one timestamped log per subject:

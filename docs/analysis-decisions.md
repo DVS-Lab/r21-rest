@@ -47,6 +47,19 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   polarity is arbitrary; the signed correlation remains in the output table.
 - Dual regression with resampled Smith09 maps will provide an atlas-based
   sensitivity analysis independent of the data-derived ICA solutions.
+- Dual regression uses design normalization of stage-1 timecourses. Primary
+  condition differences use the resulting raw stage-2 coefficient maps, not
+  the `_Z` maps. Nickerson et al. (2017, doi:10.3389/fnins.2017.00115) identify
+  design-normalized stage-2 coefficients as the valid group-inference measure;
+  Z maps additionally mix the effect estimate with run-specific uncertainty
+  and are reserved for sensitivity checks.
+- Bijsterbosch et al. (2018, doi:10.7554/eLife.32992) support treating
+  dual-regression stage-2 spatial maps as meaningful subject-varying measures,
+  but do not establish Z maps as preferable to coefficient maps.
+- Component-wise condition differences are constructed from complete sets of
+  one `SHAM`, `RTPJ`, `VLPFC`, and `BOTH` run per participant. Missing or
+  duplicate conditions stop the analysis rather than silently changing the
+  sample.
 - Automated QA should flag observations rather than silently exclude them.
 - Bonferroni correction may eventually be used across the primary inferential
   family.

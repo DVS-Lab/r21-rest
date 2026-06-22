@@ -190,6 +190,55 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("PNAS_Smith09_rsn10_resampled.nii.gz", smith_dual.stderr)
         self.assertIn("1 -1 0", smith_dual.stderr)
 
+        for dimension, label in (("0", "dim-00"), ("20", "dim-20")):
+            melodic_dual = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "run_dual_regression.sh"),
+                    dimension,
+                    "--dry-run",
+                ],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn("melodic_filelist_5mm_denoised.txt", melodic_dual.stderr)
+            self.assertIn(f"melodic-concat_denoised_{label}", melodic_dual.stderr)
+            self.assertIn("1 -1 0", melodic_dual.stderr)
+
+        contrasts = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "make_dual_regression_contrasts.sh"),
+                "20",
+                "10",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Component: 10 (FSL volume 9)", contrasts.stderr)
+        self.assertIn("dr_stage2_subjectNNNNN.nii.gz", contrasts.stderr)
+        self.assertIn("both-minus-mean-rtpj-vlpfc", contrasts.stderr)
+
+        z_contrasts = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "make_dual_regression_contrasts.sh"),
+                "smith09",
+                "4",
+                "--map-type",
+                "z",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("dr_stage2_subjectNNNNN_Z.nii.gz", z_contrasts.stderr)
+        self.assertIn("Z maps are a sensitivity analysis", z_contrasts.stderr)
+
         qa = subprocess.run(
             ["bash", str(REPO_ROOT / "code" / "check_melodic_inputs.sh"), "--help"],
             text=True,
@@ -197,6 +246,81 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertIn("mask coverage", qa.stdout)
+
+    def test_dual_regression_contrasts_build_randomise_inputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fakebin = root / "bin"
+            fakebin.mkdir()
+            self.write_command(fakebin / "fslnvols", "echo 20\n")
+            self.write_command(fakebin / "fslroi", 'printf x > "$2"\n')
+            self.write_command(
+                fakebin / "fslmaths",
+                'for argument in "$@"; do third="$second"; second="$last"; last="$argument"; done\n'
+                'printf x > "$third"\n',
+            )
+            self.write_command(fakebin / "fslmerge", 'printf x > "$2"\n')
+
+            drdir = root / "dual-regression_denoised_dim-20_task-rest.dr"
+            drdir.mkdir()
+            (drdir / "mask.nii.gz").write_text("x")
+            labels = ("subject00000", "subject00001", "subject00002", "subject00003")
+            conditions = ("vlpfc", "sham", "both", "rtpj")
+            runs = ("03", "01", "04", "02")
+            mapping = [
+                "dual_regression_index\tdual_regression_label\tparticipant\trun\tcondition\tcondition_order\tfile"
+            ]
+            for index, (label, condition, run) in enumerate(zip(labels, conditions, runs)):
+                stage2 = drdir / f"dr_stage2_{label}.nii.gz"
+                stage2.write_text("x")
+                mapping.append(
+                    f"{index}\t{label}\tsub-001\t{run}\t{condition}\t{index + 1}\tinput{index}.nii.gz"
+                )
+            (drdir / "input_order.tsv").write_text("\n".join(mapping) + "\n")
+
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "make_dual_regression_contrasts.sh"),
+                    "20",
+                    "10",
+                ],
+                env=os.environ
+                | {
+                    "PATH": f"{fakebin}:{os.environ['PATH']}",
+                    "DUAL_REGRESSION_DIR": str(drdir),
+                    "WORK_ROOT": str(root / "scratch"),
+                },
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+            output = drdir / "contrasts" / "component-0010_stat-beta"
+            self.assertIn("Participants: 1", result.stderr)
+            self.assertEqual(
+                (output / "subject_order.tsv").read_text(),
+                "randomise_index\tparticipant\n0\tsub-001\n",
+            )
+            self.assertEqual((output / "design.mat").read_text().count("\n1\n"), 1)
+            self.assertIn("/ContrastName2\tNegative", (output / "design.con").read_text())
+            randomise = (output / "run_randomise.sh").read_text()
+            self.assertEqual(randomise.count("randomise -i"), 7)
+            self.assertIn('-n "$nperm" -T', randomise)
+            for contrast in (
+                "both-minus-sham",
+                "both-minus-rtpj",
+                "both-minus-vlpfc",
+                "rtpj-minus-vlpfc",
+                "rtpj-minus-sham",
+                "vlpfc-minus-sham",
+                "both-minus-mean-rtpj-vlpfc",
+            ):
+                group_input = output / contrast / (
+                    "group_task-rest_component-0010_stat-beta_"
+                    f"contrast-{contrast}.nii.gz"
+                )
+                self.assertTrue(group_input.exists())
 
     def test_melodic_input_qa_accepts_consistent_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -319,20 +319,28 @@ component selection still requires visual review.
 
 `code/dual_regression` is restored to the unmodified FSL v0.6 script. It takes
 the cleaned images as ordinary positional inputs; confounds are not entered a
-second time. For a stage-1/stage-2 group-mean run without `randomise`:
+second time. Launch stages 1 and 2 for both denoised group-ICA solutions:
 
 ```bash
-code/dual_regression \
-  derivatives/fsl/melodic-concat_denoised_dim-20_task-rest.ica/melodic_IC \
-  1 -1 0 \
-  derivatives/fsl/melodic-concat_denoised_dim-20_task-rest.dr \
-  $(cat derivatives/fsl/melodic_filelist_5mm_denoised.txt)
+code/run_dual_regression.sh 0 --dry-run
+code/run_dual_regression.sh 0
+code/run_dual_regression.sh 20
+```
+
+Both launchers call the original script with `1 -1 0`: stage-1 timecourses are
+design-normalized, no group design is supplied, and no `randomise` permutations
+are run. Outputs are written to:
+
+```text
+derivatives/fsl/dual-regression_denoised_dim-00_task-rest.dr
+derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr
 ```
 
 The input list follows the same within-subject condition order recorded in
 `task-rest_run_manifest.tsv`. Using the same cleaned data for MELODIC and both
 dual-regression stages prevents nuisance variance removed before ICA from being
-reintroduced later.
+reintroduced later. Each output contains an `input_order.tsv` that maps FSL's
+`subjectNNNNN` labels back to participant, run, and stimulation condition.
 
 ### Smith09 Sensitivity Analysis
 
@@ -358,6 +366,51 @@ data with:
 code/run_dual_regression_smith09.sh smoothed
 ```
 
+## Condition Contrasts and Randomise Inputs
+
+Use the design-normalized raw stage-2 coefficient images
+(`dr_stage2_subjectNNNNN.nii.gz`) for the primary within-participant
+subtractions. This is the quantity forwarded by FSL's standard dual-regression
+workflow, and it is the design-normalized stage-2 spatial-map estimate
+recommended for group inference by Nickerson et al. (2017). The corresponding
+`_Z` files additionally incorporate run-specific residual uncertainty; they
+are available as a sensitivity analysis but are not the primary effect
+estimates for paired subtraction.
+
+Build all seven contrasts for one selected component at a time. Component
+numbers are 1-based, matching the MELODIC and Smith09 matching tables:
+
+```bash
+# Smith09 default mode network (published map 4)
+code/make_dual_regression_contrasts.sh smith09 4 --dry-run
+code/make_dual_regression_contrasts.sh smith09 4
+
+# Denoised dim-20 DMN match (MELODIC component 10)
+code/make_dual_regression_contrasts.sh 20 10
+
+# Denoised automatic-dimensionality DMN match (component 23)
+code/make_dual_regression_contrasts.sh 0 23
+```
+
+The script extracts that component from the four stage-2 images for each
+participant and creates `BOTH-SHAM`, `BOTH-RTPJ`, `BOTH-VLPFC`,
+`RTPJ-VLPFC`, `RTPJ-SHAM`, `VLPFC-SHAM`, and
+`BOTH-mean(RTPJ,VLPFC)`. For each comparison it merges the participant maps in
+the recorded order, then writes `subject_order.tsv`, one-sample `design.mat`,
+`design.con`, `design.grp`, and a `run_randomise.sh` launcher. The design
+contains positive and negative rows for two-sided interpretation.
+
+After reviewing the generated input and participant order, run all seven tests
+for that component with:
+
+```bash
+N_PERM=5000 derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0010_stat-beta/run_randomise.sh
+```
+
+For an explicitly secondary Z-map analysis, add `--map-type z`. Processing one
+selected component at a time avoids materializing every contrast for all 144
+automatic-dimensionality components.
+
 ## Remaining Work
 
 1. Review MRIQC flags, the fMRIPrep reports, and the stimulation-delivery note;
@@ -366,9 +419,11 @@ code/run_dual_regression_smith09.sh smoothed
 2. Extract confounds, smooth to 5 mm, regress the omnibus nuisance model, audit
    the cleaned inputs, and run both group MELODIC analyses.
 3. Compare all four ICA solutions with Smith09 and run Smith09 dual regression.
-4. Review the Smith09 correlations and component spatial maps.
-5. Build run-difference images from BIDS `trial_type` labels.
-6. Create the final `randomise` designs and contrasts.
+4. Run dual regression for the denoised automatic and fixed-20 ICA solutions.
+5. Review the Smith09 correlations and component spatial maps.
+6. Build component-wise condition differences and inspect their participant
+   ordering.
+7. Run and plot the final one-sample `randomise` analyses.
 
 ## License
 
