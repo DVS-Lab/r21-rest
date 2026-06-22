@@ -252,9 +252,9 @@ regression had almost no effect; ratios below 0.10 indicate unusually severe
 variance removal. Failed status counts and the first 20 affected inputs are
 printed directly to the terminal.
 
-Small text diagnostics in `derivatives/qc`, the root of `derivatives/fsl`, and
-`derivatives/fsl/diagnostics` may be committed. Images, MELODIC directories,
-confound matrices, and logs remain ignored.
+Small text diagnostics in `derivatives/qc` and
+`derivatives/fsl/diagnostics` may be committed. All other FSL outputs, images,
+MELODIC directories, confound matrices, and logs remain ignored.
 
 ## Group MELODIC
 

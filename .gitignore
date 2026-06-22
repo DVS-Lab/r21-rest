@@ -17,10 +17,6 @@ derivatives/qc/*
 !derivatives/qc/*.md
 !derivatives/fsl/
 derivatives/fsl/*
-!derivatives/fsl/*.tsv
-!derivatives/fsl/*.csv
-!derivatives/fsl/*.txt
-!derivatives/fsl/*.md
 !derivatives/fsl/diagnostics/
 derivatives/fsl/diagnostics/*
 !derivatives/fsl/diagnostics/*.tsv
