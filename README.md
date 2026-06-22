@@ -246,6 +246,16 @@ variance. Run-level values are written to:
 derivatives/qc/task-rest_melodic_input_qc.tsv
 ```
 
+The table also records the nuisance-regressor count and the ratio of temporal
+standard deviation retained after regression. Ratios near one indicate that
+regression had almost no effect; ratios below 0.10 indicate unusually severe
+variance removal. Failed status counts and the first 20 affected inputs are
+printed directly to the terminal.
+
+Small text diagnostics in `derivatives/qc`, the root of `derivatives/fsl`, and
+`derivatives/fsl/diagnostics` may be committed. Images, MELODIC directories,
+confound matrices, and logs remain ignored.
+
 ## Group MELODIC
 
 `code/melodic.sh` uses the checked

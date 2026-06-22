@@ -189,7 +189,8 @@ class ShellScriptTests(unittest.TestCase):
             self.write_command(
                 fakebin / "fslstats",
                 'case "$1" in '
-                '*temporal_sd*) echo "98 980 1.25";; '
+                '*pre_temporal_sd*) echo "100 1000 2.0";; '
+                '*post_temporal_sd*) echo "98 980 1.25";; '
                 '*outside_mask*) echo "0 0";; '
                 '*brain_mask*) echo "100 1000";; '
                 '*) echo "-2 2 0 1";; esac\n',
@@ -205,22 +206,29 @@ class ShellScriptTests(unittest.TestCase):
             manifest_rows = [
                 "participant\tacquired_run\tcondition\tcondition_order\tevents\tbold\tconfounds"
             ]
+            confounds = root / "confounds.1D"
+            confounds.write_text("\t".join(["0"] * 31) + "\n")
             inputs = []
             for order, condition in enumerate(("sham", "rtpj", "vlpfc", "both"), start=1):
                 run = f"{order:02d}"
                 stem = f"sub-001_task-rest_run-{run}_space-MNI152NLin6Asym_res-native"
                 bold = fmriprep / f"{stem}_desc-preproc_bold.nii.gz"
                 mask = fmriprep / f"{stem}_desc-brain_mask.nii.gz"
+                smoothed = fmriprep / (
+                    f"{stem}_condition-{condition}_order-{order:02d}"
+                    "_desc-preproc_bold_5mm.nii.gz"
+                )
                 denoised_file = denoised / (
                     f"{stem}_condition-{condition}_order-{order:02d}"
                     "_desc-denoised_bold_5mm.nii.gz"
                 )
                 bold.write_text("x")
                 mask.write_text("x")
+                smoothed.write_text("x")
                 denoised_file.write_text("x")
                 inputs.append(denoised_file)
                 manifest_rows.append(
-                    f"sub-001\t{run}\t{condition}\t{order}\tevents.tsv\t{bold}\tconfounds.tsv"
+                    f"sub-001\t{run}\t{condition}\t{order}\tevents.tsv\t{bold}\t{confounds}"
                 )
             manifest.write_text("\n".join(manifest_rows) + "\n")
             input_list.write_text("".join(f"{path}\n" for path in inputs))
@@ -242,7 +250,13 @@ class ShellScriptTests(unittest.TestCase):
                 check=True,
             )
             self.assertIn("MELODIC inputs passed all checks", result.stderr)
-            self.assertEqual(len(qc_tsv.read_text().splitlines()), 5)
+            lines = qc_tsv.read_text().splitlines()
+            self.assertEqual(len(lines), 5)
+            header = lines[0].split("\t")
+            first_run = dict(zip(header, lines[1].split("\t")))
+            self.assertEqual(first_run["confound_columns"], "31")
+            self.assertEqual(first_run["temporal_sd_ratio"], "0.625000")
+            self.assertEqual(first_run["status"], "ok")
 
 
 if __name__ == "__main__":

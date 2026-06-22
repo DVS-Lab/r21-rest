@@ -18,6 +18,7 @@ maindir="$(dirname "$scriptdir")"
 derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 task="${TASK_ID:-rest}"
+fwhm="${SMOOTH_FWHM:-5}"
 inputlist="${MELODIC_FILELIST:-${fsldir}/melodic_filelist_5mm_denoised.txt}"
 manifest="${RUN_MANIFEST:-${fsldir}/task-${task}_run_manifest.tsv}"
 outputtsv="${MELODIC_QC_TSV:-${derivdir}/qc/task-${task}_melodic_input_qc.tsv}"
@@ -66,7 +67,7 @@ append_status() {
     fi
 }
 mkdir -p "$(dirname "$outputtsv")"
-printf 'participant\trun\tcondition\tvolumes\tdim1\tdim2\tdim3\tpixdim1\tpixdim2\tpixdim3\tbrain_mask_voxels\tvarying_voxels\tvarying_fraction\toutside_mask_abs_max\tdata_min\tdata_max\tdata_mean\tdata_sd\tmean_temporal_sd\tstatus\tfile\n' >"$outputtsv"
+printf 'participant\trun\tcondition\tvolumes\tdim1\tdim2\tdim3\tpixdim1\tpixdim2\tpixdim3\tbrain_mask_voxels\tvarying_voxels\tvarying_fraction\toutside_mask_abs_max\tconfound_columns\tpre_mean_temporal_sd\tpost_mean_temporal_sd\ttemporal_sd_ratio\tdata_min\tdata_max\tdata_mean\tdata_sd\tstatus\tfile\n' >"$outputtsv"
 
 reference_grid=""
 reference_volumes=""
@@ -100,13 +101,26 @@ for input in "${inputs[@]}"; do
         failures=1
         continue
     fi
-    IFS=$'\t' read -r _participant _run manifest_condition _order _events bold _confounds <<< "$manifest_row"
+    IFS=$'\t' read -r _participant _run manifest_condition condition_order _events bold confounds <<< "$manifest_row"
+    order_padded="$(printf '%02d' "$condition_order")"
     mask="${bold%_desc-preproc_bold.nii.gz}_desc-brain_mask.nii.gz"
+    smoothed="${bold%_desc-preproc_bold.nii.gz}_condition-${manifest_condition}_order-${order_padded}_desc-preproc_bold_${fwhm}mm.nii.gz"
     if [[ ! -s "$mask" ]]; then
         echo "ERROR: Missing fMRIPrep brain mask: $mask" >&2
         failures=1
         continue
     fi
+    if [[ ! -s "$smoothed" ]]; then
+        echo "ERROR: Missing smoothed input: $smoothed" >&2
+        failures=1
+        continue
+    fi
+    if [[ ! -s "$confounds" ]]; then
+        echo "ERROR: Missing confound matrix: $confounds" >&2
+        failures=1
+        continue
+    fi
+    confound_columns="$(awk 'NF { print NF; exit }' "$confounds")"
 
     volumes="$(fslnvols "$input")"
     dim1="$(fslval "$input" dim1 | tr -d ' ')"
@@ -145,22 +159,26 @@ for input in "${inputs[@]}"; do
         fi
     fi
 
-    temporal_sd="${workdir}/temporal_sd_${index}.nii.gz"
+    pre_temporal_sd="${workdir}/pre_temporal_sd_${index}.nii.gz"
+    post_temporal_sd="${workdir}/post_temporal_sd_${index}.nii.gz"
     inside_mask="${workdir}/inside_mask_${index}.nii.gz"
     outside_mask="${workdir}/outside_mask_${index}.nii.gz"
-    fslmaths "$input" -Tstd "$temporal_sd"
+    fslmaths "$smoothed" -Tstd "$pre_temporal_sd"
+    fslmaths "$input" -Tstd "$post_temporal_sd"
     read -r brain_mask_voxels _brain_mask_mm3 <<< "$(fslstats "$mask" -V)"
-    read -r varying_voxels _varying_mm3 mean_temporal_sd <<< "$(fslstats "$temporal_sd" -V -M)"
+    read -r _pre_varying _pre_mm3 pre_mean_temporal_sd <<< "$(fslstats "$pre_temporal_sd" -V -M)"
+    read -r varying_voxels _varying_mm3 post_mean_temporal_sd <<< "$(fslstats "$post_temporal_sd" -V -M)"
     varying_fraction="$(awk -v varying="$varying_voxels" -v mask="$brain_mask_voxels" 'BEGIN { if (mask > 0) printf "%.6f", varying / mask; else print "0" }')"
+    temporal_sd_ratio="$(awk -v pre="$pre_mean_temporal_sd" -v post="$post_mean_temporal_sd" 'BEGIN { if (pre > 0) printf "%.6f", post / pre; else print "nan" }')"
     fslmaths "$input" -mas "$mask" "$inside_mask"
     fslmaths "$input" -sub "$inside_mask" -abs -Tmax "$outside_mask"
     read -r _outside_min outside_mask_abs_max <<< "$(fslstats "$outside_mask" -R)"
     read -r data_min data_max data_mean data_sd <<< "$(fslstats "$input" -R -M -S)"
-    summaries="$brain_mask_voxels $varying_voxels $varying_fraction $outside_mask_abs_max $data_min $data_max $data_mean $data_sd $mean_temporal_sd"
+    summaries="$brain_mask_voxels $varying_voxels $varying_fraction $outside_mask_abs_max $confound_columns $pre_mean_temporal_sd $post_mean_temporal_sd $temporal_sd_ratio $data_min $data_max $data_mean $data_sd"
     if grep -Eiq '(^|[[:space:]])(nan|[-+]?inf)([[:space:]]|$)' <<< "$summaries"; then
         append_status "nonfinite_summary"
     fi
-    if [[ "$brain_mask_voxels" == "0" ]] || awk -v value="$mean_temporal_sd" 'BEGIN { exit !(value <= 0) }'; then
+    if [[ "$brain_mask_voxels" == "0" ]] || awk -v value="$post_mean_temporal_sd" 'BEGIN { exit !(value <= 0) }'; then
         append_status "empty_or_constant"
     fi
     if awk -v value="$varying_fraction" 'BEGIN { exit !(value < 0.90) }'; then
@@ -169,17 +187,28 @@ for input in "${inputs[@]}"; do
     if awk -v value="$outside_mask_abs_max" 'BEGIN { exit !(value > 0.000001) }'; then
         append_status "signal_outside_mask"
     fi
+    if awk -v value="$temporal_sd_ratio" 'BEGIN { exit !(value >= 0.995) }'; then
+        append_status "no_variance_removed"
+    fi
+    if awk -v value="$temporal_sd_ratio" 'BEGIN { exit !(value < 0.10) }'; then
+        append_status "excessive_variance_removed"
+    fi
     if [[ "$participant" == "unknown" || "$run" == "unknown" || "$condition" == "unknown" ]]; then
         append_status "filename_entities"
     fi
     [[ "$status" == "ok" ]] || failures=1
 
-    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-        "$participant" "$run" "$condition" "$volumes" \
-        "$dim1" "$dim2" "$dim3" "$pixdim1" "$pixdim2" "$pixdim3" \
-        "$brain_mask_voxels" "$varying_voxels" "$varying_fraction" \
-        "$outside_mask_abs_max" "$data_min" "$data_max" "$data_mean" \
-        "$data_sd" "$mean_temporal_sd" "$status" "$input" >>"$outputtsv"
+    {
+        printf '%s\t' \
+            "$participant" "$run" "$condition" "$volumes" \
+            "$dim1" "$dim2" "$dim3" "$pixdim1" "$pixdim2" "$pixdim3" \
+            "$brain_mask_voxels" "$varying_voxels" "$varying_fraction" \
+            "$outside_mask_abs_max" "$confound_columns" \
+            "$pre_mean_temporal_sd" "$post_mean_temporal_sd" \
+            "$temporal_sd_ratio" "$data_min" "$data_max" "$data_mean" \
+            "$data_sd" "$status"
+        printf '%s\n' "$input"
+    } >>"$outputtsv"
 done
 
 bad_subjects="$(
@@ -219,6 +248,29 @@ printf 'fMRIPrep brain-mask range: %s-%s voxels\n' "$mask_min" "$mask_max"
 printf 'Wrote %s\n' "$outputtsv"
 
 if ((failures)); then
+    awk -F '\t' '
+        NR == 1 {
+            for (column = 1; column <= NF; column++) names[$column] = column
+            participant = names["participant"]
+            run = names["run"]
+            condition = names["condition"]
+            status = names["status"]
+            next
+        }
+        $status != "ok" {
+            failed++
+            if (failed <= 20) rows[failed] = $participant "\trun-" $run "\t" $condition "\t" $status
+            count = split($status, labels, ",")
+            for (index = 1; index <= count; index++) totals[labels[index]]++
+        }
+        END {
+            print "Failure counts:" > "/dev/stderr"
+            for (label in totals) print "  " label ": " totals[label] > "/dev/stderr"
+            print "Failed inputs (first 20):" > "/dev/stderr"
+            for (index = 1; index <= failed && index <= 20; index++) print "  " rows[index] > "/dev/stderr"
+            if (failed > 20) print "  ... " failed - 20 " more; see the TSV" > "/dev/stderr"
+        }
+    ' "$outputtsv"
     echo "ERROR: One or more MELODIC input checks failed." >&2
     exit 1
 fi
