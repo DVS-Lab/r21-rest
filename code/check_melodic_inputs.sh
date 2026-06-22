@@ -261,13 +261,13 @@ if ((failures)); then
             failed++
             if (failed <= 20) rows[failed] = $participant "\trun-" $run "\t" $condition "\t" $status
             count = split($status, labels, ",")
-            for (index = 1; index <= count; index++) totals[labels[index]]++
+            for (i = 1; i <= count; i++) totals[labels[i]]++
         }
         END {
             print "Failure counts:" > "/dev/stderr"
             for (label in totals) print "  " label ": " totals[label] > "/dev/stderr"
             print "Failed inputs (first 20):" > "/dev/stderr"
-            for (index = 1; index <= failed && index <= 20; index++) print "  " rows[index] > "/dev/stderr"
+            for (i = 1; i <= failed && i <= 20; i++) print "  " rows[i] > "/dev/stderr"
             if (failed > 20) print "  ... " failed - 20 " more; see the TSV" > "/dev/stderr"
         }
     ' "$outputtsv"

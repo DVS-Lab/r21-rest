@@ -258,6 +258,34 @@ class ShellScriptTests(unittest.TestCase):
             self.assertEqual(first_run["temporal_sd_ratio"], "0.625000")
             self.assertEqual(first_run["status"], "ok")
 
+            self.write_command(
+                fakebin / "fslstats",
+                'case "$1" in '
+                '*pre_temporal_sd*) echo "100 1000 2.0";; '
+                '*post_temporal_sd*) echo "98 980 2.0";; '
+                '*outside_mask*) echo "0 0";; '
+                '*brain_mask*) echo "100 1000";; '
+                '*) echo "-2 2 0 1";; esac\n',
+            )
+            failed_result = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "check_melodic_inputs.sh"),
+                    "--input-list",
+                    str(input_list),
+                    "--manifest",
+                    str(manifest),
+                    "--output-tsv",
+                    str(root / "failed_qc.tsv"),
+                ],
+                env=os.environ | {"PATH": f"{fakebin}:{os.environ['PATH']}"},
+                text=True,
+                capture_output=True,
+            )
+            self.assertNotEqual(failed_result.returncode, 0)
+            self.assertIn("Failure counts:", failed_result.stderr)
+            self.assertIn("no_variance_removed: 4", failed_result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
