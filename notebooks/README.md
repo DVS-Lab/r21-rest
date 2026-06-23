@@ -1,9 +1,10 @@
 # Randomise Results Notebook
 
-`plot_randomise_results.ipynb` interactively displays significant
-cluster-extent results on an MNI brain and summarizes the corresponding
-dual-regression stage-2 beta within the suprathreshold region for sham, RTPJ,
-VLPFC, and BOTH.
+`plot_randomise_results.ipynb` displays every significant cluster-extent
+result in its own interactive NiiVue MNI viewer. Each result includes a plain-
+language description of the analysis, network, signed contrast, corrected
+peak p-value, and cluster size, followed by sham, RTPJ, VLPFC, and BOTH
+dual-regression stage-2 beta means with SEM.
 
 Run the result checker before opening the notebook:
 

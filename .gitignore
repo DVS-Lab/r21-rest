@@ -4,6 +4,8 @@ __pycache__/
 .ruff_cache/
 .venv/
 .DS_Store
+.ipynb_checkpoints/
+.virtual_documents/
 
 # Local lists and generated neuroimaging outputs
 code/sublist.txt
