@@ -1,9 +1,8 @@
 # Analysis Decisions
 
-The repository covers fMRIPrep, MRIQC, confound extraction, joint nuisance
-regression, MELODIC input checks, group-MELODIC launching, completion checks,
-network matching, and standard dual regression. Final QA exclusions,
-run-difference images, and randomise designs remain.
+The repository covers preprocessing through cluster-extent randomise inference
+and portable result visualization. The 27-participant full-sample analysis is
+frozen as a preliminary result; a 24-participant QC sensitivity is planned.
 
 ## Current Study Context
 
@@ -38,8 +37,10 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   `BOTH - mean(RTPJ, VLPFC)`. These correlated flags supplement absolute
   subject-level QA, identify runs for visual review, and do not automatically
   exclude participants.
-- Subject exclusions should not be finalized until the stimulation-delivery
-  concern is resolved.
+- The prespecified QC sensitivity excludes `sub-218`, `sub-222`, and `sub-230`
+  when four-run mean FD is greater than 0.50 mm or mean percentage of volumes
+  above 0.20-mm FD is greater than 50%. This does not resolve or replace a
+  separate technical exclusion for failed stimulation delivery.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary
   networks are DMN, ECN, and left/right FPN; secondary networks include
   cerebellum and sensorimotor components.
@@ -60,9 +61,10 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   one `SHAM`, `RTPJ`, `VLPFC`, and `BOTH` run per participant. Missing or
   duplicate conditions stop the analysis rather than silently changing the
   sample.
-- Primary one-sample permutation tests use 5,000 permutations, 3D TFCE, and
-  cluster-extent inference with a cluster-forming t threshold of 3.1 (`-T -c
+- Primary one-sample permutation tests use 5,000 permutations and
+  cluster-extent inference with a cluster-forming t threshold of 3.1 (`-c
   3.1`). Both positive and negative condition-difference contrasts are tested.
+  TFCE is not interpreted.
 - The first randomise pass includes DMN from both denoised ICA solutions. The
   expanded primary pass adds ECN and FPN, while running dim-20 component 8 only
   once because it is the best match for both left and right FPN.

@@ -35,6 +35,8 @@ DIRECTIONS = ((1, "positive"), (2, "negative"))
 CLUSTER_METHOD = ("cluster-extent", "clustere_corrp")
 TFCE_METHOD = ("tfce", "tfce_corrp")
 SUMMARY_FIELDS = (
+    "sensitivity_label",
+    "excluded_participants",
     "analysis",
     "network",
     "component",
@@ -59,6 +61,7 @@ SUMMARY_FIELDS = (
     "roi_values_tsv",
 )
 ROI_VALUE_FIELDS = (
+    "sensitivity_label",
     "analysis",
     "network",
     "component",
@@ -90,6 +93,15 @@ def parse_args() -> argparse.Namespace:
         help="Also audit TFCE outputs. Cluster extent is the default.",
     )
     parser.add_argument("--map-type", choices=("beta", "z"), default="beta")
+    parser.add_argument(
+        "--sensitivity-label",
+        help="Audit outputs under contrasts/sensitivity-LABEL.",
+    )
+    parser.add_argument(
+        "--exclude-list",
+        type=Path,
+        help="Participant list used for the labeled sensitivity analysis.",
+    )
     parser.add_argument("--threshold", type=float, default=0.95)
     parser.add_argument("--task", default="rest")
     parser.add_argument("--space", default="MNI152NLin6Asym")
@@ -242,6 +254,24 @@ def subject_count(path: Path) -> int:
     return len(rows)
 
 
+def read_exclusions(path: Path | None) -> list[str]:
+    if path is None:
+        return []
+    exclusions: list[str] = []
+    for line in path.read_text().splitlines():
+        label = line.split("#", 1)[0].strip()
+        if not label:
+            continue
+        if not re.fullmatch(r"sub-[A-Za-z0-9]+", label):
+            raise ValueError(f"Invalid participant in exclusion list: {label}")
+        if label in exclusions:
+            raise ValueError(f"Duplicate participant in exclusion list: {label}")
+        exclusions.append(label)
+    if not exclusions:
+        raise ValueError(f"Exclusion list is empty: {path}")
+    return exclusions
+
+
 def read_input_order(path: Path) -> list[dict[str, str]]:
     with path.open(newline="") as stream:
         reader = csv.DictReader(stream, delimiter="\t")
@@ -303,13 +333,16 @@ def copied_name(
     contrast: str,
     direction: str,
     method: str,
+    sensitivity_label: str,
 ) -> str:
     dimension = {
         "0": "dim00",
         "20": "dim20",
         "smith09": "smith09",
     }[analysis]
+    sensitivity = camel_label(sensitivity_label) if sensitivity_label else ""
     description = (
+        f"{sensitivity}"
         f"{dimension}{camel_label(network)}Comp{component:04d}"
         f"{camel_label(contrast)}{camel_label(direction)}{camel_label(method)}Corrp"
     )
@@ -331,6 +364,7 @@ def extract_roi_values(
     map_type: str,
     destination: Path,
     metadata: dict[str, str],
+    excluded_participants: set[str],
     fslmaths: str,
     fslroi: str,
     fslstats: str,
@@ -356,6 +390,8 @@ def extract_roi_values(
         )
         component_image = temporary_dir / "component.nii.gz"
         for item in input_order:
+            if item["participant"] in excluded_participants:
+                continue
             source = dr_dir / (
                 f"dr_stage2_{item['dual_regression_label']}{stage2_suffix}.nii.gz"
             )
@@ -413,6 +449,8 @@ def write_sidecar(
     threshold: float,
     cluster_threshold: float,
     roi_values: Path,
+    sensitivity_label: str,
+    excluded_participants: list[str],
 ) -> None:
     payload = {
         "Description": "FSL randomise FWE-corrected 1-p statistical map",
@@ -430,6 +468,8 @@ def write_sidecar(
         "NumberOfPermutations": int(marker.get("n_perm", "5000")),
         "Sources": [relative_path(source, project_root)],
         "ROIValues": relative_path(roi_values, project_root),
+        "SensitivityLabel": sensitivity_label or None,
+        "ExcludedParticipants": excluded_participants,
         "GeneratedBy": [{"Name": "FSL randomise"}],
     }
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
@@ -439,7 +479,14 @@ def main() -> int:
     args = parse_args()
     if not 0.0 <= args.threshold <= 1.0:
         raise ValueError("--threshold must be between 0 and 1.")
+    if bool(args.sensitivity_label) != bool(args.exclude_list):
+        raise ValueError("--sensitivity-label and --exclude-list must be used together.")
+    if args.sensitivity_label and not re.fullmatch(
+        r"[a-z0-9][a-z0-9-]*", args.sensitivity_label
+    ):
+        raise ValueError("--sensitivity-label must contain lowercase letters, numbers, or hyphens.")
     project_root = Path(__file__).resolve().parent.parent
+    exclusions = read_exclusions(args.exclude_list.resolve() if args.exclude_list else None)
     fsl_dir = args.fsl_dir.resolve()
     comparison = (
         args.comparison.resolve()
@@ -452,7 +499,12 @@ def main() -> int:
         else fsl_dir / "randomise_summary"
     )
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_tsv = output_dir / f"task-{args.task}_randomise_peak_summary.tsv"
+    summary_description = (
+        f"_desc-{camel_label(args.sensitivity_label)}" if args.sensitivity_label else ""
+    )
+    output_tsv = output_dir / (
+        f"task-{args.task}{summary_description}_randomise_peak_summary.tsv"
+    )
 
     plan = build_component_plan(comparison, args.network_set, args.analysis_set)
     methods = [CLUSTER_METHOD]
@@ -494,9 +546,10 @@ def main() -> int:
         component = int(item["component"])
         component_padded = f"{component:04d}"
         dr_dir = fsl_dir / f"dual-regression_{analysis_label(analysis)}.dr"
-        component_dir = (
-            dr_dir / "contrasts" / f"component-{component_padded}_stat-{args.map_type}"
-        )
+        contrast_root = dr_dir / "contrasts"
+        if args.sensitivity_label:
+            contrast_root = contrast_root / f"sensitivity-{args.sensitivity_label}"
+        component_dir = contrast_root / f"component-{component_padded}_stat-{args.map_type}"
         design_con = component_dir / "design.con"
         design_valid = verify_design_con(design_con)
         if design_valid:
@@ -598,6 +651,8 @@ def main() -> int:
                         significant_count += 1
                         significant_by_method[method] += 1
                     row = {
+                        "sensitivity_label": args.sensitivity_label or "none",
+                        "excluded_participants": ",".join(exclusions),
                         "analysis": analysis,
                         "network": network,
                         "component": str(component),
@@ -643,6 +698,7 @@ def main() -> int:
                             contrast,
                             direction,
                             method,
+                            args.sensitivity_label or "",
                         )
                         sidecar = destination.with_name(destination.name.removesuffix(".nii.gz") + ".json")
                         roi_values = output_dir / roi_values_name(destination)
@@ -659,12 +715,14 @@ def main() -> int:
                                 args.map_type,
                                 roi_values,
                                 {
+                                    "sensitivity_label": args.sensitivity_label or "none",
                                     "analysis": analysis,
                                     "network": network,
                                     "component": str(component),
                                     "condition_contrast": contrast,
                                     "direction": direction,
                                 },
+                                set(exclusions),
                                 str(fslmaths),
                                 str(fslroi),
                                 fslstats,
@@ -679,6 +737,8 @@ def main() -> int:
                                 args.threshold,
                                 float(marker.get("cluster_threshold", "3.1")),
                                 roi_values,
+                                args.sensitivity_label or "",
+                                exclusions,
                             )
                             copied_count += 1
                             roi_values_count += 1
@@ -713,6 +773,8 @@ def main() -> int:
     expected_tstats = jobs * len(DIRECTIONS)
     expected_corrp = jobs * len(DIRECTIONS) * len(methods)
     print(f"Components checked: {len(plan)}")
+    print(f"Sensitivity label: {args.sensitivity_label or 'none'}")
+    print(f"Excluded participants: {','.join(exclusions) if exclusions else 'none'}")
     print(f"Randomise jobs checked: {jobs}")
     print(f"Design contrasts verified (+1/-1): {valid_designs}/{len(plan)}")
     print(f"Completion markers present: {marker_count}/{jobs}")

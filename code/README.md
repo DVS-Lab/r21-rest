@@ -59,6 +59,8 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `make_dual_regression_contrasts.sh` | One completed dual-regression component | Builds all seven paired condition differences, merged group inputs, and one-sample designs. |
 | `randomise.sh` | One merged component/condition difference | Runs one one-sample cluster-extent test (`-c 3.1`); TFCE is available only with `--tfce`. |
 | `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Prepares DMN, all primary ICA components, or the four direct Smith09 maps and launches up to 24 jobs concurrently. |
+| `run_randomise_qc_sensitivity.sh` | Completed dual regression and `exclude_qc_outliers.txt` | Repeats primary and/or Smith09 randomise after the predefined three-participant QC exclusion, without overwriting full-sample outputs. |
+| `exclude_qc_outliers.txt` | Participant-level QC summary | Prespecified 24-participant sensitivity exclusions and rule. |
 | `check_randomise_results.py` | Primary randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
 | `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
 
@@ -71,7 +73,19 @@ code/run_randomise.sh primary
 code/run_randomise.sh smith09 --dry-run
 code/run_randomise.sh smith09
 python3 code/check_randomise_results.py --analysis-set all --network-set primary --fail-on-missing
-jupyter lab notebooks/plot_randomise_results.ipynb
+bash notebooks/run_randomise_notebook.sh
+```
+
+Run the predefined QC sensitivity separately:
+
+```bash
+code/run_randomise_qc_sensitivity.sh all --dry-run
+code/run_randomise_qc_sensitivity.sh all
+python3 code/check_randomise_results.py \
+  --analysis-set all \
+  --sensitivity-label qc-outliers \
+  --exclude-list code/exclude_qc_outliers.txt \
+  --fail-on-missing
 ```
 
 Completed jobs have a `.complete` marker beside their output prefix, so the

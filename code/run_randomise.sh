@@ -18,6 +18,8 @@ Options:
   --map-type {beta|z}       Stage-2 map type (default: beta)
   --n-perm N                Permutations per job (default: 5000)
   --cluster-threshold VALUE Cluster-forming t threshold (default: 3.1)
+  --exclude-list PATH       Participant exclusions for a sensitivity analysis
+  --sensitivity-label NAME  Output label used with --exclude-list
   --tfce                     Also calculate TFCE inference (default: off)
   --dry-run                  Print the complete launch plan only
 USAGE
@@ -39,6 +41,8 @@ maxjobs="${RANDOMISE_MAX_JOBS:-24}"
 map_type="beta"
 nperm="${N_PERM:-5000}"
 cluster_threshold="${CLUSTER_THRESHOLD:-3.1}"
+exclude_list=""
+sensitivity_label=""
 tfce=0
 dryrun=0
 while (($#)); do
@@ -47,6 +51,8 @@ while (($#)); do
         --map-type) map_type="${2:-}"; shift 2 ;;
         --n-perm) nperm="${2:-}"; shift 2 ;;
         --cluster-threshold) cluster_threshold="${2:-}"; shift 2 ;;
+        --exclude-list) exclude_list="${2:-}"; shift 2 ;;
+        --sensitivity-label) sensitivity_label="${2:-}"; shift 2 ;;
         --tfce) tfce=1; shift ;;
         --dry-run|--render-only) dryrun=1; shift ;;
         --help|-h) usage; exit 0 ;;
@@ -61,6 +67,18 @@ done
     exit 1
 }
 case "$map_type" in beta|z) ;; *) echo "ERROR: --map-type must be beta or z." >&2; exit 1 ;; esac
+if [[ -n "$exclude_list" || -n "$sensitivity_label" ]]; then
+    [[ -n "$exclude_list" && -n "$sensitivity_label" ]] || {
+        echo "ERROR: --exclude-list and --sensitivity-label must be used together." >&2
+        exit 1
+    }
+    [[ "$sensitivity_label" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+        echo "ERROR: --sensitivity-label must contain lowercase letters, numbers, or hyphens." >&2
+        exit 1
+    }
+    exclude_list="$(cd "$(dirname "$exclude_list")" >/dev/null 2>&1 && pwd)/$(basename "$exclude_list")"
+    [[ -f "$exclude_list" ]] || { echo "ERROR: Exclusion list not found: $exclude_list" >&2; exit 1; }
+fi
 
 scriptdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 maindir="$(dirname "$scriptdir")"
@@ -161,16 +179,18 @@ else
     printf 'Unique ICA components: %d\n' "$component_count" >&2
 fi
 printf 'Randomise jobs: %d; maximum concurrent: %d\n' "$job_count" "$maxjobs" >&2
+printf 'Sensitivity label: %s\n' "${sensitivity_label:-none}" >&2
+printf 'Exclude list: %s\n' "${exclude_list:-none}" >&2
 printf 'Permutations: %d; TFCE: %s; cluster threshold: %s\n' \
     "$nperm" "$([[ "$tfce" == 1 ]] && echo yes || echo no)" "$cluster_threshold" >&2
 while IFS=$'\t' read -r analysis network component; do
     printf '  dim=%s network=%s component=%s\n' "$analysis" "$network" "$component" >&2
 done <"$plan"
 
-component_ready() {
+component_path() {
     local analysis="$1"
     local component="$2"
-    local analysis_label drdir component_padded component_dir contrast group_input required
+    local analysis_label drdir component_padded
     case "$analysis" in
         smith09) analysis_label="smith09_denoised" ;;
         0) analysis_label="denoised_dim-00_task-rest" ;;
@@ -179,7 +199,19 @@ component_ready() {
     esac
     drdir="${fsldir}/dual-regression_${analysis_label}.dr"
     component_padded="$(printf '%04d' "$component")"
-    component_dir="${drdir}/contrasts/component-${component_padded}_stat-${map_type}"
+    if [[ -n "$sensitivity_label" ]]; then
+        printf '%s\n' "${drdir}/contrasts/sensitivity-${sensitivity_label}/component-${component_padded}_stat-${map_type}"
+    else
+        printf '%s\n' "${drdir}/contrasts/component-${component_padded}_stat-${map_type}"
+    fi
+}
+
+component_ready() {
+    local analysis="$1"
+    local component="$2"
+    local component_padded component_dir contrast group_input required
+    component_padded="$(printf '%04d' "$component")"
+    component_dir="$(component_path "$analysis" "$component")" || return 1
     for required in design.mat design.con design.grp subject_order.tsv; do
         [[ -f "${component_dir}/${required}" ]] || return 1
     done
@@ -191,11 +223,13 @@ component_ready() {
 }
 
 while IFS=$'\t' read -r analysis _network component; do
+    component_dir="$(component_path "$analysis" "$component")"
     if component_ready "$analysis" "$component"; then
         printf 'Contrast inputs already prepared: dim=%s component=%s\n' "$analysis" "$component" >&2
         continue
     fi
-    args=("$analysis" "$component" --map-type "$map_type")
+    args=("$analysis" "$component" --map-type "$map_type" --output-dir "$component_dir")
+    [[ -n "$exclude_list" ]] && args+=(--exclude-list "$exclude_list")
     ((dryrun)) && args+=(--dry-run)
     bash "${scriptdir}/make_dual_regression_contrasts.sh" "${args[@]}"
 done <"$plan"
@@ -211,7 +245,7 @@ if ((dryrun)); then
     exit 0
 fi
 
-logdir="${derivdir}/logs/randomise"
+logdir="${derivdir}/logs/randomise${sensitivity_label:+/sensitivity-${sensitivity_label}}"
 mkdir -p "$logdir"
 tfce_args=()
 ((tfce)) && tfce_args=(--tfce)
@@ -219,13 +253,14 @@ pids=()
 failures=0
 launched=0
 while IFS=$'\t' read -r analysis network component; do
+    component_dir="$(component_path "$analysis" "$component")"
     for contrast in "${contrasts[@]}"; do
         while [[ "$(jobs -rp | wc -l | tr -d ' ')" -ge "$maxjobs" ]]; do
             sleep 2
         done
         logfile="${logdir}/dim-${analysis}_network-${network}_component-${component}_contrast-${contrast}.log"
         echo "Launching dim-${analysis} ${network} component ${component} ${contrast}; log: $logfile" >&2
-        bash "${scriptdir}/randomise.sh" \
+        CONTRAST_COMPONENT_DIR="$component_dir" bash "${scriptdir}/randomise.sh" \
             "$analysis" "$network" "$component" "$contrast" \
             --map-type "$map_type" --n-perm "$nperm" \
             --cluster-threshold "$cluster_threshold" \

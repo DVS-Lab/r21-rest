@@ -304,6 +304,22 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("dim=smith09 network=dmn component=4", direct_randomise.stderr)
         self.assertIn("dim=smith09 network=left-fpn component=10", direct_randomise.stderr)
 
+        sensitivity_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_randomise_qc_sensitivity.sh"),
+                "all",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertEqual(sensitivity_randomise.stderr.count("Sensitivity label: qc-outliers"), 2)
+        self.assertIn("Randomise jobs: 49; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 28; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("sensitivity-qc-outliers/component-0023_stat-beta", sensitivity_randomise.stderr)
+
         qa = subprocess.run(
             ["bash", str(REPO_ROOT / "code" / "check_melodic_inputs.sh"), "--help"],
             text=True,
@@ -329,18 +345,21 @@ class ShellScriptTests(unittest.TestCase):
             drdir = root / "dual-regression_denoised_dim-20_task-rest.dr"
             drdir.mkdir()
             (drdir / "mask.nii.gz").write_text("x")
-            labels = ("subject00000", "subject00001", "subject00002", "subject00003")
             conditions = ("vlpfc", "sham", "both", "rtpj")
             runs = ("03", "01", "04", "02")
             mapping = [
                 "dual_regression_index\tdual_regression_label\tparticipant\trun\tcondition\tcondition_order\tfile"
             ]
-            for index, (label, condition, run) in enumerate(zip(labels, conditions, runs)):
-                stage2 = drdir / f"dr_stage2_{label}.nii.gz"
-                stage2.write_text("x")
-                mapping.append(
-                    f"{index}\t{label}\tsub-001\t{run}\t{condition}\t{index + 1}\tinput{index}.nii.gz"
-                )
+            index = 0
+            for participant in ("sub-001", "sub-002"):
+                for order, (condition, run) in enumerate(zip(conditions, runs), start=1):
+                    label = f"subject{index:05d}"
+                    stage2 = drdir / f"dr_stage2_{label}.nii.gz"
+                    stage2.write_text("x")
+                    mapping.append(
+                        f"{index}\t{label}\t{participant}\t{run}\t{condition}\t{order}\tinput{index}.nii.gz"
+                    )
+                    index += 1
             (drdir / "input_order.tsv").write_text("\n".join(mapping) + "\n")
 
             result = subprocess.run(
@@ -362,12 +381,15 @@ class ShellScriptTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, msg=result.stderr)
 
             output = drdir / "contrasts" / "component-0010_stat-beta"
-            self.assertIn("Participants: 1", result.stderr)
+            self.assertIn("Participants: 2", result.stderr)
             self.assertEqual(
                 (output / "subject_order.tsv").read_text(),
-                "randomise_index\tparticipant\n0\tsub-001\n",
+                "randomise_index\tparticipant\n0\tsub-001\n1\tsub-002\n",
             )
-            self.assertEqual((output / "design.mat").read_text().count("\n1\n"), 1)
+            self.assertEqual(
+                (output / "design.mat").read_text().split("/Matrix\n", 1)[1].splitlines(),
+                ["1", "1"],
+            )
             self.assertIn("/ContrastName2\tNegative", (output / "design.con").read_text())
             randomise = (output / "run_randomise.sh").read_text()
             self.assertEqual(randomise.count("randomise -i"), 7)
@@ -386,6 +408,46 @@ class ShellScriptTests(unittest.TestCase):
                     f"contrast-{contrast}.nii.gz"
                 )
                 self.assertTrue(group_input.exists())
+
+            exclude_list = root / "exclude.txt"
+            exclude_list.write_text("# sensitivity\nsub-002\n")
+            sensitivity_output = (
+                drdir
+                / "contrasts"
+                / "sensitivity-qc-outliers"
+                / "component-0010_stat-beta"
+            )
+            sensitivity = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "make_dual_regression_contrasts.sh"),
+                    "20",
+                    "10",
+                    "--exclude-list",
+                    str(exclude_list),
+                    "--output-dir",
+                    str(sensitivity_output),
+                ],
+                env=os.environ
+                | {
+                    "PATH": f"{fakebin}:{os.environ['PATH']}",
+                    "DUAL_REGRESSION_DIR": str(drdir),
+                    "WORK_ROOT": str(root / "scratch"),
+                },
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(sensitivity.returncode, 0, msg=sensitivity.stderr)
+            self.assertIn("Participants: 1", sensitivity.stderr)
+            self.assertIn("Participants excluded: 1", sensitivity.stderr)
+            self.assertEqual(
+                (sensitivity_output / "subject_order.tsv").read_text(),
+                "randomise_index\tparticipant\n0\tsub-001\n",
+            )
+            self.assertEqual(
+                (sensitivity_output / "excluded_participants.tsv").read_text(),
+                "participant\treason\nsub-002\tpredefined_qc_sensitivity\n",
+            )
 
     def test_single_randomise_job_uses_requested_inference(self):
         with tempfile.TemporaryDirectory() as tmp:

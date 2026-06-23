@@ -1,0 +1,4 @@
+participant	mean_fd_mean	mean_fd_perc	criterion_mean_fd_gt_0.50	criterion_mean_fd_perc_gt_50	differential_contrasts_flagged	decision
+sub-218	0.506783	46.4583	true	false	6	exclude_sensitivity
+sub-222	0.732145	65.6150	true	true	5	exclude_sensitivity
+sub-230	0.309157	55.4527	false	true	4	exclude_sensitivity

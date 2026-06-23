@@ -14,6 +14,7 @@ one-sample FSL design files plus a run_randomise.sh launcher.
 Options:
   --map-type {beta|z}  Stage-2 map type (default: beta)
   --output-dir PATH    Override the component contrast output directory
+  --exclude-list PATH  Exclude listed participants from this sensitivity run
   --dry-run            Print resolved paths and planned operations only
 
 The primary analysis should use beta: dr_stage2_subjectNNNNN.nii.gz. The z
@@ -44,11 +45,13 @@ esac
 
 map_type="beta"
 outputdir=""
+exclude_list=""
 dryrun=0
 while (($#)); do
     case "$1" in
         --map-type) map_type="${2:-}"; shift 2 ;;
         --output-dir) outputdir="${2:-}"; shift 2 ;;
+        --exclude-list) exclude_list="${2:-}"; shift 2 ;;
         --dry-run|--render-only) dryrun=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -73,6 +76,10 @@ component_padded="$(printf '%04d' "$component")"
 component_index=$((component - 1))
 outputdir="${outputdir:-${drdir}/contrasts/component-${component_padded}_stat-${map_type}}"
 scratchroot="${WORK_ROOT:-/ZPOOL/data/scratch/${USER:-$(whoami)}}"
+if [[ -n "$exclude_list" ]]; then
+    exclude_list="$(cd "$(dirname "$exclude_list")" >/dev/null 2>&1 && pwd)/$(basename "$exclude_list")"
+    [[ -f "$exclude_list" ]] || { echo "ERROR: Exclusion list not found: $exclude_list" >&2; exit 1; }
+fi
 
 contrasts=(
     both-minus-sham
@@ -91,6 +98,7 @@ printf 'Component: %d (FSL volume %d)\n' "$component" "$component_index" >&2
 printf 'Stage-2 map type: %s (dr_stage2_subjectNNNNN%s.nii.gz)\n' \
     "$map_type" "$stage2_suffix" >&2
 printf 'Output: %s\n' "$outputdir" >&2
+printf 'Exclude list: %s\n' "${exclude_list:-none}" >&2
 printf 'Contrasts: %s\n' "${contrasts[*]}" >&2
 printf 'Operations: fslroi, fslmaths subtraction, fslmerge, one-sample FSL designs\n' >&2
 
@@ -119,8 +127,35 @@ cleanup() {
 trap cleanup EXIT
 
 plan="${workdir}/participant_stage2.tsv"
+clean_exclusions="${workdir}/exclude_participants.txt"
+printf '# normalized exclusions\n' >"$clean_exclusions"
+if [[ -n "$exclude_list" ]]; then
+    if ! awk '
+        /^[[:space:]]*(#|$)/ { next }
+        {
+            label = $1
+            if (label !~ /^sub-[A-Za-z0-9]+$/) {
+                print "ERROR: Invalid participant in exclusion list: " label > "/dev/stderr"
+                bad = 1
+            } else if (seen[label]++) {
+                print "ERROR: Duplicate participant in exclusion list: " label > "/dev/stderr"
+                bad = 1
+            } else {
+                print label
+            }
+        }
+        END { if (bad) exit 1 }
+    ' "$exclude_list" >>"$clean_exclusions"; then
+        exit 1
+    fi
+fi
+
 if ! awk -F $'\t' '
-    NR == 1 {
+    NR == FNR {
+        if ($1 ~ /^sub-/) excluded[$1] = 1
+        next
+    }
+    FNR == 1 {
         for (column = 1; column <= NF; column++) column_index[$column] = column
         if (!("dual_regression_label" in column_index) || !("participant" in column_index) || !("condition" in column_index)) {
             print "ERROR: input_order.tsv is missing required columns." > "/dev/stderr"
@@ -136,6 +171,10 @@ if ! awk -F $'\t' '
         if (participant == "" || participant == "unknown") {
             print "ERROR: Missing participant label in input_order.tsv." > "/dev/stderr"
             bad = 1
+            next
+        }
+        if (participant in excluded) {
+            excluded_found[participant] = 1
             next
         }
         if (condition != "sham" && condition != "rtpj" && condition != "vlpfc" && condition != "both") {
@@ -156,6 +195,12 @@ if ! awk -F $'\t' '
         }
     }
     END {
+        for (participant in excluded) {
+            if (!(participant in excluded_found)) {
+                print "ERROR: Excluded participant not found in input_order.tsv: " participant > "/dev/stderr"
+                bad = 1
+            }
+        }
         for (subject_number = 1; subject_number <= subject_count; subject_number++) {
             participant = subjects[subject_number]
             missing = ""
@@ -175,11 +220,12 @@ if ! awk -F $'\t' '
         }
         if (bad || subject_count == 0) exit 1
     }
-' "$mapping" >"$plan"; then
+' "$clean_exclusions" "$mapping" >"$plan"; then
     exit 1
 fi
 
 participant_count=$(($(wc -l <"$plan") - 1))
+excluded_count=$(($(wc -l <"$clean_exclusions") - 1))
 ((participant_count > 0)) || { echo "ERROR: No complete participants found." >&2; exit 1; }
 
 while IFS=$'\t' read -r participant sham_label rtpj_label vlpfc_label both_label; do
@@ -200,6 +246,13 @@ while IFS=$'\t' read -r participant sham_label rtpj_label vlpfc_label both_label
 done <"$plan"
 
 mkdir -p "$outputdir"
+{
+    printf 'participant\treason\n'
+    while IFS= read -r participant; do
+        [[ "$participant" == sub-* ]] || continue
+        printf '%s\tpredefined_qc_sensitivity\n' "$participant"
+    done <"$clean_exclusions"
+} >"${outputdir}/excluded_participants.tsv"
 for contrast in "${contrasts[@]}"; do
     mkdir -p "${outputdir}/${contrast}"
 done
@@ -305,6 +358,7 @@ EOF
 chmod +x "$randomise_script"
 
 echo "Participants: $participant_count" >&2
+echo "Participants excluded: $excluded_count" >&2
 echo "Wrote $subject_order" >&2
 echo "Wrote merged contrast inputs under $outputdir" >&2
 echo "Next: $randomise_script" >&2

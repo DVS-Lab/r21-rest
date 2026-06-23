@@ -69,16 +69,22 @@ uses that table to locate each participant's four conditions, extracts one
 requested component from the raw stage-2 coefficient maps, constructs the seven
 planned paired differences, and records the participant order used in the
 merged `randomise` inputs. Generated one-sample designs include positive and
-negative contrasts. `code/randomise.sh` runs one test with 3D TFCE and
-cluster-extent inference (`-T -c 3.1`); `code/run_randomise.sh` reads the
+negative contrasts. `code/randomise.sh` runs one cluster-extent test (`-c
+3.1`); `code/run_randomise.sh` reads the
 committed Smith09 comparison table and launches DMN or all primary-network
 tests with at most 24 concurrent processes.
 
+`code/run_randomise_qc_sensitivity.sh` uses the same stage-2 maps but rebuilds
+the participant stacks after applying `code/exclude_qc_outliers.txt`. Its
+inputs and randomise outputs are isolated under `sensitivity-qc-outliers`
+directories and do not overwrite the full-sample analysis.
+
 `code/check_randomise_results.py` verifies C1=`1` and C2=`-1`, checks merged
-input volume counts, and audits the expected t-stat and corrected-p outputs for
-both TFCE and cluster extent. It writes a tracked TSV under
+input volume counts, and audits the expected t-stat and cluster-extent
+corrected-p outputs. It writes a tracked TSV under
 `derivatives/fsl/randomise_summary` and copies complete corrp maps with peak
-`1-p > 0.95` into that directory with JSON provenance sidecars.
+`1-p > 0.95` into that directory with JSON provenance sidecars and compact
+participant-by-condition ROI-value TSVs.
 
 ## Logs
 

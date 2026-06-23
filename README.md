@@ -401,9 +401,10 @@ the recorded order, then writes `subject_order.tsv`, one-sample `design.mat`,
 contains positive and negative rows for two-sided interpretation.
 
 The stable batch launcher in `code` reads the committed Smith09 matching table,
-prepares missing component contrasts, and runs 5,000 permutations with TFCE
-and cluster-extent inference at a cluster-forming t threshold of 3.1 (`-T -c
-3.1`). Start with the two DMN components:
+prepares missing component contrasts, and runs 5,000 permutations with
+cluster-extent inference at a cluster-forming t threshold of 3.1 (`-c 3.1`).
+TFCE is available only as an explicit option and is not interpreted. Start with
+the two DMN components:
 
 ```bash
 code/run_randomise.sh dmn --dry-run
@@ -415,6 +416,7 @@ to all primary networks after that batch completes:
 
 ```bash
 code/run_randomise.sh primary
+code/run_randomise.sh smith09
 ```
 
 The primary plan contains seven unique ICA components and 49 jobs, with at
@@ -424,15 +426,15 @@ bilateral FPN component because both lateralized Smith09 maps select component
 `8`. Completion markers prevent the primary batch from repeating finished DMN
 tests. Logs are written under `derivatives/logs/randomise`.
 
-Audit the finished primary batch with:
+Audit the finished data-derived and direct-Smith09 batches with:
 
 ```bash
-python3 code/check_randomise_results.py --network-set primary --fail-on-missing
+python3 code/check_randomise_results.py --analysis-set all --fail-on-missing
 ```
 
 The checker verifies that every component uses C1=`1` and C2=`-1`, confirms
-the participant count in each merged input, and expects 49 jobs, 98 t-stat
-images, and 196 corrected-p images (two directions by TFCE and cluster extent).
+the participant count in each merged input, and expects 77 jobs, 154 t-stat
+images, and 154 cluster-extent corrected-p images (two directions).
 Because FSL corrp images contain `1-p`, a peak above 0.95 indicates corrected
 `p < 0.05`. Results are written to the GitHub-tracked directory:
 
@@ -444,11 +446,27 @@ Complete significant corrp images are copied into the same directory using
 `task-rest_space-MNI152NLin6Asym_desc-..._stat-corrp_statmap.nii.gz` names,
 with JSON sidecars documenting the analysis, network, component, contrast,
 direction, inference method, permutation count, threshold, peak, and source.
+Compact participant-by-condition stage-2 beta TSVs make the result notebook
+portable across machines.
+
+The preliminary full-sample result is tagged
+`preliminary-results-2026-06-23` and documented in
+[`docs/preliminary-results-2026-06-23.md`](docs/preliminary-results-2026-06-23.md).
+Repeat all 77 jobs after the predefined participant-level QC exclusion without
+overwriting the full-sample outputs:
+
+```bash
+code/run_randomise_qc_sensitivity.sh all
+python3 code/check_randomise_results.py \
+  --analysis-set all \
+  --sensitivity-label qc-outliers \
+  --exclude-list code/exclude_qc_outliers.txt \
+  --fail-on-missing
+```
 
 `code/randomise.sh` runs one network/contrast job when a targeted rerun is
 needed. See [`code/README.md`](code/README.md) for concise input/output notes on
-every script. FSL documents `-T` and `-c` as simultaneous TFCE and
-cluster-extent inference options in its
+every script. FSL documents `-c` as the cluster-extent inference option in its
 [randomise guide](https://fsl.fmrib.ox.ac.uk/fsl/docs/statistics/randomise.html).
 
 For an explicitly secondary Z-map analysis, add `--map-type z`. Processing one
@@ -457,17 +475,12 @@ automatic-dimensionality components.
 
 ## Remaining Work
 
-1. Review MRIQC flags, the fMRIPrep reports, and the stimulation-delivery note;
-   exclude incomplete `sub-212`, resolve or exclude unlabeled `sub-233`, then
-   create `code/included_sublist.txt`.
-2. Extract confounds, smooth to 5 mm, regress the omnibus nuisance model, audit
-   the cleaned inputs, and run both group MELODIC analyses.
-3. Compare all four ICA solutions with Smith09 and run Smith09 dual regression.
-4. Run dual regression for the denoised automatic and fixed-20 ICA solutions.
-5. Review the Smith09 correlations and component spatial maps.
-6. Build component-wise condition differences and inspect their participant
-   ordering.
-7. Run and plot the final one-sample `randomise` analyses.
+1. Run and audit the predefined 24-participant QC sensitivity analysis.
+2. Reconcile the 27-participant sample with the earlier 28- and 22-participant
+   analyses and resolve any stimulation-delivery exclusion.
+3. Compare full-sample and sensitivity results in the portable notebook.
+4. Decide the final primary inferential family and across-job multiplicity
+   strategy before treating any preliminary finding as confirmatory.
 
 ## License
 

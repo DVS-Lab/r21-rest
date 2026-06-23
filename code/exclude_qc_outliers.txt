@@ -1,0 +1,7 @@
+# Provisional QC sensitivity exclusions, 2026-06-23.
+# Rule: four-run mean FD > 0.50 mm OR mean percentage of volumes with
+# FD > 0.20 mm > 50%. Differential boxplot flags are supporting diagnostics
+# and are not themselves exclusion criteria.
+sub-218
+sub-222
+sub-230

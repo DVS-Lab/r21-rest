@@ -7,6 +7,10 @@ __pycache__/
 .ipynb_checkpoints/
 .virtual_documents/
 
+# Private correspondence drafts belong outside version control.
+docs/draft-reply-*.md
+docs/email-draft-*.md
+
 # Local lists and generated neuroimaging outputs
 code/sublist.txt
 subjects.txt
