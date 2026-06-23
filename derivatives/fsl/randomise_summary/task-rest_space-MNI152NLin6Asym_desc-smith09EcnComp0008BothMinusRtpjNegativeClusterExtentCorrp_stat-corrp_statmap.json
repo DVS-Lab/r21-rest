@@ -15,6 +15,7 @@
   "Network": "ecn",
   "NumberOfPermutations": 5000,
   "PeakOneMinusP": 0.98,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-smith09EcnComp0008BothMinusRtpjNegativeClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
   "SignificanceThresholdOneMinusP": 0.95,
   "Sources": [
     "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0008_stat-beta/randomise/network-ecn/task-rest_network-ecn_component-0008_stat-beta_contrast-both-minus-rtpj_clustere_corrp_tstat2.nii.gz"

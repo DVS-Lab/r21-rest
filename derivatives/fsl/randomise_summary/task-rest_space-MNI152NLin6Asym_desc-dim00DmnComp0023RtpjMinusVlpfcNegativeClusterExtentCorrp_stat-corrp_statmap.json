@@ -15,6 +15,7 @@
   "Network": "dmn",
   "NumberOfPermutations": 5000,
   "PeakOneMinusP": 0.9934,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-dim00DmnComp0023RtpjMinusVlpfcNegativeClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
   "SignificanceThresholdOneMinusP": 0.95,
   "Sources": [
     "derivatives/fsl/dual-regression_denoised_dim-00_task-rest.dr/contrasts/component-0023_stat-beta/randomise/network-dmn/task-rest_network-dmn_component-0023_stat-beta_contrast-rtpj-minus-vlpfc_clustere_corrp_tstat2.nii.gz"
