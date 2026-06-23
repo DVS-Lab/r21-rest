@@ -59,8 +59,8 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `make_dual_regression_contrasts.sh` | One completed dual-regression component | Builds all seven paired condition differences, merged group inputs, and one-sample designs. |
 | `randomise.sh` | One merged component/condition difference | Runs one one-sample cluster-extent test (`-c 3.1`); TFCE is available only with `--tfce`. |
 | `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Prepares DMN, all primary ICA components, or the four direct Smith09 maps and launches up to 24 jobs concurrently. |
-| `check_randomise_results.py` | Primary randomise outputs | Verifies both design directions and cluster-extent corrp maps, records peak corrected 1-p values, and copies significant maps to `derivatives/fsl/randomise_summary`. |
-| `../notebooks/plot_randomise_results.ipynb` | Randomise summary and stage-2 beta maps | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM. |
+| `check_randomise_results.py` | Primary randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
+| `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
 
 Use the batch launcher first for DMN and then for the full primary set:
 

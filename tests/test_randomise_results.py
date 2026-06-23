@@ -64,6 +64,21 @@ class RandomiseResultTests(unittest.TestCase):
                 (component_dir / "subject_order.tsv").write_text(
                     "randomise_index\tparticipant\n0\tsub-001\n1\tsub-002\n"
                 )
+                input_order = [
+                    "dual_regression_index\tdual_regression_label\tparticipant\trun\tcondition"
+                ]
+                index = 0
+                for participant in ("sub-001", "sub-002"):
+                    for run, condition in enumerate(
+                        ("sham", "rtpj", "vlpfc", "both"), start=1
+                    ):
+                        label_name = f"subject{index:05d}"
+                        input_order.append(
+                            f"{index}\t{label_name}\t{participant}\t{run:02d}\t{condition}"
+                        )
+                        (dr_dir / f"dr_stage2_{label_name}.nii.gz").write_text("stage2")
+                        index += 1
+                (dr_dir / "input_order.tsv").write_text("\n".join(input_order) + "\n")
                 randomise_dir = component_dir / "randomise" / "network-dmn"
                 randomise_dir.mkdir(parents=True)
                 for contrast in CONTRASTS:
@@ -91,9 +106,15 @@ class RandomiseResultTests(unittest.TestCase):
             fakebin.mkdir()
             self.write_command(
                 fakebin / "fslstats",
-                'case "$1" in *clustere_corrp_tstat1*) echo "0 0.97";; *) echo "0 0.94";; esac\n',
+                'case "$*" in *" -m") echo "0.125";; '
+                '*clustere_corrp_tstat1*) echo "0 0.97";; *) echo "0 0.94";; esac\n',
             )
             self.write_command(fakebin / "fslnvols", "echo 2\n")
+            self.write_command(
+                fakebin / "fslmaths",
+                'for argument in "$@"; do output="$argument"; done\nprintf x > "$output"\n',
+            )
+            self.write_command(fakebin / "fslroi", 'printf x > "$2"\n')
             output_dir = fsl_dir / "randomise_summary"
             result = subprocess.run(
                 [
@@ -121,6 +142,7 @@ class RandomiseResultTests(unittest.TestCase):
             self.assertIn("corrp images present: 28/28", result.stdout)
             self.assertNotIn("TFCE maps", result.stdout)
             self.assertIn("Cluster-extent maps with peak > 0.95: 14", result.stdout)
+            self.assertIn("ROI-value TSVs written: 14 (112 rows)", result.stdout)
 
             summary = output_dir / "task-rest_randomise_peak_summary.tsv"
             with summary.open(newline="") as stream:
@@ -133,15 +155,24 @@ class RandomiseResultTests(unittest.TestCase):
             significant = [row for row in rows if row["peak_gt_threshold"] == "true"]
             self.assertEqual(len(significant), 14)
             self.assertTrue(all(row["copied_image"] for row in significant))
+            self.assertTrue(all(row["roi_values_tsv"] for row in significant))
 
             copied_images = list(output_dir.glob("*.nii.gz"))
             copied_sidecars = list(output_dir.glob("*.json"))
+            roi_values = list(output_dir.glob("*_timeseries.tsv"))
             self.assertEqual(len(copied_images), 14)
             self.assertEqual(len(copied_sidecars), 14)
+            self.assertEqual(len(roi_values), 14)
+            with roi_values[0].open(newline="") as stream:
+                roi_rows = list(csv.DictReader(stream, delimiter="\t"))
+            self.assertEqual(len(roi_rows), 8)
+            self.assertEqual({row["condition"] for row in roi_rows}, {"sham", "rtpj", "vlpfc", "both"})
+            self.assertEqual({row["stage2_beta"] for row in roi_rows}, {"0.125"})
             sidecar = json.loads(copied_sidecars[0].read_text())
             self.assertEqual(sidecar["DesignContrast"], "C1")
             self.assertEqual(sidecar["InferenceMethod"], "cluster-extent")
             self.assertEqual(sidecar["ClusterFormingTThreshold"], 3.1)
+            self.assertTrue(sidecar["ROIValues"].endswith("_timeseries.tsv"))
 
 
 if __name__ == "__main__":

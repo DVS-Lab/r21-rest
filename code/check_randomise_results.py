@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from collections import OrderedDict
 from pathlib import Path
 
@@ -55,6 +56,19 @@ SUMMARY_FIELDS = (
     "corrp_file",
     "copied_image",
     "copied_sidecar",
+    "roi_values_tsv",
+)
+ROI_VALUE_FIELDS = (
+    "analysis",
+    "network",
+    "component",
+    "condition_contrast",
+    "direction",
+    "participant",
+    "run",
+    "condition",
+    "dual_regression_label",
+    "stage2_beta",
 )
 
 
@@ -228,6 +242,46 @@ def subject_count(path: Path) -> int:
     return len(rows)
 
 
+def read_input_order(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="") as stream:
+        reader = csv.DictReader(stream, delimiter="\t")
+        required = {
+            "dual_regression_label",
+            "participant",
+            "run",
+            "condition",
+        }
+        missing = required.difference(reader.fieldnames or ())
+        if missing:
+            raise ValueError(f"{path} is missing columns: {sorted(missing)}")
+        rows = list(reader)
+    if not rows:
+        raise ValueError(f"Input-order table is empty: {path}")
+
+    expected_conditions = {"sham", "rtpj", "vlpfc", "both"}
+    participant_conditions: dict[str, set[str]] = {}
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        participant = row["participant"]
+        condition = row["condition"].lower()
+        key = (participant, condition)
+        if not participant or condition not in expected_conditions:
+            raise ValueError(f"Invalid participant or condition in {path}: {row}")
+        if key in seen:
+            raise ValueError(f"Duplicate {participant} {condition} row in {path}")
+        seen.add(key)
+        participant_conditions.setdefault(participant, set()).add(condition)
+        row["condition"] = condition
+    incomplete = {
+        participant: sorted(expected_conditions.difference(conditions))
+        for participant, conditions in participant_conditions.items()
+        if conditions != expected_conditions
+    }
+    if incomplete:
+        raise ValueError(f"Incomplete participant conditions in {path}: {incomplete}")
+    return rows
+
+
 def relative_path(path: Path, project_root: Path) -> str:
     try:
         return str(path.resolve().relative_to(project_root.resolve()))
@@ -264,6 +318,80 @@ def copied_name(
     )
 
 
+def roi_values_name(copied_image: Path) -> str:
+    stem = copied_image.name.removesuffix("_stat-corrp_statmap.nii.gz")
+    return f"{stem}_stat-stage2Beta_timeseries.tsv"
+
+
+def extract_roi_values(
+    corrp: Path,
+    threshold: float,
+    dr_dir: Path,
+    component: int,
+    map_type: str,
+    destination: Path,
+    metadata: dict[str, str],
+    fslmaths: str,
+    fslroi: str,
+    fslstats: str,
+) -> int:
+    input_order = read_input_order(dr_dir / "input_order.tsv")
+    stage2_suffix = "" if map_type == "beta" else "_Z"
+    component_index = component - 1
+    extracted: list[dict[str, str]] = []
+
+    with tempfile.TemporaryDirectory(prefix="r21_randomise_roi_") as temporary:
+        temporary_dir = Path(temporary)
+        roi_mask = temporary_dir / "roi_mask.nii.gz"
+        subprocess.run(
+            [
+                fslmaths,
+                str(corrp),
+                "-thr",
+                repr(math.nextafter(threshold, math.inf)),
+                "-bin",
+                str(roi_mask),
+            ],
+            check=True,
+        )
+        component_image = temporary_dir / "component.nii.gz"
+        for item in input_order:
+            source = dr_dir / (
+                f"dr_stage2_{item['dual_regression_label']}{stage2_suffix}.nii.gz"
+            )
+            if not source.is_file():
+                raise FileNotFoundError(f"Stage-2 image not found: {source}")
+            subprocess.run(
+                [fslroi, str(source), str(component_image), str(component_index), "1"],
+                check=True,
+            )
+            result = subprocess.run(
+                [fslstats, str(component_image), "-k", str(roi_mask), "-m"],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            value = float(result.stdout.strip())
+            if not math.isfinite(value):
+                raise ValueError(f"Non-finite ROI mean for {source}: {value}")
+            extracted.append(
+                {
+                    **metadata,
+                    "participant": item["participant"],
+                    "run": item["run"],
+                    "condition": item["condition"],
+                    "dual_regression_label": item["dual_regression_label"],
+                    "stage2_beta": f"{value:.10g}",
+                }
+            )
+
+    with destination.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=ROI_VALUE_FIELDS, delimiter="\t")
+        writer.writeheader()
+        writer.writerows(extracted)
+    return len(extracted)
+
+
 def read_marker(path: Path) -> dict[str, str]:
     if not path.is_file():
         return {}
@@ -284,6 +412,7 @@ def write_sidecar(
     task: str,
     threshold: float,
     cluster_threshold: float,
+    roi_values: Path,
 ) -> None:
     payload = {
         "Description": "FSL randomise FWE-corrected 1-p statistical map",
@@ -300,6 +429,7 @@ def write_sidecar(
         "ClusterFormingTThreshold": cluster_threshold,
         "NumberOfPermutations": int(marker.get("n_perm", "5000")),
         "Sources": [relative_path(source, project_root)],
+        "ROIValues": relative_path(roi_values, project_root),
         "GeneratedBy": [{"Name": "FSL randomise"}],
     }
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
@@ -330,8 +460,18 @@ def main() -> int:
         methods.append(TFCE_METHOD)
     fslstats = shutil.which("fslstats")
     fslnvols = shutil.which("fslnvols")
-    if fslstats is None or fslnvols is None:
-        raise RuntimeError("fslstats and fslnvols must be on PATH.")
+    fslmaths = shutil.which("fslmaths")
+    fslroi = shutil.which("fslroi")
+    required_commands = {
+        "fslstats": fslstats,
+        "fslnvols": fslnvols,
+    }
+    if not args.no_copy:
+        required_commands.update({"fslmaths": fslmaths, "fslroi": fslroi})
+    missing_commands = [name for name, path in required_commands.items() if path is None]
+    if missing_commands:
+        raise RuntimeError(f"Required FSL commands are not on PATH: {missing_commands}")
+    assert fslstats is not None and fslnvols is not None
 
     rows: list[dict[str, str]] = []
     missing_paths: set[Path] = set()
@@ -343,6 +483,9 @@ def main() -> int:
     corrp_count = 0
     significant_count = 0
     copied_count = 0
+    roi_values_count = 0
+    roi_value_rows = 0
+    roi_errors: list[str] = []
     significant_by_method = {method: 0 for method, _suffix in methods}
 
     for item in plan:
@@ -480,6 +623,7 @@ def main() -> int:
                         "corrp_file": relative_path(corrp, project_root),
                         "copied_image": "",
                         "copied_sidecar": "",
+                        "roi_values_tsv": "",
                     }
 
                     scientifically_complete = (
@@ -501,20 +645,50 @@ def main() -> int:
                             method,
                         )
                         sidecar = destination.with_name(destination.name.removesuffix(".nii.gz") + ".json")
+                        roi_values = output_dir / roi_values_name(destination)
                         shutil.copy2(corrp, destination)
-                        write_sidecar(
-                            sidecar,
-                            corrp,
-                            project_root,
-                            row,
-                            marker,
-                            args.task,
-                            args.threshold,
-                            float(marker.get("cluster_threshold", "3.1")),
-                        )
                         row["copied_image"] = relative_path(destination, project_root)
                         row["copied_sidecar"] = relative_path(sidecar, project_root)
-                        copied_count += 1
+                        row["roi_values_tsv"] = relative_path(roi_values, project_root)
+                        try:
+                            extracted_rows = extract_roi_values(
+                                corrp,
+                                args.threshold,
+                                dr_dir,
+                                component,
+                                args.map_type,
+                                roi_values,
+                                {
+                                    "analysis": analysis,
+                                    "network": network,
+                                    "component": str(component),
+                                    "condition_contrast": contrast,
+                                    "direction": direction,
+                                },
+                                str(fslmaths),
+                                str(fslroi),
+                                fslstats,
+                            )
+                            write_sidecar(
+                                sidecar,
+                                corrp,
+                                project_root,
+                                row,
+                                marker,
+                                args.task,
+                                args.threshold,
+                                float(marker.get("cluster_threshold", "3.1")),
+                                roi_values,
+                            )
+                            copied_count += 1
+                            roi_values_count += 1
+                            roi_value_rows += extracted_rows
+                        except (OSError, subprocess.CalledProcessError, ValueError) as error:
+                            row["status"] = "roi_export_error"
+                            row["roi_values_tsv"] = ""
+                            roi_values.unlink(missing_ok=True)
+                            sidecar.unlink(missing_ok=True)
+                            roi_errors.append(f"{corrp}: {error}")
                     rows.append(row)
 
     with output_tsv.open("w", newline="") as stream:
@@ -530,7 +704,9 @@ def main() -> int:
         "maps for positive (C1) and negative (C2) directions; TFCE is included "
         "only when explicitly requested. "
         "NIfTI files and JSON sidecars are copied here only when the map is "
-        "complete and its peak exceeds the configured threshold.\n"
+        "complete and its peak exceeds the configured threshold. Each copied "
+        "map also has a small tracked timeseries TSV containing participant-by-"
+        "condition stage-2 beta values for portable notebook plotting.\n"
     )
 
     jobs = len(plan) * len(CONTRASTS)
@@ -549,9 +725,11 @@ def main() -> int:
         f"{significant_by_method['cluster-extent']}"
     )
     print(f"Significant maps copied: {copied_count}/{significant_count}")
+    print(f"ROI-value TSVs written: {roi_values_count} ({roi_value_rows} rows)")
     print(f"Missing or invalid required paths: {len(missing_paths)}")
     print(f"Input-validation errors: {len(validation_errors)}")
     print(f"Peak-read errors: {len(peak_errors)}")
+    print(f"ROI-export errors: {len(roi_errors)}")
     print(f"Wrote {output_tsv}")
     for path in sorted(missing_paths, key=str)[:20]:
         print(f"MISSING: {path}", file=sys.stderr)
@@ -561,11 +739,14 @@ def main() -> int:
         print(f"ERROR: {error}", file=sys.stderr)
     for error in validation_errors[:20]:
         print(f"ERROR: {error}", file=sys.stderr)
+    for error in roi_errors[:20]:
+        print(f"ERROR: {error}", file=sys.stderr)
 
     incomplete = bool(
         missing_paths
         or peak_errors
         or validation_errors
+        or roi_errors
         or valid_designs != len(plan)
     )
     return 1 if args.fail_on_missing and incomplete else 0
