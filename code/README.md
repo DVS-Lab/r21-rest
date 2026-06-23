@@ -57,9 +57,10 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `run_dual_regression.sh` | Denoised MELODIC dimension `0` or `20` | Runs stages 1 and 2 with design normalization and writes `input_order.tsv`. |
 | `run_dual_regression_smith09.sh` | Smoothed or denoised file list and Smith09 maps | Runs the same two stages using the published ten-network maps. |
 | `make_dual_regression_contrasts.sh` | One completed dual-regression component | Builds all seven paired condition differences, merged group inputs, and one-sample designs. |
-| `randomise.sh` | One merged component/condition difference | Runs one one-sample test with TFCE and cluster-extent inference (`-T -c 3.1`). |
-| `run_randomise.sh` | Smith09 ICA comparison table and completed dual regression | Prepares DMN or all primary components and launches up to 24 `randomise.sh` jobs concurrently. |
-| `check_randomise_results.py` | Primary randomise outputs | Verifies both design directions and every t-stat/corrp map, records peak corrected 1-p values, and copies significant maps to `derivatives/fsl/randomise_summary`. |
+| `randomise.sh` | One merged component/condition difference | Runs one one-sample cluster-extent test (`-c 3.1`); TFCE is available only with `--tfce`. |
+| `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Prepares DMN, all primary ICA components, or the four direct Smith09 maps and launches up to 24 jobs concurrently. |
+| `check_randomise_results.py` | Primary randomise outputs | Verifies both design directions and cluster-extent corrp maps, records peak corrected 1-p values, and copies significant maps to `derivatives/fsl/randomise_summary`. |
+| `../notebooks/plot_randomise_results.ipynb` | Randomise summary and stage-2 beta maps | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM. |
 
 Use the batch launcher first for DMN and then for the full primary set:
 
@@ -67,7 +68,10 @@ Use the batch launcher first for DMN and then for the full primary set:
 code/run_randomise.sh dmn --dry-run
 code/run_randomise.sh dmn
 code/run_randomise.sh primary
-python3 code/check_randomise_results.py --network-set primary --fail-on-missing
+code/run_randomise.sh smith09 --dry-run
+code/run_randomise.sh smith09
+python3 code/check_randomise_results.py --analysis-set all --network-set primary --fail-on-missing
+jupyter lab notebooks/plot_randomise_results.ipynb
 ```
 
 Completed jobs have a `.complete` marker beside their output prefix, so the

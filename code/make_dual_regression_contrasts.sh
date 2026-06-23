@@ -291,12 +291,14 @@ set -euo pipefail
 
 nperm="${N_PERM:-5000}"
 cluster_threshold="${CLUSTER_THRESHOLD:-3.1}"
+tfce_args=()
+[[ "${TFCE:-0}" == "1" ]] && tfce_args=(-T)
 EOF
     printf 'mkdir -p %q\n' "${outputdir}/randomise"
     for contrast in "${contrasts[@]}"; do
         group_input="${outputdir}/${contrast}/group_task-${task}_component-${component_padded}_stat-${map_type}_contrast-${contrast}.nii.gz"
         randomise_prefix="${outputdir}/randomise/task-${task}_component-${component_padded}_stat-${map_type}_contrast-${contrast}"
-        printf 'randomise -i %q -o %q -m %q -d %q -t %q -e %q -n "$nperm" -T -c "$cluster_threshold"\n' \
+        printf 'randomise -i %q -o %q -m %q -d %q -t %q -e %q -n "$nperm" "${tfce_args[@]}" -c "$cluster_threshold"\n' \
             "$group_input" "$randomise_prefix" "$mask" "$design_mat" "$design_con" "$design_grp"
     done
 } >"$randomise_script"

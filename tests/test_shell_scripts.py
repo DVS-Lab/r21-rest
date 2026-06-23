@@ -253,8 +253,9 @@ class ShellScriptTests(unittest.TestCase):
             capture_output=True,
             check=True,
         )
-        self.assertIn("Permutations: 5000; TFCE: yes; cluster threshold: 3.1", one_randomise.stderr)
-        self.assertIn("-T -c 3.1", one_randomise.stderr)
+        self.assertIn("Permutations: 5000; TFCE: no; cluster threshold: 3.1", one_randomise.stderr)
+        self.assertIn("-c 3.1", one_randomise.stderr)
+        self.assertNotIn(" -T ", one_randomise.stderr)
 
         dmn_randomise = subprocess.run(
             [
@@ -286,6 +287,22 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("Unique ICA components: 7", primary_randomise.stderr)
         self.assertIn("Randomise jobs: 49; maximum concurrent: 24", primary_randomise.stderr)
         self.assertIn("dim=20 network=bilateral-fpn component=8", primary_randomise.stderr)
+
+        direct_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_randomise.sh"),
+                "smith09",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Smith09 maps: 4", direct_randomise.stderr)
+        self.assertIn("Randomise jobs: 28; maximum concurrent: 24", direct_randomise.stderr)
+        self.assertIn("dim=smith09 network=dmn component=4", direct_randomise.stderr)
+        self.assertIn("dim=smith09 network=left-fpn component=10", direct_randomise.stderr)
 
         qa = subprocess.run(
             ["bash", str(REPO_ROOT / "code" / "check_melodic_inputs.sh"), "--help"],
@@ -354,7 +371,7 @@ class ShellScriptTests(unittest.TestCase):
             self.assertIn("/ContrastName2\tNegative", (output / "design.con").read_text())
             randomise = (output / "run_randomise.sh").read_text()
             self.assertEqual(randomise.count("randomise -i"), 7)
-            self.assertIn('-n "$nperm" -T -c "$cluster_threshold"', randomise)
+            self.assertIn('-n "$nperm" "${tfce_args[@]}" -c "$cluster_threshold"', randomise)
             for contrast in (
                 "both-minus-sham",
                 "both-minus-rtpj",
@@ -415,7 +432,8 @@ class ShellScriptTests(unittest.TestCase):
                 check=True,
             )
             args = capture.read_text()
-            self.assertIn("-n 17 -T -c 3.1", args)
+            self.assertIn("-n 17 -c 3.1", args)
+            self.assertNotIn("-T", args)
             self.assertIn("Completed:", first.stderr)
             markers = list((component / "randomise" / "network-dmn").glob("*.complete"))
             self.assertEqual(len(markers), 1)

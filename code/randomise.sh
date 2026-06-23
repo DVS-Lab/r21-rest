@@ -14,6 +14,7 @@ Options:
   --map-type {beta|z}       Stage-2 map type (default: beta)
   --n-perm N                Permutations (default: 5000)
   --cluster-threshold VALUE Cluster-forming t threshold (default: 3.1)
+  --tfce                     Also calculate TFCE inference (default: off)
   --dry-run                  Print the resolved command only
 USAGE
 }
@@ -56,12 +57,14 @@ esac
 map_type="beta"
 nperm="${N_PERM:-5000}"
 cluster_threshold="${CLUSTER_THRESHOLD:-3.1}"
+tfce=0
 dryrun=0
 while (($#)); do
     case "$1" in
         --map-type) map_type="${2:-}"; shift 2 ;;
         --n-perm) nperm="${2:-}"; shift 2 ;;
         --cluster-threshold) cluster_threshold="${2:-}"; shift 2 ;;
+        --tfce) tfce=1; shift ;;
         --dry-run|--render-only) dryrun=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -107,15 +110,16 @@ cmd=(
     -t "$design_con"
     -e "$design_grp"
     -n "$nperm"
-    -T
     -c "$cluster_threshold"
 )
+((tfce)) && cmd+=( -T )
 
 printf 'Analysis: %s\n' "$analysis" >&2
 printf 'Network: %s; component: %d; contrast: %s\n' "$network" "$component" "$contrast" >&2
 printf 'Input: %s\n' "$group_input" >&2
 printf 'Output prefix: %s\n' "$output_prefix" >&2
-printf 'Permutations: %s; TFCE: yes; cluster threshold: %s\n' "$nperm" "$cluster_threshold" >&2
+printf 'Permutations: %s; TFCE: %s; cluster threshold: %s\n' \
+    "$nperm" "$([[ "$tfce" == 1 ]] && echo yes || echo no)" "$cluster_threshold" >&2
 printf 'Command:\n' >&2
 printf '%q ' "${cmd[@]}" >&2
 printf '\n' >&2
@@ -152,5 +156,6 @@ fi
     printf 'contrast\t%s\n' "$contrast"
     printf 'n_perm\t%s\n' "$nperm"
     printf 'cluster_threshold\t%s\n' "$cluster_threshold"
+    printf 'tfce\t%s\n' "$([[ "$tfce" == 1 ]] && echo yes || echo no)"
 } >"$complete_marker"
 echo "Completed: $output_prefix" >&2

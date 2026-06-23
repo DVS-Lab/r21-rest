@@ -83,9 +83,6 @@ class RandomiseResultTests(unittest.TestCase):
                     )
                     for number in (1, 2):
                         Path(f"{prefix}_tstat{number}.nii.gz").write_text("tstat")
-                        Path(f"{prefix}_tfce_corrp_tstat{number}.nii.gz").write_text(
-                            "tfce"
-                        )
                         Path(f"{prefix}_clustere_corrp_tstat{number}.nii.gz").write_text(
                             "cluster"
                         )
@@ -94,7 +91,7 @@ class RandomiseResultTests(unittest.TestCase):
             fakebin.mkdir()
             self.write_command(
                 fakebin / "fslstats",
-                'case "$1" in *tfce_corrp_tstat1*) echo "0 0.97";; *) echo "0 0.94";; esac\n',
+                'case "$1" in *clustere_corrp_tstat1*) echo "0 0.97";; *) echo "0 0.94";; esac\n',
             )
             self.write_command(fakebin / "fslnvols", "echo 2\n")
             output_dir = fsl_dir / "randomise_summary"
@@ -104,6 +101,8 @@ class RandomiseResultTests(unittest.TestCase):
                     str(CHECKER),
                     "--network-set",
                     "dmn",
+                    "--analysis-set",
+                    "ica",
                     "--fsl-dir",
                     str(fsl_dir),
                     "--output-dir",
@@ -119,17 +118,17 @@ class RandomiseResultTests(unittest.TestCase):
             self.assertIn("Design contrasts verified (+1/-1): 2/2", result.stdout)
             self.assertIn("Completion markers present: 14/14", result.stdout)
             self.assertIn("t-stat images present: 28/28", result.stdout)
-            self.assertIn("corrp images present: 56/56", result.stdout)
-            self.assertIn("TFCE maps with peak > 0.95: 14", result.stdout)
-            self.assertIn("Cluster-extent maps with peak > 0.95: 0", result.stdout)
+            self.assertIn("corrp images present: 28/28", result.stdout)
+            self.assertNotIn("TFCE maps", result.stdout)
+            self.assertIn("Cluster-extent maps with peak > 0.95: 14", result.stdout)
 
             summary = output_dir / "task-rest_randomise_peak_summary.tsv"
             with summary.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
-            self.assertEqual(len(rows), 56)
+            self.assertEqual(len(rows), 28)
             self.assertEqual({row["design_contrast"] for row in rows}, {"C1", "C2"})
             self.assertEqual(
-                {row["inference"] for row in rows}, {"tfce", "cluster-extent"}
+                {row["inference"] for row in rows}, {"cluster-extent"}
             )
             significant = [row for row in rows if row["peak_gt_threshold"] == "true"]
             self.assertEqual(len(significant), 14)
@@ -141,7 +140,7 @@ class RandomiseResultTests(unittest.TestCase):
             self.assertEqual(len(copied_sidecars), 14)
             sidecar = json.loads(copied_sidecars[0].read_text())
             self.assertEqual(sidecar["DesignContrast"], "C1")
-            self.assertEqual(sidecar["InferenceMethod"], "tfce")
+            self.assertEqual(sidecar["InferenceMethod"], "cluster-extent")
             self.assertEqual(sidecar["ClusterFormingTThreshold"], 3.1)
 
 

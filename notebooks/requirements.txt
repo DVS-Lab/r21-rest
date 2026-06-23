@@ -1,0 +1,6 @@
+ipywidgets>=8.1,<9
+matplotlib>=3.8,<4
+nibabel>=5.2,<6
+nilearn>=0.11,<0.13
+numpy>=1.26,<3
+pandas>=2.2,<3
