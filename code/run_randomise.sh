@@ -5,13 +5,15 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_randomise.sh {dmn|primary|smith09} [options]
+Usage: code/run_randomise.sh {dmn|primary|secondary|smith09|smith09-secondary} [options]
 
 Prepare selected dual-regression maps and launch all seven condition contrasts.
 
   dmn      DMN only: 2 components x 7 contrasts = 14 jobs
   primary  DMN, ECN, and left/right FPN; shared components are run once
+  secondary  ICA matches for all remaining non-cerebellar Smith09 networks
   smith09  Direct Smith09 maps 4, 8, 9, and 10 x 7 contrasts = 28 jobs
+  smith09-secondary  Direct Smith09 maps 1, 2, 3, 6, and 7 x 7 = 35 jobs
 
 Options:
   --max-jobs N              Concurrent randomise processes (default: 24)
@@ -33,8 +35,8 @@ if [[ -z "$network_set" || "$network_set" == "--help" || "$network_set" == "-h" 
 fi
 shift
 case "$network_set" in
-    dmn|primary|smith09) ;;
-    *) echo "ERROR: Network set must be dmn, primary, or smith09." >&2; usage >&2; exit 1 ;;
+    dmn|primary|secondary|smith09|smith09-secondary) ;;
+    *) echo "ERROR: Unknown network set: $network_set" >&2; usage >&2; exit 1 ;;
 esac
 
 maxjobs="${RANDOMISE_MAX_JOBS:-24}"
@@ -95,6 +97,8 @@ trap cleanup EXIT
 
 if [[ "$network_set" == "smith09" ]]; then
     printf 'smith09\tdmn\t4\nsmith09\tecn\t8\nsmith09\tright-fpn\t9\nsmith09\tleft-fpn\t10\n' >"$plan"
+elif [[ "$network_set" == "smith09-secondary" ]]; then
+    printf 'smith09\tprimary-visual\t1\nsmith09\toccipital-pole\t2\nsmith09\tlateral-visual\t3\nsmith09\tsensorimotor\t6\nsmith09\tauditory\t7\n' >"$plan"
 elif [[ ! -f "$comparison" ]]; then
     echo "ERROR: Smith09 comparison table not found: $comparison" >&2
     exit 1
@@ -115,11 +119,15 @@ elif ! awk -F $'\t' -v network_set="$network_set" '
         next
     }
     bad { next }
-    $column_index["data_set"] == "denoised" && $column_index["analysis_priority"] == "primary" {
+    $column_index["data_set"] == "denoised" {
         dimension = $column_index["dimension"]
         network = $column_index["network"]
         component = $column_index["best_component"]
         if (network_set == "dmn" && network != "default_mode") next
+        if (network_set == "primary" && $column_index["analysis_priority"] != "primary") next
+        if (network_set == "secondary" && network != "primary_visual" && \
+            network != "occipital_pole" && network != "lateral_visual" && \
+            network != "sensorimotor" && network != "auditory") next
         if (dimension == "automatic") analysis = "0"
         else if (dimension == "20") analysis = "20"
         else next
@@ -128,6 +136,11 @@ elif ! awk -F $'\t' -v network_set="$network_set" '
         else if (network == "executive_control") label = "ecn"
         else if (network == "right_frontoparietal") label = "right-fpn"
         else if (network == "left_frontoparietal") label = "left-fpn"
+        else if (network == "primary_visual") label = "primary-visual"
+        else if (network == "occipital_pole") label = "occipital-pole"
+        else if (network == "lateral_visual") label = "lateral-visual"
+        else if (network == "sensorimotor") label = "sensorimotor"
+        else if (network == "auditory") label = "auditory"
         else next
 
         key = analysis SUBSEP component
@@ -154,7 +167,7 @@ elif ! awk -F $'\t' -v network_set="$network_set" '
         if (plan_count == 0) exit 1
     }
 ' "$comparison" >"$plan"; then
-    echo "ERROR: Could not build the primary-network plan." >&2
+    echo "ERROR: Could not build the requested ICA network plan." >&2
     exit 1
 fi
 
@@ -171,7 +184,7 @@ component_count="$(wc -l <"$plan" | tr -d ' ')"
 job_count=$((component_count * ${#contrasts[@]}))
 
 printf 'Network set: %s\n' "$network_set" >&2
-if [[ "$network_set" == "smith09" ]]; then
+if [[ "$network_set" == smith09* ]]; then
     printf 'Component plan: direct Smith09 RSN maps\n' >&2
     printf 'Smith09 maps: %d\n' "$component_count" >&2
 else

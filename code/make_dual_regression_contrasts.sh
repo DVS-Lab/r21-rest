@@ -250,7 +250,7 @@ mkdir -p "$outputdir"
     printf 'participant\treason\n'
     while IFS= read -r participant; do
         [[ "$participant" == sub-* ]] || continue
-        printf '%s\tpredefined_qc_sensitivity\n' "$participant"
+        printf '%s\tdifferential_motion_qc_sensitivity\n' "$participant"
     done <"$clean_exclusions"
 } >"${outputdir}/excluded_participants.tsv"
 for contrast in "${contrasts[@]}"; do

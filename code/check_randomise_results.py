@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit primary randomise outputs and collect significant corrected-p maps."""
+"""Audit selected randomise outputs and collect significant corrected-p maps."""
 
 from __future__ import annotations
 
@@ -30,6 +30,13 @@ PRIMARY_NETWORKS = {
     "executive_control": "ecn",
     "right_frontoparietal": "right-fpn",
     "left_frontoparietal": "left-fpn",
+}
+SECONDARY_NETWORKS = {
+    "primary_visual": "primary-visual",
+    "occipital_pole": "occipital-pole",
+    "lateral_visual": "lateral-visual",
+    "sensorimotor": "sensorimotor",
+    "auditory": "auditory",
 }
 DIRECTIONS = ((1, "positive"), (2, "negative"))
 CLUSTER_METHOD = ("cluster-extent", "clustere_corrp")
@@ -80,7 +87,11 @@ def parse_args() -> argparse.Namespace:
     project_root = script_dir.parent
     derivatives = project_root / "derivatives"
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--network-set", choices=("dmn", "primary"), default="primary")
+    parser.add_argument(
+        "--network-set",
+        choices=("dmn", "primary", "secondary", "all"),
+        default="primary",
+    )
     parser.add_argument(
         "--analysis-set",
         choices=("ica", "smith09", "all"),
@@ -139,6 +150,13 @@ def analysis_label(analysis: str) -> str:
 
 
 def build_ica_component_plan(path: Path, network_set: str) -> list[dict[str, object]]:
+    requested = dict(PRIMARY_NETWORKS)
+    if network_set == "dmn":
+        requested = {"default_mode": "dmn"}
+    elif network_set == "secondary":
+        requested = dict(SECONDARY_NETWORKS)
+    elif network_set == "all":
+        requested.update(SECONDARY_NETWORKS)
     with path.open(newline="") as stream:
         reader = csv.DictReader(stream, delimiter="\t")
         required = {
@@ -154,11 +172,9 @@ def build_ica_component_plan(path: Path, network_set: str) -> list[dict[str, obj
 
         plan: OrderedDict[tuple[str, int], dict[str, object]] = OrderedDict()
         for row in reader:
-            if row["data_set"] != "denoised" or row["analysis_priority"] != "primary":
+            if row["data_set"] != "denoised":
                 continue
-            if network_set == "dmn" and row["network"] != "default_mode":
-                continue
-            network = PRIMARY_NETWORKS.get(row["network"])
+            network = requested.get(row["network"])
             if network is None:
                 continue
             analysis = {"automatic": "0", "20": "20"}.get(row["dimension"])
@@ -178,7 +194,7 @@ def build_ica_component_plan(path: Path, network_set: str) -> list[dict[str, obj
                 plan[key]["network"] = f"{plan[key]['network']}-{network}"
 
     if not plan:
-        raise ValueError("No matching denoised primary components were found.")
+        raise ValueError("No matching denoised components were found.")
     return list(plan.values())
 
 
@@ -189,15 +205,28 @@ def build_component_plan(
     if analysis_set in {"ica", "all"}:
         plan.extend(build_ica_component_plan(path, network_set))
     if analysis_set in {"smith09", "all"}:
-        smith09 = (
+        smith09_primary = (
             ("dmn", 4),
             ("ecn", 8),
             ("right-fpn", 9),
             ("left-fpn", 10),
         )
+        smith09_secondary = (
+            ("primary-visual", 1),
+            ("occipital-pole", 2),
+            ("lateral-visual", 3),
+            ("sensorimotor", 6),
+            ("auditory", 7),
+        )
+        if network_set == "dmn":
+            smith09 = smith09_primary[:1]
+        elif network_set == "primary":
+            smith09 = smith09_primary
+        elif network_set == "secondary":
+            smith09 = smith09_secondary
+        else:
+            smith09 = smith09_primary + smith09_secondary
         for network, component in smith09:
-            if network_set == "dmn" and network != "dmn":
-                continue
             plan.append(
                 {"analysis": "smith09", "component": component, "network": network}
             )
@@ -499,8 +528,13 @@ def main() -> int:
         else fsl_dir / "randomise_summary"
     )
     output_dir.mkdir(parents=True, exist_ok=True)
+    description_parts = []
+    if args.sensitivity_label:
+        description_parts.append(camel_label(args.sensitivity_label))
+    if args.network_set not in {"dmn", "primary"}:
+        description_parts.append(f"{camel_label(args.network_set)}Networks")
     summary_description = (
-        f"_desc-{camel_label(args.sensitivity_label)}" if args.sensitivity_label else ""
+        f"_desc-{''.join(description_parts)}" if description_parts else ""
     )
     output_tsv = output_dir / (
         f"task-{args.task}{summary_description}_randomise_peak_summary.tsv"

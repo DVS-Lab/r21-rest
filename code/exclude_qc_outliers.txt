@@ -1,7 +1,7 @@
-# Provisional QC sensitivity exclusions, 2026-06-23.
-# Rule: four-run mean FD > 0.50 mm OR mean percentage of volumes with
-# FD > 0.20 mm > 50%. Differential boxplot flags are supporting diagnostics
-# and are not themselves exclusion criteria.
-sub-218
+# Differential-motion QC sensitivity exclusions.
+# For each of seven planned condition contrasts, apply a Tukey 1.5-IQR
+# upper fence to absolute mean-FD and absolute FD>0.20-mm percentage
+# differences. Exclude after paired flags on at least 2 contrasts.
 sub-222
+sub-226
 sub-230

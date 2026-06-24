@@ -1,4 +1,28 @@
-participant	mean_fd_mean	mean_fd_perc	criterion_mean_fd_gt_0.50	criterion_mean_fd_perc_gt_50	differential_contrasts_flagged	decision
-sub-218	0.506783	46.4583	true	false	6	exclude_sensitivity
-sub-222	0.732145	65.6150	true	true	5	exclude_sensitivity
-sub-230	0.309157	55.4527	false	true	4	exclude_sensitivity
+participant	n_complete_contrasts	absolute_tsnr_outlier_count	absolute_fd_mean_outlier_count	absolute_fd_perc_outlier_count	paired_motion_outlier_count	paired_motion_outlier_contrasts	decision
+sub-189	7	0	0	0	0		include_sensitivity
+sub-203	7	0	0	0	0		include_sensitivity
+sub-207	7	0	0	0	0		include_sensitivity
+sub-208	7	0	0	0	0		include_sensitivity
+sub-209	7	0	4	0	0		include_sensitivity
+sub-210	7	0	0	0	0		include_sensitivity
+sub-211	7	0	0	0	0		include_sensitivity
+sub-213	7	0	0	0	0		include_sensitivity
+sub-214	7	0	0	1	0		include_sensitivity
+sub-215	7	0	0	0	0		include_sensitivity
+sub-217	7	0	0	0	0		include_sensitivity
+sub-218	7	3	5	0	0		include_sensitivity
+sub-219	7	0	0	0	0		include_sensitivity
+sub-220	7	0	0	0	0		include_sensitivity
+sub-221	7	0	0	0	0		include_sensitivity
+sub-222	7	0	5	4	4	both_minus_rtpj,rtpj_minus_sham,vlpfc_minus_sham,both_minus_mean_rtpj_vlpfc	exclude_sensitivity
+sub-225	7	0	0	0	0		include_sensitivity
+sub-226	7	0	5	3	3	both_minus_sham,both_minus_rtpj,vlpfc_minus_sham	exclude_sensitivity
+sub-227	7	0	0	0	0		include_sensitivity
+sub-228	7	0	0	0	0		include_sensitivity
+sub-230	7	3	2	2	2	both_minus_sham,rtpj_minus_sham	exclude_sensitivity
+sub-231	7	2	0	0	0		include_sensitivity
+sub-234	7	0	0	0	0		include_sensitivity
+sub-235	7	0	0	0	0		include_sensitivity
+sub-236	7	4	0	0	0		include_sensitivity
+sub-237	7	0	0	0	0		include_sensitivity
+sub-238	7	4	3	0	0		include_sensitivity

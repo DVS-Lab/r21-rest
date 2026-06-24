@@ -304,6 +304,36 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("dim=smith09 network=dmn component=4", direct_randomise.stderr)
         self.assertIn("dim=smith09 network=left-fpn component=10", direct_randomise.stderr)
 
+        secondary_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_randomise.sh"),
+                "secondary",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Unique ICA components: 9", secondary_randomise.stderr)
+        self.assertIn("Randomise jobs: 63; maximum concurrent: 24", secondary_randomise.stderr)
+        self.assertIn("dim=20 network=sensorimotor component=3", secondary_randomise.stderr)
+
+        direct_secondary = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_randomise.sh"),
+                "smith09-secondary",
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("Smith09 maps: 5", direct_secondary.stderr)
+        self.assertIn("Randomise jobs: 35; maximum concurrent: 24", direct_secondary.stderr)
+        self.assertIn("dim=smith09 network=auditory component=7", direct_secondary.stderr)
+
         sensitivity_randomise = subprocess.run(
             [
                 "bash",
@@ -315,9 +345,11 @@ class ShellScriptTests(unittest.TestCase):
             capture_output=True,
             check=True,
         )
-        self.assertEqual(sensitivity_randomise.stderr.count("Sensitivity label: qc-outliers"), 2)
+        self.assertEqual(sensitivity_randomise.stderr.count("Sensitivity label: qc-outliers"), 4)
         self.assertIn("Randomise jobs: 49; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 63; maximum concurrent: 24", sensitivity_randomise.stderr)
         self.assertIn("Randomise jobs: 28; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 35; maximum concurrent: 24", sensitivity_randomise.stderr)
         self.assertIn("sensitivity-qc-outliers/component-0023_stat-beta", sensitivity_randomise.stderr)
 
         qa = subprocess.run(
@@ -446,7 +478,7 @@ class ShellScriptTests(unittest.TestCase):
             )
             self.assertEqual(
                 (sensitivity_output / "excluded_participants.tsv").read_text(),
-                "participant\treason\nsub-002\tpredefined_qc_sensitivity\n",
+                "participant\treason\nsub-002\tdifferential_motion_qc_sensitivity\n",
             )
 
     def test_single_randomise_job_uses_requested_inference(self):

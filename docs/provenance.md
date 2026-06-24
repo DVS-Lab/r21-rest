@@ -71,11 +71,14 @@ planned paired differences, and records the participant order used in the
 merged `randomise` inputs. Generated one-sample designs include positive and
 negative contrasts. `code/randomise.sh` runs one cluster-extent test (`-c
 3.1`); `code/run_randomise.sh` reads the
-committed Smith09 comparison table and launches DMN or all primary-network
-tests with at most 24 concurrent processes.
+committed Smith09 comparison table and launches primary or non-cerebellar
+secondary ICA-derived or direct-Smith09 tests with at most 24 concurrent
+processes.
 
-`code/run_randomise_qc_sensitivity.sh` uses the same stage-2 maps but rebuilds
-the participant stacks after applying `code/exclude_qc_outliers.txt`. Its
+`code/select_qc_sensitivity_exclusions.py` derives the sensitivity list from
+absolute condition-level motion differences using the documented paired-boxplot
+rule. `code/run_randomise_qc_sensitivity.sh` uses the same stage-2 maps but
+rebuilds the participant stacks after applying `code/exclude_qc_outliers.txt`. Its
 inputs and randomise outputs are isolated under `sensitivity-qc-outliers`
 directories and do not overwrite the full-sample analysis.
 

@@ -38,6 +38,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `regress_confounds.sh` | One smoothed run and confound matrix | Uses `3dTproject` to write one denoised BOLD run. |
 | `run_regress_confounds.sh` | Ordered run manifest | Denoises every run and writes `melodic_filelist_5mm_denoised.txt`. |
 | `check_melodic_inputs.sh` | Denoised MELODIC file list | Checks grids, masks, volumes, intensity, and variance; writes a QC TSV. |
+| `select_qc_sensitivity_exclusions.py` | Condition-contrast MRIQC TSV | Applies the absolute differential-motion boxplot rule and writes the sensitivity exclusion list and audit tables. |
 
 ## ICA and Network Matching
 
@@ -58,10 +59,10 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `run_dual_regression_smith09.sh` | Smoothed or denoised file list and Smith09 maps | Runs the same two stages using the published ten-network maps. |
 | `make_dual_regression_contrasts.sh` | One completed dual-regression component | Builds all seven paired condition differences, merged group inputs, and one-sample designs. |
 | `randomise.sh` | One merged component/condition difference | Runs one one-sample cluster-extent test (`-c 3.1`); TFCE is available only with `--tfce`. |
-| `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Prepares DMN, all primary ICA components, or the four direct Smith09 maps and launches up to 24 jobs concurrently. |
-| `run_randomise_qc_sensitivity.sh` | Completed dual regression and `exclude_qc_outliers.txt` | Repeats primary and/or Smith09 randomise after the predefined three-participant QC exclusion, without overwriting full-sample outputs. |
-| `exclude_qc_outliers.txt` | Participant-level QC summary | Prespecified 24-participant sensitivity exclusions and rule. |
-| `check_randomise_results.py` | Primary randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
+| `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Runs primary or non-cerebellar secondary ICA matches or direct Smith09 maps with up to 24 concurrent jobs. |
+| `run_randomise_qc_sensitivity.sh` | Completed dual regression and `exclude_qc_outliers.txt` | Repeats selected randomise families after the three-participant differential-motion exclusion without overwriting full-sample outputs. |
+| `exclude_qc_outliers.txt` | Generated differential-motion QC decisions | Participant list for the 24-participant sensitivity analysis. |
+| `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
 | `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
 
 Use the batch launcher first for DMN and then for the full primary set:
@@ -76,12 +77,25 @@ python3 code/check_randomise_results.py --analysis-set all --network-set primary
 bash notebooks/run_randomise_notebook.sh
 ```
 
-Run the predefined QC sensitivity separately:
+Run the remaining non-cerebellar networks separately:
 
 ```bash
+code/run_randomise.sh secondary
+code/run_randomise.sh smith09-secondary
+python3 code/check_randomise_results.py \
+  --analysis-set all \
+  --network-set secondary \
+  --fail-on-missing
+```
+
+Run the documented QC sensitivity separately:
+
+```bash
+python3 code/select_qc_sensitivity_exclusions.py
 code/run_randomise_qc_sensitivity.sh all --dry-run
 code/run_randomise_qc_sensitivity.sh all
 python3 code/check_randomise_results.py \
+  --network-set all \
   --analysis-set all \
   --sensitivity-label qc-outliers \
   --exclude-list code/exclude_qc_outliers.txt \

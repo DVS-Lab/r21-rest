@@ -1,0 +1,22 @@
+contrast	metric	n_complete	absolute_q1	absolute_q3	absolute_iqr	absolute_upper_fence	review_rule
+both_minus_sham	delta_tsnr	27	2.36034	5.946365	3.586025	11.325403	absolute condition difference above upper fence
+both_minus_sham	delta_fd_mean	27	0.04364935	0.104018	0.06036865	0.19457097	absolute condition difference above upper fence
+both_minus_sham	delta_fd_perc	27	5.683405	20.81315	15.129745	43.507767	absolute condition difference above upper fence
+both_minus_rtpj	delta_tsnr	27	1.957395	5.325005	3.36761	10.37642	absolute condition difference above upper fence
+both_minus_rtpj	delta_fd_mean	27	0.01959215	0.08279785	0.0632057	0.1776064	absolute condition difference above upper fence
+both_minus_rtpj	delta_fd_perc	27	4.10652	14.2432	10.13668	29.44822	absolute condition difference above upper fence
+both_minus_vlpfc	delta_tsnr	27	1.88519	6.69963	4.81444	13.92129	absolute condition difference above upper fence
+both_minus_vlpfc	delta_fd_mean	27	0.0237239	0.09270725	0.06898335	0.19618227	absolute condition difference above upper fence
+both_minus_vlpfc	delta_fd_perc	27	3.411515	20.82655	17.415035	46.949102	absolute condition difference above upper fence
+rtpj_minus_vlpfc	delta_tsnr	27	1.33519	7.392885	6.057695	16.479427	absolute condition difference above upper fence
+rtpj_minus_vlpfc	delta_fd_mean	27	0.01644	0.127519	0.111079	0.2941375	absolute condition difference above upper fence
+rtpj_minus_vlpfc	delta_fd_perc	27	3.634065	17.9023	14.268235	39.304652	absolute condition difference above upper fence
+rtpj_minus_sham	delta_tsnr	27	1.56123	6.366845	4.805615	13.575267	absolute condition difference above upper fence
+rtpj_minus_sham	delta_fd_mean	27	0.0139088	0.0676986	0.0537898	0.1483833	absolute condition difference above upper fence
+rtpj_minus_sham	delta_fd_perc	27	5.726245	13.30675	7.580505	24.677508	absolute condition difference above upper fence
+vlpfc_minus_sham	delta_tsnr	27	1.448205	9.42484	7.976635	21.389792	absolute condition difference above upper fence
+vlpfc_minus_sham	delta_fd_mean	27	0.01361725	0.10613555	0.0925183	0.244913	absolute condition difference above upper fence
+vlpfc_minus_sham	delta_fd_perc	27	4.6644	17.8422	13.1778	37.6089	absolute condition difference above upper fence
+both_minus_mean_rtpj_vlpfc	delta_tsnr	27	1.275845	6.125615	4.84977	13.40027	absolute condition difference above upper fence
+both_minus_mean_rtpj_vlpfc	delta_fd_mean	27	0.015738	0.09600815	0.08027015	0.21641338	absolute condition difference above upper fence
+both_minus_mean_rtpj_vlpfc	delta_fd_perc	27	3.60548	14.4417	10.83622	30.69603	absolute condition difference above upper fence

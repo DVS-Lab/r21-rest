@@ -91,11 +91,24 @@ seven planned paired differences:
 
 Each difference is calculated for tSNR, mean FD, and FD percentage. A positive
 motion difference means condition A had more motion; a negative tSNR difference
-means condition A had lower tSNR. Two-sided Tukey 1.5-IQR boxplot fences are
-calculated separately for every comparison and metric. Because the comparisons
-share runs, their flags are correlated and must not be counted as independent
-reasons for exclusion. They identify subjects and runs for visual review; they
-do not automatically exclude a participant.
+means condition A had lower tSNR. `OutlierID.py` reports signed two-sided Tukey
+1.5-IQR flags but does not exclude anyone.
+
+The sensitivity-analysis exclusions are generated separately from absolute
+condition differences:
+
+```bash
+python3 code/select_qc_sensitivity_exclusions.py
+```
+
+For each comparison, the script applies an upper Tukey 1.5-IQR fence to the
+absolute mean-FD difference and absolute difference in percentage of volumes
+above 0.20-mm FD. A comparison receives a paired motion flag only when both
+metrics exceed their fences. A participant is excluded from the sensitivity
+analysis after paired flags in at least two of the seven comparisons. This
+conservative rule makes differential head motion the primary QC exclusion
+criterion while retaining tSNR flags and participant-average thresholds as
+diagnostics. The correlated comparisons are not treated as independent tests.
 
 Review the five output tables in `derivatives/qc`:
 
@@ -105,6 +118,8 @@ task-rest_mriqc_bounds.tsv
 task-rest_mriqc_subject_summary.tsv
 task-rest_mriqc_condition_contrasts.tsv
 task-rest_mriqc_condition_contrast_bounds.tsv
+task-rest_qc_sensitivity_abs_bounds.tsv
+task-rest_qc_sensitivity_exclusions.tsv
 ```
 
 ## Verify Outputs
@@ -426,6 +441,22 @@ bilateral FPN component because both lateralized Smith09 maps select component
 `8`. Completion markers prevent the primary batch from repeating finished DMN
 tests. Logs are written under `derivatives/logs/randomise`.
 
+The full-sample preliminary analysis did not exclude any of its 27 participants
+for motion. To cover every remaining non-cerebellar Smith09 network in secondary
+analyses, run the ICA-derived matches and direct atlas maps:
+
+```bash
+code/run_randomise.sh secondary
+code/run_randomise.sh smith09-secondary
+python3 code/check_randomise_results.py \
+  --network-set secondary \
+  --analysis-set all \
+  --fail-on-missing
+```
+
+This adds primary visual, occipital-pole, lateral-visual, sensorimotor, and
+auditory networks. Cerebellum is intentionally omitted because of poor coverage.
+
 Audit the finished data-derived and direct-Smith09 batches with:
 
 ```bash
@@ -452,12 +483,15 @@ portable across machines.
 The preliminary full-sample result is tagged
 `preliminary-results-2026-06-23` and documented in
 [`docs/preliminary-results-2026-06-23.md`](docs/preliminary-results-2026-06-23.md).
-Repeat all 77 jobs after the predefined participant-level QC exclusion without
-overwriting the full-sample outputs:
+Regenerate the differential-motion exclusion list, then repeat the desired jobs
+without overwriting the full-sample outputs. `all` includes primary and
+secondary ICA-derived and direct-Smith09 analyses (175 jobs):
 
 ```bash
+python3 code/select_qc_sensitivity_exclusions.py
 code/run_randomise_qc_sensitivity.sh all
 python3 code/check_randomise_results.py \
+  --network-set all \
   --analysis-set all \
   --sensitivity-label qc-outliers \
   --exclude-list code/exclude_qc_outliers.txt \
@@ -475,11 +509,12 @@ automatic-dimensionality components.
 
 ## Remaining Work
 
-1. Run and audit the predefined 24-participant QC sensitivity analysis.
+1. Run and audit the documented 24-participant differential-motion sensitivity.
 2. Reconcile the 27-participant sample with the earlier 28- and 22-participant
    analyses and resolve any stimulation-delivery exclusion.
-3. Compare full-sample and sensitivity results in the portable notebook.
-4. Decide the final primary inferential family and across-job multiplicity
+3. Run and audit the non-cerebellar secondary-network family.
+4. Compare full-sample and sensitivity results in the portable notebook.
+5. Decide the final primary inferential family and across-job multiplicity
    strategy before treating any preliminary finding as confirmatory.
 
 ## License

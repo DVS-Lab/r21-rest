@@ -31,19 +31,20 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   dimensionality estimation.
 - QA will include motion and MRIQC outlier identification consistent with prior
   lab work, including boxplot/IQR-based flags.
-- Differential QA will use two-sided Tukey 1.5-IQR boxplot fences on tSNR, mean
-  FD, and FD percentage differences for `BOTH - SHAM`, `BOTH - RTPJ`,
+- Differential QA uses absolute Tukey 1.5-IQR upper fences on tSNR, mean FD,
+  and FD percentage differences for `BOTH - SHAM`, `BOTH - RTPJ`,
   `BOTH - VLPFC`, `RTPJ - VLPFC`, `RTPJ - SHAM`, `VLPFC - SHAM`, and
-  `BOTH - mean(RTPJ, VLPFC)`. These correlated flags supplement absolute
-  subject-level QA, identify runs for visual review, and do not automatically
-  exclude participants.
-- The prespecified QC sensitivity excludes `sub-218`, `sub-222`, and `sub-230`
-  when four-run mean FD is greater than 0.50 mm or mean percentage of volumes
-  above 0.20-mm FD is greater than 50%. This does not resolve or replace a
-  separate technical exclusion for failed stimulation delivery.
+  `BOTH - mean(RTPJ, VLPFC)`. A comparison receives a paired motion flag when
+  both absolute mean-FD and FD-percentage differences exceed their fences.
+- The documented post hoc QC sensitivity excludes `sub-222`, `sub-226`, and `sub-230`
+  because each has paired motion flags in at least two comparisons. tSNR and
+  participant-average motion thresholds are diagnostics, not the primary
+  exclusion rule. This does not replace a separate technical exclusion for
+  failed stimulation delivery.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary
-  networks are DMN, ECN, and left/right FPN; secondary networks include
-  cerebellum and sensorimotor components.
+  networks are DMN, ECN, and left/right FPN. Secondary analyses cover primary
+  visual, occipital-pole, lateral-visual, sensorimotor, and auditory networks;
+  cerebellum is omitted because of poor coverage.
 - ICA matches are ranked by absolute spatial correlation because component
   polarity is arbitrary; the signed correlation remains in the output table.
 - Dual regression with resampled Smith09 maps will provide an atlas-based
