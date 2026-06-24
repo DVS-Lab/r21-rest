@@ -1,0 +1,26 @@
+{
+  "AnalysisDimension": "0",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 55,
+  "ConditionContrast": "rtpj-minus-sham",
+  "Description": "FSL randomise FWE-corrected 1-p statistical map",
+  "DesignContrast": "C1",
+  "Direction": "positive",
+  "ExcludedParticipants": [],
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "auditory",
+  "NumberOfPermutations": 5000,
+  "PeakOneMinusP": 0.961,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-dim00AuditoryComp0055RtpjMinusShamPositiveClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SensitivityLabel": null,
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_denoised_dim-00_task-rest.dr/contrasts/component-0055_stat-beta/randomise/network-auditory/task-rest_network-auditory_component-0055_stat-beta_contrast-rtpj-minus-sham_clustere_corrp_tstat1.nii.gz"
+  ],
+  "TaskName": "rest"
+}

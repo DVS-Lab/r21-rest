@@ -1,0 +1,26 @@
+{
+  "AnalysisDimension": "smith09",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 6,
+  "ConditionContrast": "both-minus-sham",
+  "Description": "FSL randomise FWE-corrected 1-p statistical map",
+  "DesignContrast": "C1",
+  "Direction": "positive",
+  "ExcludedParticipants": [],
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "sensorimotor",
+  "NumberOfPermutations": 5000,
+  "PeakOneMinusP": 0.953,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-smith09SensorimotorComp0006BothMinusShamPositiveClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SensitivityLabel": null,
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0006_stat-beta/randomise/network-sensorimotor/task-rest_network-sensorimotor_component-0006_stat-beta_contrast-both-minus-sham_clustere_corrp_tstat1.nii.gz"
+  ],
+  "TaskName": "rest"
+}

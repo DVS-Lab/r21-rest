@@ -1,0 +1,26 @@
+{
+  "AnalysisDimension": "smith09",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 3,
+  "ConditionContrast": "both-minus-vlpfc",
+  "Description": "FSL randomise FWE-corrected 1-p statistical map",
+  "DesignContrast": "C2",
+  "Direction": "negative",
+  "ExcludedParticipants": [],
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "lateral-visual",
+  "NumberOfPermutations": 5000,
+  "PeakOneMinusP": 0.9914,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-smith09LateralVisualComp0003BothMinusVlpfcNegativeClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SensitivityLabel": null,
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0003_stat-beta/randomise/network-lateral-visual/task-rest_network-lateral-visual_component-0003_stat-beta_contrast-both-minus-vlpfc_clustere_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest"
+}
