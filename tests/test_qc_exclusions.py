@@ -10,8 +10,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-class QCSensitivityTests(unittest.TestCase):
-    def test_differential_motion_rule_selects_three_participants(self):
+class QCExclusionTests(unittest.TestCase):
+    def test_three_metric_boxplot_rule_excludes_nobody(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             report = root / "decisions.tsv"
@@ -20,13 +20,13 @@ class QCSensitivityTests(unittest.TestCase):
             result = subprocess.run(
                 [
                     "python3",
-                    str(REPO_ROOT / "code" / "select_qc_sensitivity_exclusions.py"),
-                    "--condition-contrasts",
+                    str(REPO_ROOT / "code" / "select_qc_exclusions.py"),
+                    "--mriqc-runs",
                     str(
                         REPO_ROOT
                         / "derivatives"
                         / "qc"
-                        / "task-rest_mriqc_condition_contrasts.tsv"
+                        / "task-rest_mriqc_outliers.tsv"
                     ),
                     "--output",
                     str(report),
@@ -40,28 +40,42 @@ class QCSensitivityTests(unittest.TestCase):
                 check=True,
             )
             self.assertIn("Participants evaluated: 27", result.stdout)
-            self.assertIn("Participants excluded from sensitivity: 3", result.stdout)
+            self.assertIn("Participants excluded: 0", result.stdout)
             self.assertEqual(
                 [
                     line
                     for line in exclude_list.read_text().splitlines()
                     if line and not line.startswith("#")
                 ],
-                ["sub-222", "sub-226", "sub-230"],
+                [],
             )
             with report.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
             self.assertEqual(len(rows), 27)
-            excluded = {
-                row["participant"]: int(row["paired_motion_outlier_count"])
+            self.assertFalse(any(row["decision"] == "exclude" for row in rows))
+            counts = {
+                row["participant"]: int(row["n_metric_outliers"])
                 for row in rows
-                if row["decision"] == "exclude_sensitivity"
+                if int(row["n_metric_outliers"]) > 0
             }
-            self.assertEqual(excluded, {"sub-222": 4, "sub-226": 3, "sub-230": 2})
+            self.assertEqual(
+                counts,
+                {
+                    "sub-218": 2,
+                    "sub-222": 1,
+                    "sub-226": 1,
+                    "sub-230": 2,
+                    "sub-236": 1,
+                    "sub-238": 1,
+                },
+            )
             with bounds.open(newline="") as stream:
                 bound_rows = list(csv.DictReader(stream, delimiter="\t"))
-            self.assertEqual(len(bound_rows), 21)
-            self.assertEqual({row["n_complete"] for row in bound_rows}, {"27"})
+            self.assertEqual(len(bound_rows), 3)
+            self.assertEqual({row["n_participants"] for row in bound_rows}, {"27"})
+            self.assertEqual(
+                {row["metric"] for row in bound_rows}, {"tsnr", "fd_mean", "fd_perc"}
+            )
 
 
 if __name__ == "__main__":

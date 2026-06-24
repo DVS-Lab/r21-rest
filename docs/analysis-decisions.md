@@ -2,8 +2,8 @@
 
 The repository covers preprocessing through cluster-extent randomise inference
 and portable result visualization. The 27-participant first-pass analysis is
-frozen as a preliminary result while the recoverable N=28 sample and final QC
-criteria are resolved. No QC-exclusion sensitivity is currently adopted.
+frozen as a preliminary result while the recoverable N=28 sample is resolved.
+The adopted three-metric boxplot rule yields no data-quality exclusions.
 
 ## Current Study Context
 
@@ -38,12 +38,11 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   versus SHAM, BOTH versus the single-site mean, and RTPJ versus VLPFC. These
   span all between-condition variation without seven correlated pairwise tests.
 - Participant-level QC magnitude is summarized by the within-subject SD and
-  range across all four conditions. Tukey spread flags identify records for
-  review but do not automatically exclude anyone. The earlier absolute-pairwise
-  screen is retained for provenance and is not an adopted exclusion rule.
-- No data-quality exclusion is currently applied to the N=27 first-pass
-  analysis. A technical exclusion for failed stimulation delivery remains a
-  separate question.
+  range across all four conditions. Apply the upper Tukey fence (`Q3 + 1.5 ×
+  IQR`) separately to the tSNR, mean-FD, and high-motion-percentage SDs. Exclude
+  only if all three metrics are flagged. No participant meets that rule, so no
+  data-quality exclusion is applied to the N=27 analysis. A technical exclusion
+  for failed stimulation delivery remains a separate question.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary
   networks are DMN, ECN, and left/right FPN. Secondary analyses cover primary
   visual, occipital-pole, lateral-visual, sensorimotor, and auditory networks;

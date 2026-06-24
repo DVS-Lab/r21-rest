@@ -67,19 +67,21 @@ independent ROI tests.
 ## Data-Quality Review
 
 No data-quality exclusion was applied to this N=27 first pass. The earlier
-absolute-pairwise screen is retained for provenance but is not an adopted
-sensitivity analysis because its seven comparisons are redundant and discard
-direction.
+absolute-pairwise screen was superseded because its seven comparisons are
+redundant and discard direction.
 
 The current review centers condition values within participant, summarizes all
 between-condition variation with three orthogonal signed contrasts, and uses
 each participant's four-condition SD as a pair-independent magnitude measure.
 Within-subject label-permutation tests show no consistent group condition
 pattern for tSNR (`p=.58`), mean FD (`p=.75`), or high-motion percentage
-(`p=.96`). Spread flags identify `sub-218` and `sub-230` in two QC metrics;
-`sub-222`, `sub-226`, `sub-236`, and `sub-238` are flagged in one metric. These
-are review targets, not exclusions. Known stimulation-delivery failures, if
-confirmed, remain a separate technical issue.
+(`p=.96`). These omnibus tests assess whether condition labels organize the
+group profile; they do not select participants. The participant rule applies
+the upper Tukey fence to the four-condition SD separately for all three QC
+metrics and requires all three flags for exclusion. `sub-218` and `sub-230` are
+flagged on two metrics; `sub-222`, `sub-226`, `sub-236`, and `sub-238` are
+flagged on one. Nobody is flagged on all three, so nobody is excluded. Known
+stimulation-delivery failures, if confirmed, remain a separate technical issue.
 
 ## Secondary Networks
 

@@ -1,8 +1,6 @@
-# Historical exploratory screen; these are not adopted exclusions.
-# Differential-motion QC sensitivity candidates from the earlier rule.
-# For each of seven planned condition contrasts, apply a Tukey 1.5-IQR
-# upper fence to absolute mean-FD and absolute FD>0.20-mm percentage
-# differences. Exclude after paired flags on at least 2 contrasts.
-sub-222
-sub-226
-sub-230
+# Task-rest condition-level QC exclusions.
+# For each participant and metric, calculate the SD across SHAM, RTPJ,
+# VLPFC, and BOTH. Apply the Tukey upper fence to those SDs across
+# participants.
+# Exclude only when all 3 metrics are outliers.
+# Excluded participants: 0.

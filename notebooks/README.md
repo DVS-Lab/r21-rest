@@ -3,17 +3,19 @@
 `plot_randomise_results.ipynb` displays every significant N=27 primary and
 secondary cluster-extent result in its own interactive NiiVue MNI viewer. Each
 result includes a plain-language description of the analysis, network, signed
-contrast, corrected peak p-value, cluster size, and any paired differential-
-motion flags for that comparison, followed by sham, RTPJ, VLPFC, and BOTH
-dual-regression stage-2 beta means with SEM and participant points.
+contrast, corrected peak p-value, and cluster size, followed by sham, RTPJ,
+VLPFC, and BOTH dual-regression stage-2 beta means with SEM and participant
+points.
 
 The notebook also summarizes condition-level tSNR, mean FD, and high-motion
 percentage without privileging an absolute pairwise contrast. It shows signed
 condition deviations centered within participant, three orthogonal contrasts
 that span all four conditions, and each participant's four-condition spread.
 Within-subject label permutation tests whether condition directions align
-across participants. The QC section explains the N=31 to N=27 data-availability
-flow and does not apply an automatic QC exclusion.
+across participants; it is not an exclusion test. The participant rule applies
+the upper Tukey fence to four-condition spread separately for tSNR, mean FD,
+and high-motion percentage, requiring all three flags for exclusion. Nobody
+meets that rule in the current N=27 sample.
 
 Run the result checker before opening the notebook. Then close any existing
 JupyterLab server and use the project launcher:
