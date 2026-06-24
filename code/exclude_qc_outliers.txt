@@ -1,6 +1,6 @@
-# Task-rest condition-level QC exclusions.
-# For each participant and metric, calculate the SD across SHAM, RTPJ,
-# VLPFC, and BOTH. Apply the Tukey upper fence to those SDs across
-# participants.
-# Exclude only when all 3 metrics are outliers.
-# Excluded participants: 0.
+# Task-rest differential-QC exclusions.
+# Average the absolute magnitude of three orthogonal condition contrasts
+# separately for tSNR and mean FD, then apply the Tukey upper fence.
+# Exclude when both (2) metric summaries are outliers.
+# Excluded participants: 1.
+sub-218

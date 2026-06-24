@@ -1,204 +1,204 @@
-participant	contrast	condition_a	condition_b	complete	a_tsnr	b_tsnr	delta_tsnr	a_fd_mean	b_fd_mean	delta_fd_mean	a_fd_perc	b_fd_perc	delta_fd_perc	delta_tsnr_outlier	delta_fd_mean_outlier	delta_fd_perc_outlier	n_delta_outliers	review
-sub-189	both_minus_sham	both	sham	true	56.2637	56.0667	0.19704	0.109461	0.121901	-0.0124392	3.36134	2.09205	1.26929	false	false	false	0	false
-sub-189	both_minus_rtpj	both	rtpj	true	56.2637	53.3994	2.86431	0.109461	0.110937	-0.00147557	3.36134	2.51046	0.850884	false	false	false	0	false
-sub-189	both_minus_vlpfc	both	vlpfc	true	56.2637	53.3924	2.87129	0.109461	0.131919	-0.0224574	3.36134	12.5523	-9.19096	false	false	false	0	false
-sub-189	rtpj_minus_vlpfc	rtpj	vlpfc	true	53.3994	53.3924	0.0069787	0.110937	0.131919	-0.0209819	2.51046	12.5523	-10.0418	false	false	false	0	false
-sub-189	rtpj_minus_sham	rtpj	sham	true	53.3994	56.0667	-2.66727	0.110937	0.121901	-0.0109636	2.51046	2.09205	0.41841	false	false	false	0	false
-sub-189	vlpfc_minus_sham	vlpfc	sham	true	53.3924	56.0667	-2.67425	0.131919	0.121901	0.0100182	12.5523	2.09205	10.4603	false	false	false	0	false
-sub-189	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	56.2637	53.3959	2.8678	0.109461	0.121428	-0.0119665	3.36134	7.53138	-4.17004	false	false	false	0	false
-sub-203	both_minus_sham	both	sham	true	51.9162	56.8281	-4.91187	0.222489	0.175815	0.0466746	51.6667	34.728	16.9386	false	false	false	0	false
-sub-203	both_minus_rtpj	both	rtpj	true	51.9162	56.8674	-4.95119	0.222489	0.200737	0.0217525	51.6667	45	6.66667	false	false	false	0	false
-sub-203	both_minus_vlpfc	both	vlpfc	true	51.9162	47.2044	4.7118	0.222489	0.170472	0.0520174	51.6667	29.5833	22.0833	false	false	false	0	false
-sub-203	rtpj_minus_vlpfc	rtpj	vlpfc	true	56.8674	47.2044	9.66299	0.200737	0.170472	0.0302649	45	29.5833	15.4167	false	false	false	0	false
-sub-203	rtpj_minus_sham	rtpj	sham	true	56.8674	56.8281	0.0393248	0.200737	0.175815	0.0249221	45	34.728	10.272	false	false	false	0	false
-sub-203	vlpfc_minus_sham	vlpfc	sham	true	47.2044	56.8281	-9.62367	0.170472	0.175815	-0.00534274	29.5833	34.728	-5.1447	false	false	false	0	false
-sub-203	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	51.9162	52.0359	-0.119695	0.222489	0.185604	0.0368849	51.6667	37.2917	14.375	false	false	false	0	false
-sub-207	both_minus_sham	both	sham	true	24.675	24.2	0.474916	0.242879	0.19317	0.0497088	26.6667	23.75	2.91667	false	false	false	0	false
-sub-207	both_minus_rtpj	both	rtpj	true	24.675	23.8659	0.809071	0.242879	0.139039	0.10384	26.6667	16.6667	10	false	false	false	0	false
-sub-207	both_minus_vlpfc	both	vlpfc	true	24.675	22.7887	1.88626	0.242879	0.283175	-0.0402963	26.6667	44.3515	-17.6848	false	false	false	0	false
-sub-207	rtpj_minus_vlpfc	rtpj	vlpfc	true	23.8659	22.7887	1.07719	0.139039	0.283175	-0.144136	16.6667	44.3515	-27.6848	false	false	false	0	false
-sub-207	rtpj_minus_sham	rtpj	sham	true	23.8659	24.2	-0.334155	0.139039	0.19317	-0.0541314	16.6667	23.75	-7.08333	false	false	false	0	false
-sub-207	vlpfc_minus_sham	vlpfc	sham	true	22.7887	24.2	-1.41135	0.283175	0.19317	0.0900051	44.3515	23.75	20.6015	false	false	false	0	false
-sub-207	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	24.675	23.3273	1.34767	0.242879	0.211107	0.0317719	26.6667	30.5091	-3.8424	false	false	false	0	false
-sub-208	both_minus_sham	both	sham	true	46.4941	42.0557	4.43838	0.157518	0.227311	-0.0697927	20	41.4226	-21.4226	false	false	false	0	false
-sub-208	both_minus_rtpj	both	rtpj	true	46.4941	36.4262	10.0678	0.157518	0.156329	0.00118882	20	23.3333	-3.33333	false	false	false	0	false
-sub-208	both_minus_vlpfc	both	vlpfc	true	46.4941	34.3895	12.1046	0.157518	0.192562	-0.0350437	20	32.7731	-12.7731	false	false	false	0	false
-sub-208	rtpj_minus_vlpfc	rtpj	vlpfc	true	36.4262	34.3895	2.03676	0.156329	0.192562	-0.0362325	23.3333	32.7731	-9.43978	false	false	false	0	false
-sub-208	rtpj_minus_sham	rtpj	sham	true	36.4262	42.0557	-5.62947	0.156329	0.227311	-0.0709815	23.3333	41.4226	-18.0893	false	false	false	0	false
-sub-208	vlpfc_minus_sham	vlpfc	sham	true	34.3895	42.0557	-7.66624	0.192562	0.227311	-0.034749	32.7731	41.4226	-8.64948	false	false	false	0	false
-sub-208	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	46.4941	35.4079	11.0862	0.157518	0.174446	-0.0169274	20	28.0532	-8.05322	true	false	false	1	true
-sub-209	both_minus_sham	both	sham	true	25.1539	19.1101	6.04375	0.463731	0.523508	-0.0597773	56.9038	63.3333	-6.42957	false	false	false	0	false
-sub-209	both_minus_rtpj	both	rtpj	true	25.1539	20.6622	4.49172	0.463731	0.548939	-0.0852085	56.9038	77.4059	-20.5021	false	false	false	0	false
-sub-209	both_minus_vlpfc	both	vlpfc	true	25.1539	18.7313	6.42255	0.463731	0.848803	-0.385073	56.9038	80.4167	-23.5129	false	true	false	1	true
-sub-209	rtpj_minus_vlpfc	rtpj	vlpfc	true	20.6622	18.7313	1.93084	0.548939	0.848803	-0.299864	77.4059	80.4167	-3.01081	false	true	false	1	true
-sub-209	rtpj_minus_sham	rtpj	sham	true	20.6622	19.1101	1.55204	0.548939	0.523508	0.0254313	77.4059	63.3333	14.0725	false	false	false	0	false
-sub-209	vlpfc_minus_sham	vlpfc	sham	true	18.7313	19.1101	-0.378798	0.848803	0.523508	0.325295	80.4167	63.3333	17.0833	false	true	false	1	true
-sub-209	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	25.1539	19.6967	5.45713	0.463731	0.698871	-0.235141	56.9038	78.9113	-22.0075	false	true	false	1	true
-sub-210	both_minus_sham	both	sham	true	32.3543	38.2033	-5.84898	0.28806	0.168574	0.119487	61.25	26.4706	34.7794	false	false	false	0	false
-sub-210	both_minus_rtpj	both	rtpj	true	32.3543	39.1677	-6.81338	0.28806	0.207673	0.0803872	61.25	40.1674	21.0826	false	false	false	0	false
-sub-210	both_minus_vlpfc	both	vlpfc	true	32.3543	38.9908	-6.63649	0.28806	0.177585	0.110475	61.25	28.8703	32.3797	false	false	false	0	false
-sub-210	rtpj_minus_vlpfc	rtpj	vlpfc	true	39.1677	38.9908	0.176895	0.207673	0.177585	0.0300883	40.1674	28.8703	11.2971	false	false	false	0	false
-sub-210	rtpj_minus_sham	rtpj	sham	true	39.1677	38.2033	0.964402	0.207673	0.168574	0.0390997	40.1674	26.4706	13.6968	false	false	false	0	false
-sub-210	vlpfc_minus_sham	vlpfc	sham	true	38.9908	38.2033	0.787507	0.177585	0.168574	0.00901143	28.8703	26.4706	2.3997	false	false	false	0	false
-sub-210	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	32.3543	39.0792	-6.72494	0.28806	0.192629	0.0954313	61.25	34.5188	26.7312	false	false	false	0	false
-sub-211	both_minus_sham	both	sham	true	46.3643	48.6218	-2.25744	0.114624	0.180812	-0.0661883	6.25	31.7992	-25.5492	false	false	false	0	false
-sub-211	both_minus_rtpj	both	rtpj	true	46.3643	43.3899	2.97441	0.114624	0.165144	-0.0505199	6.25	25.9414	-19.6914	false	false	false	0	false
-sub-211	both_minus_vlpfc	both	vlpfc	true	46.3643	51.4714	-5.10702	0.114624	0.154989	-0.0403652	6.25	24.1667	-17.9167	false	false	false	0	false
-sub-211	rtpj_minus_vlpfc	rtpj	vlpfc	true	43.3899	51.4714	-8.08143	0.165144	0.154989	0.0101547	25.9414	24.1667	1.77476	false	false	false	0	false
-sub-211	rtpj_minus_sham	rtpj	sham	true	43.3899	48.6218	-5.23185	0.165144	0.180812	-0.0156684	25.9414	31.7992	-5.85774	false	false	false	0	false
-sub-211	vlpfc_minus_sham	vlpfc	sham	true	51.4714	48.6218	2.84958	0.154989	0.180812	-0.0258231	24.1667	31.7992	-7.6325	false	false	false	0	false
-sub-211	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	46.3643	47.4306	-1.0663	0.114624	0.160067	-0.0454426	6.25	25.054	-18.804	false	false	false	0	false
-sub-212	both_minus_sham	both	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-212	both_minus_rtpj	both	rtpj	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-212	both_minus_vlpfc	both	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-212	rtpj_minus_vlpfc	rtpj	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-212	rtpj_minus_sham	rtpj	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-212	vlpfc_minus_sham	vlpfc	sham	true	29.3971	33.2246	-3.82753	0.447492	0.323786	0.123706	49.3724	36.25	13.1224	false	false	false	0	false
-sub-212	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-213	both_minus_sham	both	sham	true	47.4411	51.2097	-3.76861	0.177701	0.222235	-0.0445342	21.7573	42.5	-20.7427	false	false	false	0	false
-sub-213	both_minus_rtpj	both	rtpj	true	47.4411	52.2226	-4.78147	0.177701	0.216346	-0.0386454	21.7573	36.6667	-14.9093	false	false	false	0	false
-sub-213	both_minus_vlpfc	both	vlpfc	true	47.4411	49.3252	-1.88412	0.177701	0.208795	-0.031094	21.7573	40.8333	-19.076	false	false	false	0	false
-sub-213	rtpj_minus_vlpfc	rtpj	vlpfc	true	52.2226	49.3252	2.89736	0.216346	0.208795	0.00755137	36.6667	40.8333	-4.16667	false	false	false	0	false
-sub-213	rtpj_minus_sham	rtpj	sham	true	52.2226	51.2097	1.01286	0.216346	0.222235	-0.00588886	36.6667	42.5	-5.83333	false	false	false	0	false
-sub-213	vlpfc_minus_sham	vlpfc	sham	true	49.3252	51.2097	-1.8845	0.208795	0.222235	-0.0134402	40.8333	42.5	-1.66667	false	false	false	0	false
-sub-213	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	47.4411	50.7739	-3.33279	0.177701	0.21257	-0.0348697	21.7573	38.75	-16.9927	false	false	false	0	false
-sub-214	both_minus_sham	both	sham	true	29.953	35.027	-5.07399	0.195022	0.124729	0.0702929	29.7071	8.82353	20.8836	false	false	false	0	false
-sub-214	both_minus_rtpj	both	rtpj	true	29.953	27.9228	2.03023	0.195022	0.213511	-0.0184887	29.7071	42.437	-12.7299	false	false	false	0	false
-sub-214	both_minus_vlpfc	both	vlpfc	true	29.953	32.4911	-2.5381	0.195022	0.135345	0.0596777	29.7071	8.3682	21.3389	false	false	false	0	false
-sub-214	rtpj_minus_vlpfc	rtpj	vlpfc	true	27.9228	32.4911	-4.56834	0.213511	0.135345	0.0781664	42.437	8.3682	34.0688	false	false	false	0	false
-sub-214	rtpj_minus_sham	rtpj	sham	true	27.9228	35.027	-7.10422	0.213511	0.124729	0.0887816	42.437	8.82353	33.6134	false	false	false	0	false
-sub-214	vlpfc_minus_sham	vlpfc	sham	true	32.4911	35.027	-2.53589	0.135345	0.124729	0.0106151	8.3682	8.82353	-0.455329	false	false	false	0	false
-sub-214	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	29.953	30.2069	-0.253934	0.195022	0.174428	0.0205945	29.7071	25.4026	4.30453	false	false	false	0	false
-sub-215	both_minus_sham	both	sham	true	47.3393	53.166	-5.82665	0.170511	0.123191	0.0473203	20.5021	10.0418	10.4603	false	false	false	0	false
-sub-215	both_minus_rtpj	both	rtpj	true	47.3393	51.45	-4.11068	0.170511	0.127464	0.043047	20.5021	11.7155	8.78661	false	false	false	0	false
-sub-215	both_minus_vlpfc	both	vlpfc	true	47.3393	45.9092	1.43009	0.170511	0.184461	-0.0139499	20.5021	28.5714	-8.06934	false	false	false	0	false
-sub-215	rtpj_minus_vlpfc	rtpj	vlpfc	true	51.45	45.9092	5.54077	0.127464	0.184461	-0.0569969	11.7155	28.5714	-16.8559	false	false	false	0	false
-sub-215	rtpj_minus_sham	rtpj	sham	true	51.45	53.166	-1.71597	0.127464	0.123191	0.00427327	11.7155	10.0418	1.67364	false	false	false	0	false
-sub-215	vlpfc_minus_sham	vlpfc	sham	true	45.9092	53.166	-7.25674	0.184461	0.123191	0.0612702	28.5714	10.0418	18.5296	false	false	false	0	false
-sub-215	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	47.3393	48.6796	-1.3403	0.170511	0.155963	0.0145486	20.5021	20.1435	0.358637	false	false	false	0	false
-sub-217	both_minus_sham	both	sham	true	30.72	34.8527	-4.1327	0.388012	0.283262	0.10475	82.5	65.272	17.228	false	false	false	0	false
-sub-217	both_minus_rtpj	both	rtpj	true	30.72	27.5919	3.12817	0.388012	0.234362	0.15365	82.5	53.5565	28.9435	false	true	false	1	true
-sub-217	both_minus_vlpfc	both	vlpfc	true	30.72	22.7956	7.92441	0.388012	0.448567	-0.0605551	82.5	82.4268	0.0732218	false	false	false	0	false
-sub-217	rtpj_minus_vlpfc	rtpj	vlpfc	true	27.5919	22.7956	4.79625	0.234362	0.448567	-0.214205	53.5565	82.4268	-28.8703	false	true	false	1	true
-sub-217	rtpj_minus_sham	rtpj	sham	true	27.5919	34.8527	-7.26087	0.234362	0.283262	-0.0488999	53.5565	65.272	-11.7155	false	false	false	0	false
-sub-217	vlpfc_minus_sham	vlpfc	sham	true	22.7956	34.8527	-12.0571	0.448567	0.283262	0.165305	82.4268	65.272	17.1548	false	false	false	0	false
-sub-217	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	30.72	25.1937	5.52629	0.388012	0.341465	0.0465473	82.5	67.9916	14.5084	false	false	false	0	false
-sub-218	both_minus_sham	both	sham	true	19.3742	43.3041	-23.9299	0.760295	0.197952	0.562343	56.25	28.3333	27.9167	true	true	false	2	true
-sub-218	both_minus_rtpj	both	rtpj	true	19.3742	27.6108	-8.23663	0.760295	0.496927	0.263368	56.25	50.4167	5.83333	false	true	false	1	true
-sub-218	both_minus_vlpfc	both	vlpfc	true	19.3742	19.3146	0.0595297	0.760295	0.571959	0.188336	56.25	50.8333	5.41667	false	true	false	1	true
-sub-218	rtpj_minus_vlpfc	rtpj	vlpfc	true	27.6108	19.3146	8.29616	0.496927	0.571959	-0.0750318	50.4167	50.8333	-0.416667	false	false	false	0	false
-sub-218	rtpj_minus_sham	rtpj	sham	true	27.6108	43.3041	-15.6933	0.496927	0.197952	0.298975	50.4167	28.3333	22.0833	true	true	false	2	true
-sub-218	vlpfc_minus_sham	vlpfc	sham	true	19.3146	43.3041	-23.9894	0.571959	0.197952	0.374007	50.8333	28.3333	22.5	true	true	false	2	true
-sub-218	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	19.3742	23.4627	-4.08855	0.760295	0.534443	0.225852	56.25	50.625	5.625	false	true	false	1	true
-sub-219	both_minus_sham	both	sham	true	50.6913	51.519	-0.827732	0.161762	0.17302	-0.0112581	22.5	27.6151	-5.11506	false	false	false	0	false
-sub-219	both_minus_rtpj	both	rtpj	true	50.6913	53.1646	-2.47336	0.161762	0.153584	0.0081784	22.5	14.7059	7.79412	false	false	false	0	false
-sub-219	both_minus_vlpfc	both	vlpfc	true	50.6913	52.4192	-1.72794	0.161762	0.168799	-0.00703689	22.5	20.9205	1.5795	false	false	false	0	false
-sub-219	rtpj_minus_vlpfc	rtpj	vlpfc	true	53.1646	52.4192	0.745427	0.153584	0.168799	-0.0152153	14.7059	20.9205	-6.21462	false	false	false	0	false
-sub-219	rtpj_minus_sham	rtpj	sham	true	53.1646	51.519	1.64563	0.153584	0.17302	-0.0194365	14.7059	27.6151	-12.9092	false	false	false	0	false
-sub-219	vlpfc_minus_sham	vlpfc	sham	true	52.4192	51.519	0.900204	0.168799	0.17302	-0.00422124	20.9205	27.6151	-6.69456	false	false	false	0	false
-sub-219	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	50.6913	52.7919	-2.10065	0.161762	0.161192	0.000570754	22.5	17.8132	4.68681	false	false	false	0	false
-sub-220	both_minus_sham	both	sham	true	31.0146	25.5676	5.44695	0.111669	0.140438	-0.0287684	8.78661	16.8067	-8.02011	false	false	false	0	false
-sub-220	both_minus_rtpj	both	rtpj	true	31.0146	32.8991	-1.88456	0.111669	0.0966547	0.0150147	8.78661	5.43933	3.34728	false	false	false	0	false
-sub-220	both_minus_vlpfc	both	vlpfc	true	31.0146	31.7739	-0.759291	0.111669	0.114319	-0.00264992	8.78661	6.69456	2.09205	false	false	false	0	false
-sub-220	rtpj_minus_vlpfc	rtpj	vlpfc	true	32.8991	31.7739	1.12527	0.0966547	0.114319	-0.0176647	5.43933	6.69456	-1.25523	false	false	false	0	false
-sub-220	rtpj_minus_sham	rtpj	sham	true	32.8991	25.5676	7.33151	0.0966547	0.140438	-0.0437831	5.43933	16.8067	-11.3674	false	false	false	0	false
-sub-220	vlpfc_minus_sham	vlpfc	sham	true	31.7739	25.5676	6.20624	0.114319	0.140438	-0.0261184	6.69456	16.8067	-10.1122	false	false	false	0	false
-sub-220	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	31.0146	32.3365	-1.32193	0.111669	0.105487	0.00618241	8.78661	6.06695	2.71967	false	false	false	0	false
-sub-221	both_minus_sham	both	sham	true	24.1509	22.1566	1.99436	0.307146	0.301476	0.00566992	48.3051	46.25	2.05508	false	false	false	0	false
-sub-221	both_minus_rtpj	both	rtpj	true	24.1509	23.8674	0.283576	0.307146	0.23706	0.0700856	48.3051	34.728	13.5771	false	false	false	0	false
-sub-221	both_minus_vlpfc	both	vlpfc	true	24.1509	18.787	5.36389	0.307146	0.36085	-0.0537039	48.3051	68.6192	-20.3142	false	false	false	0	false
-sub-221	rtpj_minus_vlpfc	rtpj	vlpfc	true	23.8674	18.787	5.08031	0.23706	0.36085	-0.12379	34.728	68.6192	-33.8912	false	false	false	0	false
-sub-221	rtpj_minus_sham	rtpj	sham	true	23.8674	22.1566	1.71079	0.23706	0.301476	-0.0644157	34.728	46.25	-11.522	false	false	false	0	false
-sub-221	vlpfc_minus_sham	vlpfc	sham	true	18.787	22.1566	-3.36953	0.36085	0.301476	0.0593739	68.6192	46.25	22.3692	false	false	false	0	false
-sub-221	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	24.1509	21.3272	2.82373	0.307146	0.298955	0.00819084	48.3051	51.6736	-3.36856	false	false	false	0	false
-sub-222	both_minus_sham	both	sham	true	17.4004	14.8484	2.55199	1.0368	1.1442	-0.107407	86.25	85.8333	0.416667	false	false	false	0	false
-sub-222	both_minus_rtpj	both	rtpj	true	17.4004	23.0498	-5.64943	1.0368	0.358906	0.677891	86.25	46.8619	39.3881	false	true	true	2	true
-sub-222	both_minus_vlpfc	both	vlpfc	true	17.4004	28.2628	-10.8624	1.0368	0.388674	0.648124	86.25	43.5146	42.7354	false	true	true	2	true
-sub-222	rtpj_minus_vlpfc	rtpj	vlpfc	true	23.0498	28.2628	-5.21296	0.358906	0.388674	-0.0297677	46.8619	43.5146	3.34728	false	false	false	0	false
-sub-222	rtpj_minus_sham	rtpj	sham	true	23.0498	14.8484	8.20142	0.358906	1.1442	-0.785298	46.8619	85.8333	-38.9714	false	true	false	1	true
-sub-222	vlpfc_minus_sham	vlpfc	sham	true	28.2628	14.8484	13.4144	0.388674	1.1442	-0.75553	43.5146	85.8333	-42.3187	true	true	true	3	true
-sub-222	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	17.4004	25.6563	-8.25591	1.0368	0.37379	0.663008	86.25	45.1883	41.0617	false	true	true	2	true
-sub-225	both_minus_sham	both	sham	true	35.2013	39.1077	-3.90634	0.152611	0.255897	-0.103286	17.9916	30.9623	-12.9707	false	false	false	0	false
-sub-225	both_minus_rtpj	both	rtpj	true	35.2013	35.0896	0.111688	0.152611	0.256289	-0.103678	17.9916	25.9414	-7.94979	false	false	false	0	false
-sub-225	both_minus_vlpfc	both	vlpfc	true	35.2013	32.8535	2.34783	0.152611	0.242103	-0.0894919	17.9916	37.9167	-19.925	false	false	false	0	false
-sub-225	rtpj_minus_vlpfc	rtpj	vlpfc	true	35.0896	32.8535	2.23614	0.256289	0.242103	0.0141862	25.9414	37.9167	-11.9752	false	false	false	0	false
-sub-225	rtpj_minus_sham	rtpj	sham	true	35.0896	39.1077	-4.01803	0.256289	0.255897	0.000391833	25.9414	30.9623	-5.02092	false	false	false	0	false
-sub-225	vlpfc_minus_sham	vlpfc	sham	true	32.8535	39.1077	-6.25417	0.242103	0.255897	-0.0137943	37.9167	30.9623	6.95432	false	false	false	0	false
-sub-225	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	35.2013	33.9716	1.22976	0.152611	0.249196	-0.096585	17.9916	31.929	-13.9374	false	false	false	0	false
-sub-226	both_minus_sham	both	sham	true	28.2415	21.7023	6.53919	0.236573	0.730718	-0.494145	27.0833	70.7113	-43.628	false	true	false	1	true
-sub-226	both_minus_rtpj	both	rtpj	true	28.2415	24.5536	3.68788	0.236573	0.52787	-0.291296	27.0833	62.0833	-35	false	true	true	2	true
-sub-226	both_minus_vlpfc	both	vlpfc	true	28.2415	32.1584	-3.91687	0.236573	0.203591	0.0329825	27.0833	24.2678	2.81555	false	false	false	0	false
-sub-226	rtpj_minus_vlpfc	rtpj	vlpfc	true	24.5536	32.1584	-7.60475	0.52787	0.203591	0.324279	62.0833	24.2678	37.8156	false	true	true	2	true
-sub-226	rtpj_minus_sham	rtpj	sham	true	24.5536	21.7023	2.85131	0.52787	0.730718	-0.202849	62.0833	70.7113	-8.62796	false	true	false	1	true
-sub-226	vlpfc_minus_sham	vlpfc	sham	true	32.1584	21.7023	10.4561	0.203591	0.730718	-0.527127	24.2678	70.7113	-46.4435	true	true	true	3	true
-sub-226	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	28.2415	28.356	-0.114496	0.236573	0.36573	-0.129157	27.0833	43.1756	-16.0922	false	true	false	1	true
-sub-227	both_minus_sham	both	sham	true	36.1422	30.9446	5.19759	0.228203	0.316657	-0.0884544	26.3598	37.9167	-11.5568	false	false	false	0	false
-sub-227	both_minus_rtpj	both	rtpj	true	36.1422	34.8526	1.28953	0.228203	0.266193	-0.0379907	26.3598	28.75	-2.39017	false	false	false	0	false
-sub-227	both_minus_vlpfc	both	vlpfc	true	36.1422	31.4702	4.67197	0.228203	0.403131	-0.174928	26.3598	47.6987	-21.3389	false	true	false	1	true
-sub-227	rtpj_minus_vlpfc	rtpj	vlpfc	true	34.8526	31.4702	3.38244	0.266193	0.403131	-0.136938	28.75	47.6987	-18.9487	false	false	false	0	false
-sub-227	rtpj_minus_sham	rtpj	sham	true	34.8526	30.9446	3.90806	0.266193	0.316657	-0.0504637	28.75	37.9167	-9.16667	false	false	false	0	false
-sub-227	vlpfc_minus_sham	vlpfc	sham	true	31.4702	30.9446	0.525619	0.403131	0.316657	0.086474	47.6987	37.9167	9.78208	false	false	false	0	false
-sub-227	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	36.1422	33.1614	2.98075	0.228203	0.334662	-0.10646	26.3598	38.2244	-11.8645	false	false	false	0	false
-sub-228	both_minus_sham	both	sham	true	33.6433	35.463	-1.81965	0.264287	0.209188	0.0550987	67.7824	50	17.7824	false	false	false	0	false
-sub-228	both_minus_rtpj	both	rtpj	true	33.6433	33.8926	-0.24923	0.264287	0.243591	0.0206956	67.7824	62.9167	4.86576	false	false	false	0	false
-sub-228	both_minus_vlpfc	both	vlpfc	true	33.6433	34.6958	-1.05248	0.264287	0.238826	0.0254607	67.7824	58.9958	8.78661	false	false	false	0	false
-sub-228	rtpj_minus_vlpfc	rtpj	vlpfc	true	33.8926	34.6958	-0.803247	0.243591	0.238826	0.00476507	62.9167	58.9958	3.92085	false	false	false	0	false
-sub-228	rtpj_minus_sham	rtpj	sham	true	33.8926	35.463	-1.57042	0.243591	0.209188	0.0344032	62.9167	50	12.9167	false	false	false	0	false
-sub-228	vlpfc_minus_sham	vlpfc	sham	true	34.6958	35.463	-0.767171	0.238826	0.209188	0.0296381	58.9958	50	8.99582	false	false	false	0	false
-sub-228	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	33.6433	34.2942	-0.650853	0.264287	0.241209	0.0230781	67.7824	60.9562	6.82619	false	false	false	0	false
-sub-230	both_minus_sham	both	sham	true	17.8929	47.2335	-29.3406	0.378853	0.160665	0.218188	73.2218	17.5	55.7218	true	true	true	3	true
-sub-230	both_minus_rtpj	both	rtpj	true	17.8929	22.8935	-5.00058	0.378853	0.414179	-0.0353255	73.2218	80.6723	-7.45051	false	false	false	0	false
-sub-230	both_minus_vlpfc	both	vlpfc	true	17.8929	32.8287	-14.9358	0.378853	0.28293	0.0959226	73.2218	50.4167	22.8051	true	false	false	1	true
-sub-230	rtpj_minus_vlpfc	rtpj	vlpfc	true	22.8935	32.8287	-9.93518	0.414179	0.28293	0.131248	80.6723	50.4167	30.2556	false	false	false	0	false
-sub-230	rtpj_minus_sham	rtpj	sham	true	22.8935	47.2335	-24.34	0.414179	0.160665	0.253514	80.6723	17.5	63.1723	true	true	true	3	true
-sub-230	vlpfc_minus_sham	vlpfc	sham	true	32.8287	47.2335	-14.4048	0.28293	0.160665	0.122266	50.4167	17.5	32.9167	true	false	false	1	true
-sub-230	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	17.8929	27.8611	-9.96817	0.378853	0.348554	0.0302985	73.2218	65.5445	7.67729	false	false	false	0	false
-sub-231	both_minus_sham	both	sham	true	53.3704	39.3925	13.9779	0.105383	0.148148	-0.0427645	0.833333	6.27615	-5.44282	false	false	false	0	false
-sub-231	both_minus_rtpj	both	rtpj	true	53.3704	42.7964	10.574	0.105383	0.155143	-0.0497605	0.833333	13.8075	-12.9742	false	false	false	0	false
-sub-231	both_minus_vlpfc	both	vlpfc	true	53.3704	49.9774	3.393	0.105383	0.10905	-0.00366709	0.833333	2.09205	-1.25872	false	false	false	0	false
-sub-231	rtpj_minus_vlpfc	rtpj	vlpfc	true	42.7964	49.9774	-7.18102	0.155143	0.10905	0.0460934	13.8075	2.09205	11.7155	false	false	false	0	false
-sub-231	rtpj_minus_sham	rtpj	sham	true	42.7964	39.3925	3.40389	0.155143	0.148148	0.00699598	13.8075	6.27615	7.53138	false	false	false	0	false
-sub-231	vlpfc_minus_sham	vlpfc	sham	true	49.9774	39.3925	10.5849	0.10905	0.148148	-0.0390974	2.09205	6.27615	-4.1841	true	false	false	1	true
-sub-231	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	53.3704	46.3869	6.98351	0.105383	0.132097	-0.0267138	0.833333	7.94979	-7.11646	false	false	false	0	false
-sub-233	both_minus_sham	both	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-233	both_minus_rtpj	both	rtpj	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-233	both_minus_vlpfc	both	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-233	rtpj_minus_vlpfc	rtpj	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-233	rtpj_minus_sham	rtpj	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-233	vlpfc_minus_sham	vlpfc	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-233	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	n/a	false	false	false	0	true
-sub-234	both_minus_sham	both	sham	true	38.9195	40.4287	-1.50918	0.26302	0.25948	0.00353991	68.6192	64.2553	4.36393	false	false	false	0	false
-sub-234	both_minus_rtpj	both	rtpj	true	38.9195	41.8246	-2.90507	0.26302	0.262796	0.000224037	68.6192	69.8745	-1.25523	false	false	false	0	false
-sub-234	both_minus_vlpfc	both	vlpfc	true	38.9195	42.0065	-3.08692	0.26302	0.253036	0.00998434	68.6192	65.5462	3.07303	false	false	false	0	false
-sub-234	rtpj_minus_vlpfc	rtpj	vlpfc	true	41.8246	42.0065	-0.18185	0.262796	0.253036	0.00976031	69.8745	65.5462	4.32826	false	false	false	0	false
-sub-234	rtpj_minus_sham	rtpj	sham	true	41.8246	40.4287	1.39589	0.262796	0.25948	0.00331587	69.8745	64.2553	5.61916	false	false	false	0	false
-sub-234	vlpfc_minus_sham	vlpfc	sham	true	42.0065	40.4287	1.57774	0.253036	0.25948	-0.00644443	65.5462	64.2553	1.2909	false	false	false	0	false
-sub-234	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	38.9195	41.9155	-2.996	0.26302	0.257916	0.00510419	68.6192	67.7103	0.908899	false	false	false	0	false
-sub-235	both_minus_sham	both	sham	true	20.8951	24.7034	-3.80834	0.198448	0.15147	0.0469776	27.6151	19.5833	8.03173	false	false	false	0	false
-sub-235	both_minus_rtpj	both	rtpj	true	20.8951	22.1865	-1.29143	0.198448	0.167583	0.0308651	27.6151	17.9167	9.6984	false	false	false	0	false
-sub-235	both_minus_vlpfc	both	vlpfc	true	20.8951	20.6414	0.253679	0.198448	0.213692	-0.0152439	27.6151	22.0833	5.53173	false	false	false	0	false
-sub-235	rtpj_minus_vlpfc	rtpj	vlpfc	true	22.1865	20.6414	1.54511	0.167583	0.213692	-0.0461091	17.9167	22.0833	-4.16667	false	false	false	0	false
-sub-235	rtpj_minus_sham	rtpj	sham	true	22.1865	24.7034	-2.51691	0.167583	0.15147	0.0161124	17.9167	19.5833	-1.66667	false	false	false	0	false
-sub-235	vlpfc_minus_sham	vlpfc	sham	true	20.6414	24.7034	-4.06202	0.213692	0.15147	0.0622215	22.0833	19.5833	2.5	false	false	false	0	false
-sub-235	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	20.8951	21.4139	-0.518874	0.198448	0.190637	0.00781061	27.6151	20	7.61506	false	false	false	0	false
-sub-236	both_minus_sham	both	sham	true	27.2634	52.9381	-25.6747	0.126149	0.0809034	0.0452452	10.8787	3.34728	7.53138	true	false	false	1	true
-sub-236	both_minus_rtpj	both	rtpj	true	27.2634	48.7629	-21.4995	0.126149	0.0930527	0.033096	10.8787	8.3682	2.51046	true	false	false	1	true
-sub-236	both_minus_vlpfc	both	vlpfc	true	27.2634	51.4531	-24.1897	0.126149	0.101158	0.0249904	10.8787	7.11297	3.76569	true	false	false	1	true
-sub-236	rtpj_minus_vlpfc	rtpj	vlpfc	true	48.7629	51.4531	-2.6902	0.0930527	0.101158	-0.00810555	8.3682	7.11297	1.25523	false	false	false	0	false
-sub-236	rtpj_minus_sham	rtpj	sham	true	48.7629	52.9381	-4.17527	0.0930527	0.0809034	0.0121492	8.3682	3.34728	5.02092	false	false	false	0	false
-sub-236	vlpfc_minus_sham	vlpfc	sham	true	51.4531	52.9381	-1.48506	0.101158	0.0809034	0.0202548	7.11297	3.34728	3.76569	false	false	false	0	false
-sub-236	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	27.2634	50.108	-22.8446	0.126149	0.0971055	0.0290432	10.8787	7.74059	3.13808	true	false	false	1	true
-sub-237	both_minus_sham	both	sham	true	44.7984	42.3351	2.46324	0.207967	0.23963	-0.0316635	15.8333	21.7573	-5.92399	false	false	false	0	false
-sub-237	both_minus_rtpj	both	rtpj	true	44.7984	41.5131	3.28529	0.207967	0.190321	0.0176456	15.8333	25.523	-9.68968	false	false	false	0	false
-sub-237	both_minus_vlpfc	both	vlpfc	true	44.7984	51.5611	-6.76277	0.207967	0.158099	0.0498683	15.8333	12.0833	3.75	false	false	false	0	false
-sub-237	rtpj_minus_vlpfc	rtpj	vlpfc	true	41.5131	51.5611	-10.0481	0.190321	0.158099	0.0322227	25.523	12.0833	13.4397	false	false	false	0	false
-sub-237	rtpj_minus_sham	rtpj	sham	true	41.5131	42.3351	-0.822049	0.190321	0.23963	-0.049309	25.523	21.7573	3.76569	false	false	false	0	false
-sub-237	vlpfc_minus_sham	vlpfc	sham	true	51.5611	42.3351	9.22601	0.158099	0.23963	-0.0815317	12.0833	21.7573	-9.67399	false	false	false	0	false
-sub-237	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	44.7984	46.5371	-1.73874	0.207967	0.17421	0.0337569	15.8333	18.8032	-2.96984	false	false	false	0	false
-sub-238	both_minus_sham	both	sham	true	39.7962	20.1607	19.6355	0.231944	0.659705	-0.427761	39.749	55.4167	-15.6677	true	true	false	2	true
-sub-238	both_minus_rtpj	both	rtpj	true	39.7962	29.3971	10.3992	0.231944	0.287086	-0.0551419	39.749	43.0962	-3.34728	false	false	false	0	false
-sub-238	both_minus_vlpfc	both	vlpfc	true	39.7962	20.2803	19.5159	0.231944	0.437557	-0.205613	39.749	42.0833	-2.33438	true	true	false	2	true
-sub-238	rtpj_minus_vlpfc	rtpj	vlpfc	true	29.3971	20.2803	9.11675	0.287086	0.437557	-0.150472	43.0962	42.0833	1.0129	false	false	false	0	false
-sub-238	rtpj_minus_sham	rtpj	sham	true	29.3971	20.1607	9.23637	0.287086	0.659705	-0.372619	43.0962	55.4167	-12.3204	false	true	false	1	true
-sub-238	vlpfc_minus_sham	vlpfc	sham	true	20.2803	20.1607	0.119615	0.437557	0.659705	-0.222148	42.0833	55.4167	-13.3333	false	true	false	1	true
-sub-238	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	39.7962	24.8387	14.9575	0.231944	0.362322	-0.130378	39.749	42.5898	-2.84083	true	true	false	2	true
+participant	contrast	condition_a	condition_b	complete	a_tsnr	b_tsnr	delta_tsnr	a_fd_mean	b_fd_mean	delta_fd_mean	delta_tsnr_outlier	delta_fd_mean_outlier	n_delta_outliers	review
+sub-189	both_minus_sham	both	sham	true	56.2637	56.0667	0.197	0.109461	0.121901	-0.01244	false	false	0	false
+sub-189	both_minus_rtpj	both	rtpj	true	56.2637	53.3994	2.8643	0.109461	0.110937	-0.001476	false	false	0	false
+sub-189	both_minus_vlpfc	both	vlpfc	true	56.2637	53.3924	2.8713	0.109461	0.131919	-0.022458	false	false	0	false
+sub-189	rtpj_minus_vlpfc	rtpj	vlpfc	true	53.3994	53.3924	0.007	0.110937	0.131919	-0.020982	false	false	0	false
+sub-189	rtpj_minus_sham	rtpj	sham	true	53.3994	56.0667	-2.6673	0.110937	0.121901	-0.010964	false	false	0	false
+sub-189	vlpfc_minus_sham	vlpfc	sham	true	53.3924	56.0667	-2.6743	0.131919	0.121901	0.010018	false	false	0	false
+sub-189	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	56.2637	53.3959	2.8678	0.109461	0.121428	-0.011967	false	false	0	false
+sub-203	both_minus_sham	both	sham	true	51.9162	56.8281	-4.9119	0.222489	0.175815	0.046674	false	false	0	false
+sub-203	both_minus_rtpj	both	rtpj	true	51.9162	56.8674	-4.9512	0.222489	0.200737	0.021752	false	false	0	false
+sub-203	both_minus_vlpfc	both	vlpfc	true	51.9162	47.2044	4.7118	0.222489	0.170472	0.052017	false	false	0	false
+sub-203	rtpj_minus_vlpfc	rtpj	vlpfc	true	56.8674	47.2044	9.663	0.200737	0.170472	0.030265	false	false	0	false
+sub-203	rtpj_minus_sham	rtpj	sham	true	56.8674	56.8281	0.0393	0.200737	0.175815	0.024922	false	false	0	false
+sub-203	vlpfc_minus_sham	vlpfc	sham	true	47.2044	56.8281	-9.6237	0.170472	0.175815	-0.005343	false	false	0	false
+sub-203	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	51.9162	52.0359	-0.1197	0.222489	0.185605	0.0368845	false	false	0	false
+sub-207	both_minus_sham	both	sham	true	24.675	24.2	0.475	0.242879	0.19317	0.049709	false	false	0	false
+sub-207	both_minus_rtpj	both	rtpj	true	24.675	23.8659	0.8091	0.242879	0.139039	0.10384	false	false	0	false
+sub-207	both_minus_vlpfc	both	vlpfc	true	24.675	22.7887	1.8863	0.242879	0.283175	-0.040296	false	false	0	false
+sub-207	rtpj_minus_vlpfc	rtpj	vlpfc	true	23.8659	22.7887	1.0772	0.139039	0.283175	-0.144136	false	false	0	false
+sub-207	rtpj_minus_sham	rtpj	sham	true	23.8659	24.2	-0.3341	0.139039	0.19317	-0.054131	false	false	0	false
+sub-207	vlpfc_minus_sham	vlpfc	sham	true	22.7887	24.2	-1.4113	0.283175	0.19317	0.090005	false	false	0	false
+sub-207	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	24.675	23.3273	1.3477	0.242879	0.211107	0.031772	false	false	0	false
+sub-208	both_minus_sham	both	sham	true	46.4941	42.0557	4.4384	0.157518	0.227311	-0.069793	false	false	0	false
+sub-208	both_minus_rtpj	both	rtpj	true	46.4941	36.4262	10.0679	0.157518	0.156329	0.001189	false	false	0	false
+sub-208	both_minus_vlpfc	both	vlpfc	true	46.4941	34.3895	12.1046	0.157518	0.192562	-0.035044	false	false	0	false
+sub-208	rtpj_minus_vlpfc	rtpj	vlpfc	true	36.4262	34.3895	2.0367	0.156329	0.192562	-0.036233	false	false	0	false
+sub-208	rtpj_minus_sham	rtpj	sham	true	36.4262	42.0557	-5.6295	0.156329	0.227311	-0.070982	false	false	0	false
+sub-208	vlpfc_minus_sham	vlpfc	sham	true	34.3895	42.0557	-7.6662	0.192562	0.227311	-0.034749	false	false	0	false
+sub-208	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	46.4941	35.4078	11.0863	0.157518	0.174446	-0.0169275	true	false	1	true
+sub-209	both_minus_sham	both	sham	true	25.1539	19.1101	6.0438	0.463731	0.523508	-0.059777	false	false	0	false
+sub-209	both_minus_rtpj	both	rtpj	true	25.1539	20.6622	4.4917	0.463731	0.548939	-0.085208	false	false	0	false
+sub-209	both_minus_vlpfc	both	vlpfc	true	25.1539	18.7313	6.4226	0.463731	0.848803	-0.385072	false	true	1	true
+sub-209	rtpj_minus_vlpfc	rtpj	vlpfc	true	20.6622	18.7313	1.9309	0.548939	0.848803	-0.299864	false	true	1	true
+sub-209	rtpj_minus_sham	rtpj	sham	true	20.6622	19.1101	1.5521	0.548939	0.523508	0.025431	false	false	0	false
+sub-209	vlpfc_minus_sham	vlpfc	sham	true	18.7313	19.1101	-0.3788	0.848803	0.523508	0.325295	false	true	1	true
+sub-209	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	25.1539	19.6968	5.45715	0.463731	0.698871	-0.23514	false	true	1	true
+sub-210	both_minus_sham	both	sham	true	32.3543	38.2033	-5.849	0.28806	0.168574	0.119486	false	false	0	false
+sub-210	both_minus_rtpj	both	rtpj	true	32.3543	39.1677	-6.8134	0.28806	0.207673	0.080387	false	false	0	false
+sub-210	both_minus_vlpfc	both	vlpfc	true	32.3543	38.9908	-6.6365	0.28806	0.177585	0.110475	false	false	0	false
+sub-210	rtpj_minus_vlpfc	rtpj	vlpfc	true	39.1677	38.9908	0.1769	0.207673	0.177585	0.030088	false	false	0	false
+sub-210	rtpj_minus_sham	rtpj	sham	true	39.1677	38.2033	0.9644	0.207673	0.168574	0.039099	false	false	0	false
+sub-210	vlpfc_minus_sham	vlpfc	sham	true	38.9908	38.2033	0.7875	0.177585	0.168574	0.009011	false	false	0	false
+sub-210	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	32.3543	39.0793	-6.72495	0.28806	0.192629	0.095431	false	false	0	false
+sub-211	both_minus_sham	both	sham	true	46.3643	48.6218	-2.2575	0.114624	0.180812	-0.066188	false	false	0	false
+sub-211	both_minus_rtpj	both	rtpj	true	46.3643	43.3899	2.9744	0.114624	0.165144	-0.05052	false	false	0	false
+sub-211	both_minus_vlpfc	both	vlpfc	true	46.3643	51.4714	-5.1071	0.114624	0.154989	-0.040365	false	false	0	false
+sub-211	rtpj_minus_vlpfc	rtpj	vlpfc	true	43.3899	51.4714	-8.0815	0.165144	0.154989	0.010155	false	false	0	false
+sub-211	rtpj_minus_sham	rtpj	sham	true	43.3899	48.6218	-5.2319	0.165144	0.180812	-0.015668	false	false	0	false
+sub-211	vlpfc_minus_sham	vlpfc	sham	true	51.4714	48.6218	2.8496	0.154989	0.180812	-0.025823	false	false	0	false
+sub-211	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	46.3643	47.4306	-1.06635	0.114624	0.160067	-0.0454425	false	false	0	false
+sub-212	both_minus_sham	both	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-212	both_minus_rtpj	both	rtpj	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-212	both_minus_vlpfc	both	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-212	rtpj_minus_vlpfc	rtpj	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-212	rtpj_minus_sham	rtpj	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-212	vlpfc_minus_sham	vlpfc	sham	true	29.3971	33.2246	-3.8275	0.447492	0.323786	0.123706	false	false	0	false
+sub-212	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-213	both_minus_sham	both	sham	true	47.4411	51.2097	-3.7686	0.177701	0.222235	-0.044534	false	false	0	false
+sub-213	both_minus_rtpj	both	rtpj	true	47.4411	52.2226	-4.7815	0.177701	0.216346	-0.038645	false	false	0	false
+sub-213	both_minus_vlpfc	both	vlpfc	true	47.4411	49.3252	-1.8841	0.177701	0.208795	-0.031094	false	false	0	false
+sub-213	rtpj_minus_vlpfc	rtpj	vlpfc	true	52.2226	49.3252	2.8974	0.216346	0.208795	0.007551	false	false	0	false
+sub-213	rtpj_minus_sham	rtpj	sham	true	52.2226	51.2097	1.0129	0.216346	0.222235	-0.005889	false	false	0	false
+sub-213	vlpfc_minus_sham	vlpfc	sham	true	49.3252	51.2097	-1.8845	0.208795	0.222235	-0.01344	false	false	0	false
+sub-213	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	47.4411	50.7739	-3.3328	0.177701	0.21257	-0.0348695	false	false	0	false
+sub-214	both_minus_sham	both	sham	true	29.953	35.027	-5.074	0.195022	0.124729	0.070293	false	false	0	false
+sub-214	both_minus_rtpj	both	rtpj	true	29.953	27.9228	2.0302	0.195022	0.213511	-0.018489	false	false	0	false
+sub-214	both_minus_vlpfc	both	vlpfc	true	29.953	32.4911	-2.5381	0.195022	0.135345	0.059677	false	false	0	false
+sub-214	rtpj_minus_vlpfc	rtpj	vlpfc	true	27.9228	32.4911	-4.5683	0.213511	0.135345	0.078166	false	false	0	false
+sub-214	rtpj_minus_sham	rtpj	sham	true	27.9228	35.027	-7.1042	0.213511	0.124729	0.088782	false	false	0	false
+sub-214	vlpfc_minus_sham	vlpfc	sham	true	32.4911	35.027	-2.5359	0.135345	0.124729	0.010616	false	false	0	false
+sub-214	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	29.953	30.2069	-0.25395	0.195022	0.174428	0.020594	false	false	0	false
+sub-215	both_minus_sham	both	sham	true	47.3393	53.166	-5.8267	0.170511	0.123191	0.04732	false	false	0	false
+sub-215	both_minus_rtpj	both	rtpj	true	47.3393	51.45	-4.1107	0.170511	0.127464	0.043047	false	false	0	false
+sub-215	both_minus_vlpfc	both	vlpfc	true	47.3393	45.9092	1.4301	0.170511	0.184461	-0.01395	false	false	0	false
+sub-215	rtpj_minus_vlpfc	rtpj	vlpfc	true	51.45	45.9092	5.5408	0.127464	0.184461	-0.056997	false	false	0	false
+sub-215	rtpj_minus_sham	rtpj	sham	true	51.45	53.166	-1.716	0.127464	0.123191	0.004273	false	false	0	false
+sub-215	vlpfc_minus_sham	vlpfc	sham	true	45.9092	53.166	-7.2568	0.184461	0.123191	0.06127	false	false	0	false
+sub-215	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	47.3393	48.6796	-1.3403	0.170511	0.155963	0.0145485	false	false	0	false
+sub-217	both_minus_sham	both	sham	true	30.72	34.8527	-4.1327	0.388012	0.283262	0.10475	false	false	0	false
+sub-217	both_minus_rtpj	both	rtpj	true	30.72	27.5919	3.1281	0.388012	0.234362	0.15365	false	true	1	true
+sub-217	both_minus_vlpfc	both	vlpfc	true	30.72	22.7956	7.9244	0.388012	0.448567	-0.060555	false	false	0	false
+sub-217	rtpj_minus_vlpfc	rtpj	vlpfc	true	27.5919	22.7956	4.7963	0.234362	0.448567	-0.214205	false	true	1	true
+sub-217	rtpj_minus_sham	rtpj	sham	true	27.5919	34.8527	-7.2608	0.234362	0.283262	-0.0489	false	false	0	false
+sub-217	vlpfc_minus_sham	vlpfc	sham	true	22.7956	34.8527	-12.0571	0.448567	0.283262	0.165305	false	false	0	false
+sub-217	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	30.72	25.1938	5.52625	0.388012	0.341465	0.0465475	false	false	0	false
+sub-218	both_minus_sham	both	sham	true	19.3742	43.3041	-23.9299	0.760295	0.197952	0.562343	true	true	2	true
+sub-218	both_minus_rtpj	both	rtpj	true	19.3742	27.6108	-8.2366	0.760295	0.496927	0.263368	false	true	1	true
+sub-218	both_minus_vlpfc	both	vlpfc	true	19.3742	19.3146	0.0596	0.760295	0.571959	0.188336	false	true	1	true
+sub-218	rtpj_minus_vlpfc	rtpj	vlpfc	true	27.6108	19.3146	8.2962	0.496927	0.571959	-0.075032	false	false	0	false
+sub-218	rtpj_minus_sham	rtpj	sham	true	27.6108	43.3041	-15.6933	0.496927	0.197952	0.298975	true	true	2	true
+sub-218	vlpfc_minus_sham	vlpfc	sham	true	19.3146	43.3041	-23.9895	0.571959	0.197952	0.374007	true	true	2	true
+sub-218	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	19.3742	23.4627	-4.0885	0.760295	0.534443	0.225852	false	true	1	true
+sub-219	both_minus_sham	both	sham	true	50.6913	51.519	-0.8277	0.161762	0.17302	-0.011258	false	false	0	false
+sub-219	both_minus_rtpj	both	rtpj	true	50.6913	53.1646	-2.4733	0.161762	0.153584	0.008178	false	false	0	false
+sub-219	both_minus_vlpfc	both	vlpfc	true	50.6913	52.4192	-1.7279	0.161762	0.168799	-0.007037	false	false	0	false
+sub-219	rtpj_minus_vlpfc	rtpj	vlpfc	true	53.1646	52.4192	0.7454	0.153584	0.168799	-0.015215	false	false	0	false
+sub-219	rtpj_minus_sham	rtpj	sham	true	53.1646	51.519	1.6456	0.153584	0.17302	-0.019436	false	false	0	false
+sub-219	vlpfc_minus_sham	vlpfc	sham	true	52.4192	51.519	0.9002	0.168799	0.17302	-0.004221	false	false	0	false
+sub-219	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	50.6913	52.7919	-2.1006	0.161762	0.161191	0.0005705	false	false	0	false
+sub-220	both_minus_sham	both	sham	true	31.0146	25.5676	5.447	0.111669	0.140438	-0.028769	false	false	0	false
+sub-220	both_minus_rtpj	both	rtpj	true	31.0146	32.8991	-1.8845	0.111669	0.0966547	0.0150143	false	false	0	false
+sub-220	both_minus_vlpfc	both	vlpfc	true	31.0146	31.7739	-0.7593	0.111669	0.114319	-0.00265	false	false	0	false
+sub-220	rtpj_minus_vlpfc	rtpj	vlpfc	true	32.8991	31.7739	1.1252	0.0966547	0.114319	-0.0176643	false	false	0	false
+sub-220	rtpj_minus_sham	rtpj	sham	true	32.8991	25.5676	7.3315	0.0966547	0.140438	-0.0437833	false	false	0	false
+sub-220	vlpfc_minus_sham	vlpfc	sham	true	31.7739	25.5676	6.2063	0.114319	0.140438	-0.026119	false	false	0	false
+sub-220	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	31.0146	32.3365	-1.3219	0.111669	0.105487	0.00618215	false	false	0	false
+sub-221	both_minus_sham	both	sham	true	24.1509	22.1566	1.9943	0.307146	0.301476	0.00567	false	false	0	false
+sub-221	both_minus_rtpj	both	rtpj	true	24.1509	23.8674	0.2835	0.307146	0.23706	0.070086	false	false	0	false
+sub-221	both_minus_vlpfc	both	vlpfc	true	24.1509	18.787	5.3639	0.307146	0.36085	-0.053704	false	false	0	false
+sub-221	rtpj_minus_vlpfc	rtpj	vlpfc	true	23.8674	18.787	5.0804	0.23706	0.36085	-0.12379	false	false	0	false
+sub-221	rtpj_minus_sham	rtpj	sham	true	23.8674	22.1566	1.7108	0.23706	0.301476	-0.064416	false	false	0	false
+sub-221	vlpfc_minus_sham	vlpfc	sham	true	18.787	22.1566	-3.3696	0.36085	0.301476	0.059374	false	false	0	false
+sub-221	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	24.1509	21.3272	2.8237	0.307146	0.298955	0.008191	false	false	0	false
+sub-222	both_minus_sham	both	sham	true	17.4004	14.8484	2.552	1.0368	1.1442	-0.1074	false	false	0	false
+sub-222	both_minus_rtpj	both	rtpj	true	17.4004	23.0498	-5.6494	1.0368	0.358906	0.677894	false	true	1	true
+sub-222	both_minus_vlpfc	both	vlpfc	true	17.4004	28.2628	-10.8624	1.0368	0.388674	0.648126	false	true	1	true
+sub-222	rtpj_minus_vlpfc	rtpj	vlpfc	true	23.0498	28.2628	-5.213	0.358906	0.388674	-0.029768	false	false	0	false
+sub-222	rtpj_minus_sham	rtpj	sham	true	23.0498	14.8484	8.2014	0.358906	1.1442	-0.785294	false	true	1	true
+sub-222	vlpfc_minus_sham	vlpfc	sham	true	28.2628	14.8484	13.4144	0.388674	1.1442	-0.755526	true	true	2	true
+sub-222	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	17.4004	25.6563	-8.2559	1.0368	0.37379	0.66301	false	true	1	true
+sub-225	both_minus_sham	both	sham	true	35.2013	39.1077	-3.9064	0.152611	0.255897	-0.103286	false	false	0	false
+sub-225	both_minus_rtpj	both	rtpj	true	35.2013	35.0896	0.1117	0.152611	0.256289	-0.103678	false	false	0	false
+sub-225	both_minus_vlpfc	both	vlpfc	true	35.2013	32.8535	2.3478	0.152611	0.242103	-0.089492	false	false	0	false
+sub-225	rtpj_minus_vlpfc	rtpj	vlpfc	true	35.0896	32.8535	2.2361	0.256289	0.242103	0.014186	false	false	0	false
+sub-225	rtpj_minus_sham	rtpj	sham	true	35.0896	39.1077	-4.0181	0.256289	0.255897	0.000392	false	false	0	false
+sub-225	vlpfc_minus_sham	vlpfc	sham	true	32.8535	39.1077	-6.2542	0.242103	0.255897	-0.013794	false	false	0	false
+sub-225	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	35.2013	33.9715	1.22975	0.152611	0.249196	-0.096585	false	false	0	false
+sub-226	both_minus_sham	both	sham	true	28.2415	21.7023	6.5392	0.236573	0.730718	-0.494145	false	true	1	true
+sub-226	both_minus_rtpj	both	rtpj	true	28.2415	24.5536	3.6879	0.236573	0.52787	-0.291297	false	true	1	true
+sub-226	both_minus_vlpfc	both	vlpfc	true	28.2415	32.1584	-3.9169	0.236573	0.203591	0.032982	false	false	0	false
+sub-226	rtpj_minus_vlpfc	rtpj	vlpfc	true	24.5536	32.1584	-7.6048	0.52787	0.203591	0.324279	false	true	1	true
+sub-226	rtpj_minus_sham	rtpj	sham	true	24.5536	21.7023	2.8513	0.52787	0.730718	-0.202848	false	true	1	true
+sub-226	vlpfc_minus_sham	vlpfc	sham	true	32.1584	21.7023	10.4561	0.203591	0.730718	-0.527127	true	true	2	true
+sub-226	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	28.2415	28.356	-0.1145	0.236573	0.36573	-0.129157	false	true	1	true
+sub-227	both_minus_sham	both	sham	true	36.1422	30.9446	5.1976	0.228203	0.316657	-0.088454	false	false	0	false
+sub-227	both_minus_rtpj	both	rtpj	true	36.1422	34.8526	1.2896	0.228203	0.266193	-0.03799	false	false	0	false
+sub-227	both_minus_vlpfc	both	vlpfc	true	36.1422	31.4702	4.672	0.228203	0.403131	-0.174928	false	true	1	true
+sub-227	rtpj_minus_vlpfc	rtpj	vlpfc	true	34.8526	31.4702	3.3824	0.266193	0.403131	-0.136938	false	false	0	false
+sub-227	rtpj_minus_sham	rtpj	sham	true	34.8526	30.9446	3.908	0.266193	0.316657	-0.050464	false	false	0	false
+sub-227	vlpfc_minus_sham	vlpfc	sham	true	31.4702	30.9446	0.5256	0.403131	0.316657	0.086474	false	false	0	false
+sub-227	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	36.1422	33.1614	2.9808	0.228203	0.334662	-0.106459	false	false	0	false
+sub-228	both_minus_sham	both	sham	true	33.6433	35.463	-1.8197	0.264287	0.209188	0.055099	false	false	0	false
+sub-228	both_minus_rtpj	both	rtpj	true	33.6433	33.8926	-0.2493	0.264287	0.243591	0.020696	false	false	0	false
+sub-228	both_minus_vlpfc	both	vlpfc	true	33.6433	34.6958	-1.0525	0.264287	0.238826	0.025461	false	false	0	false
+sub-228	rtpj_minus_vlpfc	rtpj	vlpfc	true	33.8926	34.6958	-0.8032	0.243591	0.238826	0.004765	false	false	0	false
+sub-228	rtpj_minus_sham	rtpj	sham	true	33.8926	35.463	-1.5704	0.243591	0.209188	0.034403	false	false	0	false
+sub-228	vlpfc_minus_sham	vlpfc	sham	true	34.6958	35.463	-0.7672	0.238826	0.209188	0.029638	false	false	0	false
+sub-228	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	33.6433	34.2942	-0.6509	0.264287	0.241208	0.0230785	false	false	0	false
+sub-230	both_minus_sham	both	sham	true	17.8929	47.2335	-29.3406	0.378853	0.160665	0.218188	true	true	2	true
+sub-230	both_minus_rtpj	both	rtpj	true	17.8929	22.8935	-5.0006	0.378853	0.414179	-0.035326	false	false	0	false
+sub-230	both_minus_vlpfc	both	vlpfc	true	17.8929	32.8287	-14.9358	0.378853	0.28293	0.095923	true	false	1	true
+sub-230	rtpj_minus_vlpfc	rtpj	vlpfc	true	22.8935	32.8287	-9.9352	0.414179	0.28293	0.131249	false	false	0	false
+sub-230	rtpj_minus_sham	rtpj	sham	true	22.8935	47.2335	-24.34	0.414179	0.160665	0.253514	true	true	2	true
+sub-230	vlpfc_minus_sham	vlpfc	sham	true	32.8287	47.2335	-14.4048	0.28293	0.160665	0.122265	true	false	1	true
+sub-230	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	17.8929	27.8611	-9.9682	0.378853	0.348554	0.0302985	false	false	0	false
+sub-231	both_minus_sham	both	sham	true	53.3704	39.3925	13.9779	0.105383	0.148148	-0.042765	false	false	0	false
+sub-231	both_minus_rtpj	both	rtpj	true	53.3704	42.7964	10.574	0.105383	0.155143	-0.04976	false	false	0	false
+sub-231	both_minus_vlpfc	both	vlpfc	true	53.3704	49.9774	3.393	0.105383	0.10905	-0.003667	false	false	0	false
+sub-231	rtpj_minus_vlpfc	rtpj	vlpfc	true	42.7964	49.9774	-7.181	0.155143	0.10905	0.046093	false	false	0	false
+sub-231	rtpj_minus_sham	rtpj	sham	true	42.7964	39.3925	3.4039	0.155143	0.148148	0.006995	false	false	0	false
+sub-231	vlpfc_minus_sham	vlpfc	sham	true	49.9774	39.3925	10.5849	0.10905	0.148148	-0.039098	true	false	1	true
+sub-231	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	53.3704	46.3869	6.9835	0.105383	0.132097	-0.0267135	false	false	0	false
+sub-233	both_minus_sham	both	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-233	both_minus_rtpj	both	rtpj	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-233	both_minus_vlpfc	both	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-233	rtpj_minus_vlpfc	rtpj	vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-233	rtpj_minus_sham	rtpj	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-233	vlpfc_minus_sham	vlpfc	sham	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-233	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	false	n/a	n/a	n/a	n/a	n/a	n/a	false	false	0	true
+sub-234	both_minus_sham	both	sham	true	38.9195	40.4287	-1.5092	0.26302	0.25948	0.00354	false	false	0	false
+sub-234	both_minus_rtpj	both	rtpj	true	38.9195	41.8246	-2.9051	0.26302	0.262796	0.000224	false	false	0	false
+sub-234	both_minus_vlpfc	both	vlpfc	true	38.9195	42.0065	-3.087	0.26302	0.253036	0.009984	false	false	0	false
+sub-234	rtpj_minus_vlpfc	rtpj	vlpfc	true	41.8246	42.0065	-0.1819	0.262796	0.253036	0.00976	false	false	0	false
+sub-234	rtpj_minus_sham	rtpj	sham	true	41.8246	40.4287	1.3959	0.262796	0.25948	0.003316	false	false	0	false
+sub-234	vlpfc_minus_sham	vlpfc	sham	true	42.0065	40.4287	1.5778	0.253036	0.25948	-0.006444	false	false	0	false
+sub-234	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	38.9195	41.9155	-2.99605	0.26302	0.257916	0.005104	false	false	0	false
+sub-235	both_minus_sham	both	sham	true	20.8951	24.7034	-3.8083	0.198448	0.15147	0.046978	false	false	0	false
+sub-235	both_minus_rtpj	both	rtpj	true	20.8951	22.1865	-1.2914	0.198448	0.167583	0.030865	false	false	0	false
+sub-235	both_minus_vlpfc	both	vlpfc	true	20.8951	20.6414	0.2537	0.198448	0.213692	-0.015244	false	false	0	false
+sub-235	rtpj_minus_vlpfc	rtpj	vlpfc	true	22.1865	20.6414	1.5451	0.167583	0.213692	-0.046109	false	false	0	false
+sub-235	rtpj_minus_sham	rtpj	sham	true	22.1865	24.7034	-2.5169	0.167583	0.15147	0.016113	false	false	0	false
+sub-235	vlpfc_minus_sham	vlpfc	sham	true	20.6414	24.7034	-4.062	0.213692	0.15147	0.062222	false	false	0	false
+sub-235	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	20.8951	21.4139	-0.51885	0.198448	0.190638	0.0078105	false	false	0	false
+sub-236	both_minus_sham	both	sham	true	27.2634	52.9381	-25.6747	0.126149	0.0809034	0.0452456	true	false	1	true
+sub-236	both_minus_rtpj	both	rtpj	true	27.2634	48.7629	-21.4995	0.126149	0.0930527	0.0330963	true	false	1	true
+sub-236	both_minus_vlpfc	both	vlpfc	true	27.2634	51.4531	-24.1897	0.126149	0.101158	0.024991	true	false	1	true
+sub-236	rtpj_minus_vlpfc	rtpj	vlpfc	true	48.7629	51.4531	-2.6902	0.0930527	0.101158	-0.0081053	false	false	0	false
+sub-236	rtpj_minus_sham	rtpj	sham	true	48.7629	52.9381	-4.1752	0.0930527	0.0809034	0.0121493	false	false	0	false
+sub-236	vlpfc_minus_sham	vlpfc	sham	true	51.4531	52.9381	-1.485	0.101158	0.0809034	0.0202546	false	false	0	false
+sub-236	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	27.2634	50.108	-22.8446	0.126149	0.0971054	0.0290437	true	false	1	true
+sub-237	both_minus_sham	both	sham	true	44.7984	42.3351	2.4633	0.207967	0.23963	-0.031663	false	false	0	false
+sub-237	both_minus_rtpj	both	rtpj	true	44.7984	41.5131	3.2853	0.207967	0.190321	0.017646	false	false	0	false
+sub-237	both_minus_vlpfc	both	vlpfc	true	44.7984	51.5611	-6.7627	0.207967	0.158099	0.049868	false	false	0	false
+sub-237	rtpj_minus_vlpfc	rtpj	vlpfc	true	41.5131	51.5611	-10.048	0.190321	0.158099	0.032222	false	false	0	false
+sub-237	rtpj_minus_sham	rtpj	sham	true	41.5131	42.3351	-0.822	0.190321	0.23963	-0.049309	false	false	0	false
+sub-237	vlpfc_minus_sham	vlpfc	sham	true	51.5611	42.3351	9.226	0.158099	0.23963	-0.081531	false	false	0	false
+sub-237	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	44.7984	46.5371	-1.7387	0.207967	0.17421	0.033757	false	false	0	false
+sub-238	both_minus_sham	both	sham	true	39.7962	20.1607	19.6355	0.231944	0.659705	-0.427761	true	true	2	true
+sub-238	both_minus_rtpj	both	rtpj	true	39.7962	29.3971	10.3991	0.231944	0.287086	-0.055142	false	false	0	false
+sub-238	both_minus_vlpfc	both	vlpfc	true	39.7962	20.2803	19.5159	0.231944	0.437557	-0.205613	true	true	2	true
+sub-238	rtpj_minus_vlpfc	rtpj	vlpfc	true	29.3971	20.2803	9.1168	0.287086	0.437557	-0.150471	false	false	0	false
+sub-238	rtpj_minus_sham	rtpj	sham	true	29.3971	20.1607	9.2364	0.287086	0.659705	-0.372619	false	true	1	true
+sub-238	vlpfc_minus_sham	vlpfc	sham	true	20.2803	20.1607	0.1196	0.437557	0.659705	-0.222148	false	true	1	true
+sub-238	both_minus_mean_rtpj_vlpfc	both	mean_rtpj_vlpfc	true	39.7962	24.8387	14.9575	0.231944	0.362321	-0.130377	true	true	2	true

@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
-"""Apply the prespecified boxplot rule to task-rest condition-level QC spread."""
+"""Apply Tukey boxplots to mean QC magnitude across three orthogonal contrasts."""
 
 from __future__ import annotations
 
 import argparse
 import csv
 import math
-import statistics
 from collections import defaultdict
 from pathlib import Path
 
 
 CONDITIONS = ("sham", "rtpj", "vlpfc", "both")
-METRICS = ("tsnr", "fd_mean", "fd_perc")
+METRICS = ("tsnr", "fd_mean")
+CONTRASTS = (
+    (
+        "active_mean_minus_sham",
+        {"sham": -1.0, "rtpj": 1 / 3, "vlpfc": 1 / 3, "both": 1 / 3},
+    ),
+    (
+        "both_minus_mean_rtpj_vlpfc",
+        {"rtpj": -0.5, "vlpfc": -0.5, "both": 1.0},
+    ),
+    ("rtpj_minus_vlpfc", {"rtpj": 1.0, "vlpfc": -1.0}),
+)
 
 
 def percentile(values: list[float], quantile: float) -> float:
@@ -61,57 +71,68 @@ def read_complete_profiles(path: Path) -> dict[str, dict[str, dict[str, str]]]:
     return dict(sorted(complete.items()))
 
 
+def signed_contrast(
+    profile: dict[str, dict[str, str]], metric: str, weights: dict[str, float]
+) -> float:
+    return sum(
+        float(profile[condition][metric]) * weight
+        for condition, weight in weights.items()
+    )
+
+
 def select_participants(
     profiles: dict[str, dict[str, dict[str, str]]], required_metric_flags: int
 ) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-    spreads: dict[str, dict[str, float]] = defaultdict(dict)
+    contrasts: dict[str, dict[str, dict[str, float]]] = defaultdict(dict)
+    scores: dict[str, dict[str, float]] = defaultdict(dict)
     for participant, profile in profiles.items():
         for metric in METRICS:
-            values = [float(profile[condition][metric]) for condition in CONDITIONS]
-            spreads[participant][metric] = statistics.stdev(values)
+            metric_contrasts = {
+                label: signed_contrast(profile, metric, weights)
+                for label, weights in CONTRASTS
+            }
+            contrasts[participant][metric] = metric_contrasts
+            scores[participant][metric] = sum(
+                abs(value) for value in metric_contrasts.values()
+            ) / len(CONTRASTS)
 
     bounds: dict[str, tuple[float, float, float, float]] = {}
     bound_rows: list[dict[str, str]] = []
     for metric in METRICS:
-        values = [spreads[participant][metric] for participant in spreads]
+        values = [scores[participant][metric] for participant in scores]
         metric_bounds = tukey_upper_fence(values)
         bounds[metric] = metric_bounds
         bound_rows.append(
             {
                 "metric": metric,
                 "n_participants": str(len(values)),
-                "spread_measure": "within-subject SD across four conditions",
+                "aggregate": (
+                    "mean absolute magnitude across three orthogonal contrasts"
+                ),
                 "q1": f"{metric_bounds[0]:.8g}",
                 "q3": f"{metric_bounds[1]:.8g}",
                 "iqr": f"{metric_bounds[2]:.8g}",
                 "upper_fence": f"{metric_bounds[3]:.8g}",
-                "outlier_rule": "SD > Q3 + 1.5*IQR",
+                "outlier_rule": "mean absolute contrast > Q3 + 1.5*IQR",
             }
         )
 
     output: list[dict[str, str]] = []
-    for participant in spreads:
+    for participant in scores:
         flags = {
-            metric: spreads[participant][metric] > bounds[metric][3]
+            metric: scores[participant][metric] > bounds[metric][3]
             for metric in METRICS
         }
         flag_count = sum(flags.values())
-        output.append(
-            {
-                "participant": participant,
-                "n_conditions": str(len(CONDITIONS)),
-                "tsnr_sd": f"{spreads[participant]['tsnr']:.8g}",
-                "tsnr_outlier": str(flags["tsnr"]).lower(),
-                "fd_mean_sd": f"{spreads[participant]['fd_mean']:.8g}",
-                "fd_mean_outlier": str(flags["fd_mean"]).lower(),
-                "fd_perc_sd": f"{spreads[participant]['fd_perc']:.8g}",
-                "fd_perc_outlier": str(flags["fd_perc"]).lower(),
-                "n_metric_outliers": str(flag_count),
-                "decision": (
-                    "exclude" if flag_count >= required_metric_flags else "include"
-                ),
-            }
-        )
+        row = {"participant": participant, "n_contrasts": str(len(CONTRASTS))}
+        for metric in METRICS:
+            for label, _ in CONTRASTS:
+                row[f"{label}_delta_{metric}"] = f"{contrasts[participant][metric][label]:.8g}"
+            row[f"mean_abs_delta_{metric}"] = f"{scores[participant][metric]:.8g}"
+            row[f"{metric}_outlier"] = str(flags[metric]).lower()
+        row["n_metric_outliers"] = str(flag_count)
+        row["decision"] = "exclude" if flag_count >= required_metric_flags else "include"
+        output.append(row)
     return output, bound_rows
 
 
@@ -131,11 +152,10 @@ def write_exclusion_list(
     excluded = [row["participant"] for row in rows if row["decision"] == "exclude"]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        "# Task-rest condition-level QC exclusions.\n"
-        "# For each participant and metric, calculate the SD across SHAM, RTPJ,\n"
-        "# VLPFC, and BOTH. Apply the Tukey upper fence to those SDs across\n"
-        "# participants.\n"
-        f"# Exclude only when all {required_metric_flags} metrics are outliers.\n"
+        "# Task-rest differential-QC exclusions.\n"
+        "# Average the absolute magnitude of three orthogonal condition contrasts\n"
+        "# separately for tSNR and mean FD, then apply the Tukey upper fence.\n"
+        f"# Exclude when both ({required_metric_flags}) metric summaries are outliers.\n"
         f"# Excluded participants: {len(excluded)}.\n"
         + "".join(f"{participant}\n" for participant in excluded)
     )
@@ -158,7 +178,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--bounds-output",
         type=Path,
-        default=qc_dir / "task-rest_qc_spread_bounds.tsv",
+        default=qc_dir / "task-rest_qc_contrast_average_bounds.tsv",
     )
     parser.add_argument(
         "--exclude-list",
@@ -180,7 +200,9 @@ def main() -> int:
     write_exclusion_list(
         args.exclude_list.resolve(), decisions, args.required_metric_flags
     )
-    excluded = [row["participant"] for row in decisions if row["decision"] == "exclude"]
+    excluded = [
+        row["participant"] for row in decisions if row["decision"] == "exclude"
+    ]
     print(f"Participants evaluated: {len(decisions)}")
     print(f"Participants excluded: {len(excluded)}")
     print(f"Excluded: {','.join(excluded) if excluded else 'none'}")

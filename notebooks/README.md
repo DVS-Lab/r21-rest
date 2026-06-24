@@ -4,18 +4,13 @@
 secondary cluster-extent result in its own interactive NiiVue MNI viewer. Each
 result includes a plain-language description of the analysis, network, signed
 contrast, corrected peak p-value, and cluster size, followed by sham, RTPJ,
-VLPFC, and BOTH dual-regression stage-2 beta means with SEM and participant
-points.
+VLPFC, and BOTH dual-regression stage-2 beta means with SEM.
 
-The notebook also summarizes condition-level tSNR, mean FD, and high-motion
-percentage without privileging an absolute pairwise contrast. It shows signed
-condition deviations centered within participant, three orthogonal contrasts
-that span all four conditions, and each participant's four-condition spread.
-Within-subject label permutation tests whether condition directions align
-across participants; it is not an exclusion test. The participant rule applies
-the upper Tukey fence to four-condition spread separately for tSNR, mean FD,
-and high-motion percentage, requiring all three flags for exclusion. Nobody
-meets that rule in the current N=27 sample.
+The notebook also audits every planned contrast, so nonsignificant comparisons
+do not disappear. Its QC section uses only tSNR and mean FD. It shows centered
+condition boxplots, three orthogonal signed-contrast boxplots, and participant
+boxplots of mean absolute magnitude across those three contrasts. The Tukey
+rule identifies `sub-218` on both metrics as a sensitivity-analysis candidate.
 
 Run the result checker before opening the notebook. Then close any existing
 JupyterLab server and use the project launcher:
@@ -42,10 +37,32 @@ already-running Lab session can leave the frontend unregistered. If Lab was
 already open during installation, stop it with `Ctrl-C`, rerun the launcher,
 and refresh the browser tab.
 
+## Sharing Rendered Output
+
+Running every cell, saving the notebook, and committing the resulting `.ipynb`
+allows collaborators to view saved text, tables, bar plots, boxplots, and the
+static brain-map fallback on GitHub without executing Python. NiiVue is a live
+widget and GitHub's static notebook renderer does not execute it; collaborators
+must run the notebook to use NiiVue interactively. A saved notebook can also be
+exported as a convenient standalone static HTML file:
+
+```bash
+python3 -m jupyter nbconvert \
+  --to html \
+  --HTMLExporter.embed_images=True \
+  --output plot_randomise_results_rendered.html \
+  notebooks/plot_randomise_results.ipynb
+```
+
+Collaborators can download and open that HTML file directly without Python.
+Keep the executed notebook or rendered HTML only when intentionally publishing
+a result snapshot; the source notebook otherwise remains output-free for clean
+review.
+
 Only cluster-extent results are displayed. The notebook reads both tracked
 randomise summary tables and intentionally ignores TFCE. The region is selected
-from the same group contrast summarized in the bar plot, so the condition means,
-SEM, and participant points are descriptive and must not be treated as
+from the same group contrast summarized in the bar plot, so the condition means
+and SEM are descriptive and must not be treated as
 independent ROI inference. Each network/contrast is reported as an individual
 hypothesis. Following Rubin's inference-based framework, an across-job alpha
 adjustment is relevant to a disjunctive claim that at least one result exists,

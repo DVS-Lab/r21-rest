@@ -3,7 +3,8 @@
 The repository covers preprocessing through cluster-extent randomise inference
 and portable result visualization. The 27-participant first-pass analysis is
 frozen as a preliminary result while the recoverable N=28 sample is resolved.
-The adopted three-metric boxplot rule yields no data-quality exclusions.
+The current two-metric contrast-average rule identifies `sub-218` for a future
+QC sensitivity analysis but does not alter the frozen results.
 
 ## Current Study Context
 
@@ -37,11 +38,12 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   labels within participant. Three orthogonal contrasts encode active-mean
   versus SHAM, BOTH versus the single-site mean, and RTPJ versus VLPFC. These
   span all between-condition variation without seven correlated pairwise tests.
-- Participant-level QC magnitude is summarized by the within-subject SD and
-  range across all four conditions. Apply the upper Tukey fence (`Q3 + 1.5 ×
-  IQR`) separately to the tSNR, mean-FD, and high-motion-percentage SDs. Exclude
-  only if all three metrics are flagged. No participant meets that rule, so no
-  data-quality exclusion is applied to the N=27 analysis. A technical exclusion
+- Participant-level QC magnitude is the mean absolute value across three
+  orthogonal contrasts: active mean versus SHAM, BOTH versus the single-site
+  mean, and RTPJ versus VLPFC. Apply the upper Tukey fence (`Q3 + 1.5 × IQR`)
+  separately to tSNR and mean FD and require both flags. This identifies
+  `sub-218` as the sole QC exclusion candidate for a future N=26 sensitivity
+  analysis; it does not alter the frozen N=27 results. A technical exclusion
   for failed stimulation delivery remains a separate question.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary
   networks are DMN, ECN, and left/right FPN. Secondary analyses cover primary

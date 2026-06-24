@@ -38,7 +38,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `regress_confounds.sh` | One smoothed run and confound matrix | Uses `3dTproject` to write one denoised BOLD run. |
 | `run_regress_confounds.sh` | Ordered run manifest | Denoises every run and writes `melodic_filelist_5mm_denoised.txt`. |
 | `check_melodic_inputs.sh` | Denoised MELODIC file list | Checks grids, masks, volumes, intensity, and variance; writes a QC TSV. |
-| `select_qc_exclusions.py` | Condition-labeled run-level MRIQC TSV | Applies the Tukey upper fence to each participant's four-condition SD for tSNR, mean FD, and high-motion percentage; excludes only when all three metrics are flagged. |
+| `select_qc_exclusions.py` | Condition-labeled run-level MRIQC TSV | Averages absolute magnitude across three orthogonal contrasts, applies Tukey upper fences to tSNR and mean FD, and selects participants flagged on both. |
 
 ## ICA and Network Matching
 
@@ -61,7 +61,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `randomise.sh` | One merged component/condition difference | Runs one one-sample cluster-extent test (`-c 3.1`); TFCE is available only with `--tfce`. |
 | `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Runs primary or non-cerebellar secondary ICA matches or direct Smith09 maps with up to 24 concurrent jobs. |
 | `run_randomise_qc_sensitivity.sh` | Completed dual regression and `exclude_qc_outliers.txt` | Repeats selected randomise families with a supplied exclusion list without overwriting full-sample outputs. |
-| `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participant exclusions meeting all three QC boxplot criteria; currently empty. |
+| `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participants whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; currently `sub-218`. |
 | `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
 | `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
 
@@ -94,8 +94,8 @@ Regenerate the participant QC decisions with the adopted boxplot rule:
 python3 code/select_qc_exclusions.py
 ```
 
-No participant currently meets all three criteria, so the generated exclusion
-list is empty and a QC-exclusion randomise rerun is unnecessary.
+The generated exclusion list currently contains `sub-218`. Treat an N=26 rerun
+as a sensitivity analysis; the preliminary N=27 outputs remain frozen.
 
 Completed jobs have a `.complete` marker beside their output prefix, so the
 primary run skips DMN tests already finished by the first batch.

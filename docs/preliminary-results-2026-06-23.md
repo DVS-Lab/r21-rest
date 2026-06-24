@@ -70,18 +70,21 @@ No data-quality exclusion was applied to this N=27 first pass. The earlier
 absolute-pairwise screen was superseded because its seven comparisons are
 redundant and discard direction.
 
-The current review centers condition values within participant, summarizes all
-between-condition variation with three orthogonal signed contrasts, and uses
-each participant's four-condition SD as a pair-independent magnitude measure.
+The current review centers condition values within participant and summarizes
+all between-condition variation with three orthogonal signed contrasts.
 Within-subject label-permutation tests show no consistent group condition
-pattern for tSNR (`p=.58`), mean FD (`p=.75`), or high-motion percentage
-(`p=.96`). These omnibus tests assess whether condition labels organize the
-group profile; they do not select participants. The participant rule applies
-the upper Tukey fence to the four-condition SD separately for all three QC
-metrics and requires all three flags for exclusion. `sub-218` and `sub-230` are
-flagged on two metrics; `sub-222`, `sub-226`, `sub-236`, and `sub-238` are
-flagged on one. Nobody is flagged on all three, so nobody is excluded. Known
-stimulation-delivery failures, if confirmed, remain a separate technical issue.
+pattern for tSNR (`p=.58`) or mean FD (`p=.75`). These omnibus tests assess
+whether condition labels organize the group profile; they do not select
+participants. For participant screening, mean absolute magnitude is calculated
+across all three contrasts separately for tSNR and mean FD. Applying the upper
+Tukey fence to both distributions identifies `sub-218` as the sole participant
+flagged on both metrics. The frozen results remain N=27; this criterion defines
+a future N=26 sensitivity analysis. Known stimulation-delivery failures, if
+confirmed, remain a separate technical issue.
+
+All 25 jobs (50 tested directions) for `BOTH - mean(RTPJ, VLPFC)` were
+nonsignificant. The closest result was the fixed-20 auditory component
+(corrected `p=.0506`).
 
 ## Secondary Networks
 

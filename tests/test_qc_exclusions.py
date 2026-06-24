@@ -11,7 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class QCExclusionTests(unittest.TestCase):
-    def test_three_metric_boxplot_rule_excludes_nobody(self):
+    def test_mean_three_contrast_rule_selects_joint_tsnr_fd_outlier(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             report = root / "decisions.tsv"
@@ -40,41 +40,29 @@ class QCExclusionTests(unittest.TestCase):
                 check=True,
             )
             self.assertIn("Participants evaluated: 27", result.stdout)
-            self.assertIn("Participants excluded: 0", result.stdout)
+            self.assertIn("Participants excluded: 1", result.stdout)
             self.assertEqual(
                 [
                     line
                     for line in exclude_list.read_text().splitlines()
                     if line and not line.startswith("#")
                 ],
-                [],
+                ["sub-218"],
             )
             with report.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
             self.assertEqual(len(rows), 27)
-            self.assertFalse(any(row["decision"] == "exclude" for row in rows))
-            counts = {
-                row["participant"]: int(row["n_metric_outliers"])
-                for row in rows
-                if int(row["n_metric_outliers"]) > 0
-            }
-            self.assertEqual(
-                counts,
-                {
-                    "sub-218": 2,
-                    "sub-222": 1,
-                    "sub-226": 1,
-                    "sub-230": 2,
-                    "sub-236": 1,
-                    "sub-238": 1,
-                },
-            )
+            excluded = [row for row in rows if row["decision"] == "exclude"]
+            self.assertEqual([row["participant"] for row in excluded], ["sub-218"])
+            self.assertEqual(excluded[0]["n_metric_outliers"], "2")
+            self.assertEqual(excluded[0]["tsnr_outlier"], "true")
+            self.assertEqual(excluded[0]["fd_mean_outlier"], "true")
             with bounds.open(newline="") as stream:
                 bound_rows = list(csv.DictReader(stream, delimiter="\t"))
-            self.assertEqual(len(bound_rows), 3)
+            self.assertEqual(len(bound_rows), 2)
             self.assertEqual({row["n_participants"] for row in bound_rows}, {"27"})
             self.assertEqual(
-                {row["metric"] for row in bound_rows}, {"tsnr", "fd_mean", "fd_perc"}
+                {row["metric"] for row in bound_rows}, {"tsnr", "fd_mean"}
             )
 
 

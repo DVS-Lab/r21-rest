@@ -1,6 +1,5 @@
 metric	q1	q3	iqr	lower_fence	upper_fence	review_rule
-run_tsnr	25.9916	47.2262	21.2347	-5.86043	79.0782	value < -5.86043 or value < 30
-run_fd_mean	0.157663	0.28613	0.128467	-0.0350368	0.47883	value > 0.47883 or value > 0.5
-subject_mean_tsnr	27.4086	46.3842	18.9756	-1.05487	74.8476	value < -1.05487 or value < 30
-subject_mean_fd_mean	0.167152	0.309157	0.142005	-0.0458554	0.522164	value > 0.522164 or value > 0.5
-subject_mean_fd_perc	21.7996	46.4583	24.6587	-15.1885	83.4464	value > 83.4464 or value > 50
+run_tsnr	25.9916	47.2262	21.2347	-5.86046	79.0782	value < -5.86046 or value < 30
+run_fd_mean	0.157663	0.28613	0.128467	-0.0350369	0.47883	value > 0.47883 or value > 0.5
+subject_mean_tsnr	27.4086	46.3842	18.9756	-1.05483	74.8476	value < -1.05483 or value < 30
+subject_mean_fd_mean	0.167152	0.309157	0.142005	-0.0458557	0.522164	value > 0.522164 or value > 0.5

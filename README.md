@@ -68,14 +68,11 @@ Summarize the completed task-rest MRIQC outputs:
 python3 code/OutlierID.py
 ```
 
-The subject summary is a diagnostic QC table. It averages
-tSNR, mean FD, and MRIQC's percentage of volumes above 0.2-mm FD across the
-acquired runs, while also reporting each subject's worst run. Subjects are
-marked for review when they have fewer than four runs, mean tSNR below 30,
-mean FD above 0.5 mm, mean high-motion volumes above 50%, or any run above 50%
-high-motion volumes. Directional Tukey 1.5-IQR flags are included as additional
-diagnostics. The 20% and 50% motion columns make stricter alternatives visible,
-but no participant or run is excluded automatically.
+The subject summary is a diagnostic QC table. It averages tSNR and mean FD
+across the acquired runs while also reporting each subject's worst run.
+Subjects are marked for review when they have fewer than four runs, mean tSNR
+below 30, or mean FD above 0.5 mm. Directional Tukey 1.5-IQR flags are included
+as additional diagnostics, but no participant or run is excluded automatically.
 
 The condition-contrast table records the seven planned differences for
 diagnostic review. It
@@ -90,25 +87,24 @@ seven planned paired differences:
 - `VLPFC - SHAM`
 - `BOTH - mean(RTPJ, VLPFC)`
 
-Each difference is calculated for tSNR, mean FD, and FD percentage. A positive
-motion difference means condition A had more motion; a negative tSNR difference
-means condition A had lower tSNR. `OutlierID.py` reports signed two-sided Tukey
-1.5-IQR flags as diagnostics. The adopted participant rule is implemented by
-`select_qc_exclusions.py`: calculate each participant's SD across the four
-conditions for tSNR, mean FD, and high-motion percentage; apply the upper Tukey
-fence to each spread distribution; and exclude only when all three metrics are
-flagged.
+Each difference is calculated for tSNR and mean FD. A positive motion
+difference means condition A had more motion; a negative tSNR difference means
+condition A had lower tSNR. `OutlierID.py` reports signed two-sided Tukey
+1.5-IQR flags as diagnostics.
 
 The result notebook provides the current nonredundant QC summary. It subtracts
 each participant's four-condition mean to retain direction, uses three
-orthogonal contrasts that span all possible condition differences, and uses
-the four-condition within-subject SD to quantify overall magnitude without
-selecting one pair. Within-subject label permutation tests whether condition
-directions align across participants. These permutation tests describe group
-condition structure and are not exclusion tests. In the N=27 data, there is no
-consistent condition pattern for tSNR (`p=.58`), mean FD (`p=.75`), or
-high-motion percentage (`p=.96`). No participant meets all three boxplot
-criteria, so the QC rule excludes nobody.
+orthogonal contrasts that span all possible condition differences. Within-
+subject label permutation tests whether condition directions align across
+participants. These permutation tests describe group condition structure and
+are not exclusion tests. In the N=27 data, there is no consistent condition
+pattern for tSNR (`p=.58`) or mean FD (`p=.75`).
+
+`select_qc_exclusions.py` averages each participant's absolute magnitude across
+the three orthogonal contrasts separately for tSNR and mean FD, then applies
+the upper Tukey fence to each distribution. Requiring both metrics identifies
+`sub-218` as the sole QC exclusion candidate. This does not alter the frozen
+N=27 preliminary analysis; it defines a future N=26 sensitivity analysis.
 
 Review the tracked output tables in `derivatives/qc`:
 
@@ -118,7 +114,7 @@ task-rest_mriqc_bounds.tsv
 task-rest_mriqc_subject_summary.tsv
 task-rest_mriqc_condition_contrasts.tsv
 task-rest_mriqc_condition_contrast_bounds.tsv
-task-rest_qc_spread_bounds.tsv
+task-rest_qc_contrast_average_bounds.tsv
 task-rest_qc_exclusions.tsv
 ```
 
@@ -489,8 +485,8 @@ Regenerate the QC decision table and exclusion list with:
 python3 code/select_qc_exclusions.py
 ```
 
-The current list is empty because no participant is a spread outlier on all
-three metrics. A QC-exclusion randomise rerun is therefore unnecessary.
+The current list contains `sub-218`, the only participant whose average
+three-contrast magnitude is a boxplot outlier for both tSNR and mean FD.
 
 `code/randomise.sh` runs one network/contrast job when a targeted rerun is
 needed. See [`code/README.md`](code/README.md) for concise input/output notes on
@@ -505,8 +501,8 @@ automatic-dimensionality components.
 
 1. Reconcile the 27-participant sample with the earlier 28- and 22-participant
    analyses and resolve any stimulation-delivery exclusion.
-2. Review the within-subject QC spread profiles and source reports before
-   adopting any data-quality exclusion.
+2. Review `sub-218`'s average three-contrast QC profile and source reports before
+   running the N=26 sensitivity analysis.
 3. Interpret primary and secondary network results in the portable notebook.
 4. State whether each inferential claim is individual, conjunctive, or
    disjunctive. Following Rubin (2021), do not apply a blanket across-job alpha

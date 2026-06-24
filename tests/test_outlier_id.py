@@ -26,13 +26,13 @@ class OutlierIDTests(unittest.TestCase):
             root = Path(tmp)
             mriqc = root / "mriqc"
             values = [
-                ("001", "01", 10, 0.10, 1, 1),
-                ("002", "01", 100, 0.11, 2, 2),
-                ("003", "01", 110, 0.12, 3, 3),
-                ("004", "01", 120, 0.13, 4, 4),
-                ("005", "01", 1000, 0.90, 90, 75),
+                ("001", "01", 10, 0.10),
+                ("002", "01", 100, 0.11),
+                ("003", "01", 110, 0.12),
+                ("004", "01", 120, 0.13),
+                ("005", "01", 1000, 0.90),
             ]
-            for subject, run, tsnr, fd_mean, fd_num, fd_perc in values:
+            for subject, run, tsnr, fd_mean in values:
                 path = (
                     mriqc
                     / f"sub-{subject}"
@@ -42,12 +42,7 @@ class OutlierIDTests(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(
                     json.dumps(
-                        {
-                            "tsnr": tsnr,
-                            "fd_mean": fd_mean,
-                            "fd_num": fd_num,
-                            "fd_perc": fd_perc,
-                        }
+                        {"tsnr": tsnr, "fd_mean": fd_mean}
                     )
                 )
 
@@ -65,7 +60,6 @@ class OutlierIDTests(unittest.TestCase):
             self.assertEqual(by_subject["sub-005"]["low_tsnr"], "false")
             self.assertEqual(by_subject["sub-005"]["high_fd_mean"], "true")
             self.assertEqual(by_subject["sub-005"]["fd_mean_gt_0.5"], "true")
-            self.assertEqual(by_subject["sub-005"]["fd_perc_gt_50"], "true")
 
     def test_reads_condition_from_matching_events_file(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -86,11 +80,7 @@ class OutlierIDTests(unittest.TestCase):
             )
             mriqc_file.parent.mkdir(parents=True)
             events_file.parent.mkdir(parents=True)
-            mriqc_file.write_text(
-                json.dumps(
-                    {"tsnr": 50, "fd_mean": 0.1, "fd_num": 1, "fd_perc": 5}
-                )
-            )
+            mriqc_file.write_text(json.dumps({"tsnr": 50, "fd_mean": 0.1}))
             events_file.write_text("onset\tduration\ttrial_type\n0\t1\tboth\n")
 
             runs = outliers.read_iqms(root / "mriqc", "rest", root / "bids")
@@ -108,8 +98,6 @@ class OutlierIDTests(unittest.TestCase):
                 echo="",
                 tsnr=40 + run,
                 fd_mean=0.1 * run,
-                fd_num=run,
-                fd_perc=10 * run,
                 source=f"sub-001-run-{run}",
             )
             for run in range(1, 5)
@@ -124,8 +112,6 @@ class OutlierIDTests(unittest.TestCase):
                 echo="",
                 tsnr=50,
                 fd_mean=0.1,
-                fd_num=1,
-                fd_perc=5,
                 source=f"sub-002-run-{run}",
             )
             for run in range(1, 3)
@@ -135,7 +121,6 @@ class OutlierIDTests(unittest.TestCase):
         by_subject = {subject.participant: subject for subject in subjects}
         self.assertEqual(by_subject["sub-001"].n_runs, 4)
         self.assertEqual(by_subject["sub-001"].mean_tsnr, 42.5)
-        self.assertEqual(by_subject["sub-001"].mean_fd_perc, 25)
 
         with tempfile.TemporaryDirectory() as tmp:
             rows = outliers.write_subject_report(
@@ -143,17 +128,12 @@ class OutlierIDTests(unittest.TestCase):
                 subjects,
                 tsnr_lower=0,
                 fd_upper=10,
-                fd_perc_upper=100,
                 expected_runs=4,
                 fd_threshold=0.5,
-                fd_perc_threshold=20,
                 tsnr_threshold=30,
             )
         reports = {row["participant"]: row for row in rows}
         self.assertEqual(reports["sub-001"]["incomplete_runs"], "false")
-        self.assertEqual(
-            reports["sub-001"]["mean_fd_perc_gt_review_threshold"], "true"
-        )
         self.assertEqual(reports["sub-002"]["incomplete_runs"], "true")
 
     def test_condition_contrasts_flag_unusual_paired_differences(self):
@@ -162,11 +142,9 @@ class OutlierIDTests(unittest.TestCase):
             for condition in ("sham", "rtpj", "vlpfc", "both"):
                 tsnr = 50.0
                 fd_mean = 0.1
-                fd_perc = 10.0
                 if subject == 5 and condition == "both":
                     tsnr = 20.0
                     fd_mean = 0.8
-                    fd_perc = 80.0
                 runs.append(
                     outliers.RunIQM(
                         participant=f"sub-{subject:03d}",
@@ -177,8 +155,6 @@ class OutlierIDTests(unittest.TestCase):
                         echo="",
                         tsnr=tsnr,
                         fd_mean=fd_mean,
-                        fd_num=1,
-                        fd_perc=fd_perc,
                         source=f"sub-{subject:03d}-{condition}",
                         condition=condition,
                     )
@@ -198,7 +174,6 @@ class OutlierIDTests(unittest.TestCase):
         self.assertEqual(flagged["delta_fd_mean"], "0.7")
         self.assertEqual(flagged["delta_tsnr_outlier"], "true")
         self.assertEqual(flagged["delta_fd_mean_outlier"], "true")
-        self.assertEqual(flagged["delta_fd_perc_outlier"], "true")
         self.assertEqual(flagged["review"], "true")
         self.assertIn(("both_minus_rtpj", "fd_mean"), bounds)
         self.assertIn(("both_minus_vlpfc", "fd_mean"), bounds)
@@ -216,8 +191,6 @@ class OutlierIDTests(unittest.TestCase):
                 echo="",
                 tsnr=50,
                 fd_mean=0.1,
-                fd_num=1,
-                fd_perc=10,
                 source="sub-001-sham",
                 condition="sham",
             )

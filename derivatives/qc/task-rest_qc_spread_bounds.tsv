@@ -1,4 +1,0 @@
-metric	n_participants	spread_measure	q1	q3	iqr	upper_fence	outlier_rule
-tsnr	27	within-subject SD across four conditions	2.2891472	5.2913719	3.0022248	9.7947091	SD > Q3 + 1.5*IQR
-fd_mean	27	within-subject SD across four conditions	0.023372105	0.0865179	0.063145795	0.18123659	SD > Q3 + 1.5*IQR
-fd_perc	27	within-subject SD across four conditions	5.9242877	13.231966	7.307678	24.193483	SD > Q3 + 1.5*IQR

@@ -1,30 +1,30 @@
-participant	n_runs	expected_runs	mean_tsnr	min_run_tsnr	mean_fd_mean	max_run_fd_mean	total_fd_num	mean_fd_perc	max_run_fd_perc	incomplete_runs	low_mean_tsnr	mean_tsnr_lt_threshold	high_mean_fd	mean_fd_gt_threshold	high_mean_fd_perc	mean_fd_perc_gt_review_threshold	mean_fd_perc_gt_20	mean_fd_perc_gt_50	any_run_fd_perc_gt_50	review
-sub-189	4	4	54.7806	53.3924	0.118555	0.131919	49	5.12904	12.5523	false	false	false	false	false	false	false	false	false	false	false
-sub-203	4	4	53.204	47.2044	0.192378	0.222489	386	40.2445	51.6667	false	false	false	false	false	false	false	true	false	true	true
-sub-207	4	4	23.8824	22.7887	0.214566	0.283175	267	27.8587	44.3515	false	false	true	false	false	false	false	true	false	false	true
-sub-208	4	4	39.8414	34.3895	0.18343	0.227311	281	29.3823	41.4226	false	false	false	false	false	false	false	true	false	false	false
-sub-209	4	4	20.9144	18.7313	0.596245	0.848803	666	69.5149	80.4167	false	false	true	true	true	false	true	true	true	true	true
-sub-210	4	4	37.179	32.3543	0.210473	0.28806	375	39.1896	61.25	false	false	false	false	false	false	false	true	false	true	true
-sub-211	4	4	47.4619	43.3899	0.153892	0.180812	211	22.0393	31.7992	false	false	false	false	false	false	false	true	false	false	false
-sub-212	2	4	31.3108	29.3971	0.385639	0.447492	205	42.8112	49.3724	true	false	false	false	false	false	false	true	false	false	true
-sub-213	4	4	50.0497	47.4411	0.206269	0.222235	340	35.4393	42.5	false	false	false	false	false	false	false	true	false	false	false
-sub-214	4	4	31.3485	27.9228	0.167152	0.213511	213	22.334	42.437	false	false	false	false	false	false	false	true	false	false	false
-sub-215	4	4	49.4661	45.9092	0.151407	0.184461	169	17.7077	28.5714	false	false	false	false	false	false	false	false	false	false	false
-sub-217	4	4	28.9901	22.7956	0.338551	0.448567	679	70.9388	82.5	false	false	true	false	false	false	true	true	true	true	true
-sub-218	4	4	27.4009	19.3146	0.506783	0.760295	446	46.4583	56.25	false	false	true	false	true	false	false	true	false	true	true
-sub-219	4	4	51.9485	50.6913	0.164291	0.17302	205	21.4354	27.6151	false	false	false	false	false	false	false	true	false	false	false
-sub-220	4	4	30.3138	25.5676	0.11577	0.140438	90	9.43181	16.8067	false	false	false	false	false	false	false	false	false	false	false
-sub-221	4	4	22.2405	18.787	0.301633	0.36085	472	49.4756	68.6192	false	false	true	false	false	false	false	true	false	true	true
-sub-222	4	4	20.8903	14.8484	0.732145	1.1442	629	65.615	86.25	false	false	true	true	true	false	true	true	true	true	true
-sub-225	4	4	35.563	32.8535	0.226725	0.256289	270	28.203	37.9167	false	false	false	false	false	false	false	true	false	false	false
-sub-226	4	4	26.664	21.7023	0.424688	0.730718	441	46.0364	70.7113	false	false	true	false	false	false	false	true	false	true	true
-sub-227	4	4	33.3524	30.9446	0.303546	0.403131	337	35.1813	47.6987	false	false	false	false	false	false	false	true	false	false	false
-sub-228	4	4	34.4237	33.6433	0.238973	0.264287	574	59.9237	67.7824	false	false	false	false	false	false	true	true	true	true	true
-sub-230	4	4	30.2122	17.8929	0.309157	0.414179	530	55.4527	80.6723	false	false	false	false	false	false	true	true	true	true	true
-sub-231	4	4	46.3842	39.3925	0.129431	0.155143	55	5.75227	13.8075	false	false	false	false	false	false	false	false	false	false	false
-sub-233	4	4	47.1055	38.6263	0.223454	0.304802	276	28.8145	53.3333	false	false	false	false	false	false	false	true	false	true	true
-sub-234	4	4	40.7948	38.9195	0.259583	0.26302	638	67.0738	69.8745	false	false	false	false	false	false	true	true	true	true	true
-sub-235	4	4	22.1066	20.6414	0.182798	0.213692	209	21.7996	27.6151	false	false	true	false	false	false	false	true	false	false	true
-sub-236	4	4	45.1044	27.2634	0.100316	0.126149	71	7.42678	10.8787	false	false	false	false	false	false	false	false	false	false	false
-sub-237	4	4	45.0519	41.5131	0.199004	0.23963	180	18.7993	25.523	false	false	false	false	false	false	false	false	false	false	false
-sub-238	4	4	27.4086	20.1607	0.404073	0.659705	432	45.0863	55.4167	false	false	true	false	false	false	false	true	false	true	true
+participant	n_runs	expected_runs	mean_tsnr	min_run_tsnr	mean_fd_mean	max_run_fd_mean	incomplete_runs	low_mean_tsnr	mean_tsnr_lt_threshold	high_mean_fd	mean_fd_gt_threshold	review
+sub-189	4	4	54.7806	53.3924	0.118555	0.131919	false	false	false	false	false	false
+sub-203	4	4	53.204	47.2044	0.192378	0.222489	false	false	false	false	false	false
+sub-207	4	4	23.8824	22.7887	0.214566	0.283175	false	false	true	false	false	true
+sub-208	4	4	39.8414	34.3895	0.18343	0.227311	false	false	false	false	false	false
+sub-209	4	4	20.9144	18.7313	0.596245	0.848803	false	false	true	true	true	true
+sub-210	4	4	37.179	32.3543	0.210473	0.28806	false	false	false	false	false	false
+sub-211	4	4	47.4618	43.3899	0.153892	0.180812	false	false	false	false	false	false
+sub-212	2	4	31.3109	29.3971	0.385639	0.447492	true	false	false	false	false	true
+sub-213	4	4	50.0496	47.4411	0.206269	0.222235	false	false	false	false	false	false
+sub-214	4	4	31.3485	27.9228	0.167152	0.213511	false	false	false	false	false	false
+sub-215	4	4	49.4661	45.9092	0.151407	0.184461	false	false	false	false	false	false
+sub-217	4	4	28.9901	22.7956	0.338551	0.448567	false	false	true	false	false	true
+sub-218	4	4	27.4009	19.3146	0.506783	0.760295	false	false	true	false	true	true
+sub-219	4	4	51.9485	50.6913	0.164291	0.17302	false	false	false	false	false	false
+sub-220	4	4	30.3138	25.5676	0.11577	0.140438	false	false	false	false	false	false
+sub-221	4	4	22.2405	18.787	0.301633	0.36085	false	false	true	false	false	true
+sub-222	4	4	20.8904	14.8484	0.732145	1.1442	false	false	true	true	true	true
+sub-225	4	4	35.563	32.8535	0.226725	0.256289	false	false	false	false	false	false
+sub-226	4	4	26.664	21.7023	0.424688	0.730718	false	false	true	false	false	true
+sub-227	4	4	33.3524	30.9446	0.303546	0.403131	false	false	false	false	false	false
+sub-228	4	4	34.4237	33.6433	0.238973	0.264287	false	false	false	false	false	false
+sub-230	4	4	30.2121	17.8929	0.309157	0.414179	false	false	false	false	false	false
+sub-231	4	4	46.3842	39.3925	0.129431	0.155143	false	false	false	false	false	false
+sub-233	4	4	47.1055	38.6263	0.223454	0.304802	false	false	false	false	false	false
+sub-234	4	4	40.7948	38.9195	0.259583	0.26302	false	false	false	false	false	false
+sub-235	4	4	22.1066	20.6414	0.182798	0.213692	false	false	true	false	false	true
+sub-236	4	4	45.1044	27.2634	0.100316	0.126149	false	false	false	false	false	false
+sub-237	4	4	45.0519	41.5131	0.199004	0.23963	false	false	false	false	false	false
+sub-238	4	4	27.4086	20.1607	0.404073	0.659705	false	false	true	false	false	true

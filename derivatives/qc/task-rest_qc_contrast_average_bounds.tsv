@@ -1,0 +1,3 @@
+metric	n_participants	aggregate	q1	q3	iqr	upper_fence	outlier_rule
+tsnr	27	mean absolute magnitude across three orthogonal contrasts	2.6321444	5.7024667	3.0703222	10.30795	mean absolute contrast > Q3 + 1.5*IQR
+fd_mean	27	mean absolute magnitude across three orthogonal contrasts	0.026131778	0.099224861	0.073093083	0.20886449	mean absolute contrast > Q3 + 1.5*IQR

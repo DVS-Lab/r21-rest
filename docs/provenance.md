@@ -76,8 +76,8 @@ secondary ICA-derived or direct-Smith09 tests with at most 24 concurrent
 processes.
 
 `code/select_qc_exclusions.py` applies the documented participant-level
-boxplot rule to four-condition spread in tSNR, mean FD, and high-motion
-percentage. `code/run_randomise_qc_sensitivity.sh` uses the same stage-2 maps but
+boxplot rule to mean absolute magnitude across three orthogonal tSNR and mean-FD
+contrasts. `code/run_randomise_qc_sensitivity.sh` uses the same stage-2 maps but
 rebuilds the participant stacks after applying `code/exclude_qc_outliers.txt`. Its
 inputs and randomise outputs are isolated under `sensitivity-qc-outliers`
 directories and do not overwrite the full-sample analysis.

@@ -27,7 +27,7 @@ CONTRASTS = (
         {"rtpj": 0.5, "vlpfc": 0.5},
     ),
 )
-CONTRAST_METRICS = ("tsnr", "fd_mean", "fd_perc")
+CONTRAST_METRICS = ("tsnr", "fd_mean")
 
 
 @dataclass(frozen=True)
@@ -40,8 +40,6 @@ class RunIQM:
     echo: str
     tsnr: float
     fd_mean: float
-    fd_num: int
-    fd_perc: float
     source: str
     condition: str = ""
 
@@ -54,9 +52,6 @@ class SubjectIQM:
     min_tsnr: float
     mean_fd_mean: float
     max_fd_mean: float
-    total_fd_num: int
-    mean_fd_perc: float
-    max_fd_perc: float
 
 
 @dataclass(frozen=True)
@@ -72,9 +67,6 @@ class ContrastIQM:
     a_fd_mean: float | None
     b_fd_mean: float | None
     delta_fd_mean: float | None
-    a_fd_perc: float | None
-    b_fd_perc: float | None
-    delta_fd_perc: float | None
 
 
 def percentile(values: list[float], quantile: float) -> float:
@@ -182,8 +174,6 @@ def read_iqms(
                 echo=entities.get("echo", ""),
                 tsnr=required_number(data, "tsnr", path),
                 fd_mean=required_number(data, "fd_mean", path),
-                fd_num=int(required_number(data, "fd_num", path)),
-                fd_perc=required_number(data, "fd_perc", path),
                 source=str(path.resolve()),
                 condition=(
                     condition_from_events(find_events(path, bids_dir))
@@ -217,24 +207,20 @@ def write_run_report(
         tsnr_threshold_flag = run.tsnr < tsnr_threshold
         high_fd = run.fd_mean > fd_upper
         fd_threshold_flag = run.fd_mean > fd_threshold
-        high_fd_perc = run.fd_perc > 50
         review = (
             low_tsnr
             or tsnr_threshold_flag
             or high_fd
             or fd_threshold_flag
-            or high_fd_perc
         )
         row = {
             **{key: str(value) for key, value in asdict(run).items()},
             "tsnr": fmt(run.tsnr),
             "fd_mean": fmt(run.fd_mean),
-            "fd_perc": fmt(run.fd_perc),
             "low_tsnr": str(low_tsnr).lower(),
             "tsnr_lt_threshold": str(tsnr_threshold_flag).lower(),
             "high_fd_mean": str(high_fd).lower(),
             f"fd_mean_gt_{fd_threshold:g}": str(fd_threshold_flag).lower(),
-            "fd_perc_gt_50": str(high_fd_perc).lower(),
             "review": str(review).lower(),
         }
         rows.append(row)
@@ -290,9 +276,6 @@ def summarize_subjects(runs: list[RunIQM]) -> list[SubjectIQM]:
                 min_tsnr=min(run.tsnr for run in participant_runs),
                 mean_fd_mean=sum(run.fd_mean for run in participant_runs) / n_runs,
                 max_fd_mean=max(run.fd_mean for run in participant_runs),
-                total_fd_num=sum(run.fd_num for run in participant_runs),
-                mean_fd_perc=sum(run.fd_perc for run in participant_runs) / n_runs,
-                max_fd_perc=max(run.fd_perc for run in participant_runs),
             )
         )
     return subjects
@@ -405,12 +388,8 @@ def write_condition_contrast_report(
                 "a_fd_mean": fmt_optional(contrast.a_fd_mean),
                 "b_fd_mean": fmt_optional(contrast.b_fd_mean),
                 "delta_fd_mean": fmt_optional(contrast.delta_fd_mean),
-                "a_fd_perc": fmt_optional(contrast.a_fd_perc),
-                "b_fd_perc": fmt_optional(contrast.b_fd_perc),
-                "delta_fd_perc": fmt_optional(contrast.delta_fd_perc),
                 "delta_tsnr_outlier": str(flags["tsnr"]).lower(),
                 "delta_fd_mean_outlier": str(flags["fd_mean"]).lower(),
-                "delta_fd_perc_outlier": str(flags["fd_perc"]).lower(),
                 "n_delta_outliers": str(n_outliers),
                 "review": str(not contrast.complete or n_outliers > 0).lower(),
             }
@@ -470,10 +449,8 @@ def write_subject_report(
     subjects: list[SubjectIQM],
     tsnr_lower: float,
     fd_upper: float,
-    fd_perc_upper: float,
     expected_runs: int,
     fd_threshold: float,
-    fd_perc_threshold: float,
     tsnr_threshold: float,
 ) -> list[dict[str, str]]:
     output = []
@@ -483,20 +460,12 @@ def write_subject_report(
         tsnr_threshold_flag = subject.mean_tsnr < tsnr_threshold
         high_fd = subject.mean_fd_mean > fd_upper
         fd_threshold_flag = subject.mean_fd_mean > fd_threshold
-        high_fd_perc = subject.mean_fd_perc > fd_perc_upper
-        fd_perc_threshold_flag = subject.mean_fd_perc > fd_perc_threshold
-        moderate_fd_perc = subject.mean_fd_perc > 20
-        severe_fd_perc = subject.mean_fd_perc > 50
-        any_run_severe_fd_perc = subject.max_fd_perc > 50
         review = (
             incomplete_runs
             or low_tsnr
             or tsnr_threshold_flag
             or high_fd
             or fd_threshold_flag
-            or high_fd_perc
-            or fd_perc_threshold_flag
-            or any_run_severe_fd_perc
         )
         output.append(
             {
@@ -507,21 +476,11 @@ def write_subject_report(
                 "min_run_tsnr": fmt(subject.min_tsnr),
                 "mean_fd_mean": fmt(subject.mean_fd_mean),
                 "max_run_fd_mean": fmt(subject.max_fd_mean),
-                "total_fd_num": str(subject.total_fd_num),
-                "mean_fd_perc": fmt(subject.mean_fd_perc),
-                "max_run_fd_perc": fmt(subject.max_fd_perc),
                 "incomplete_runs": str(incomplete_runs).lower(),
                 "low_mean_tsnr": str(low_tsnr).lower(),
                 "mean_tsnr_lt_threshold": str(tsnr_threshold_flag).lower(),
                 "high_mean_fd": str(high_fd).lower(),
                 "mean_fd_gt_threshold": str(fd_threshold_flag).lower(),
-                "high_mean_fd_perc": str(high_fd_perc).lower(),
-                "mean_fd_perc_gt_review_threshold": str(
-                    fd_perc_threshold_flag
-                ).lower(),
-                "mean_fd_perc_gt_20": str(moderate_fd_perc).lower(),
-                "mean_fd_perc_gt_50": str(severe_fd_perc).lower(),
-                "any_run_fd_perc_gt_50": str(any_run_severe_fd_perc).lower(),
                 "review": str(review).lower(),
             }
         )
@@ -542,7 +501,7 @@ def parse_args() -> argparse.Namespace:
     repo_root = Path(__file__).resolve().parents[1]
     derivatives = Path(os.environ.get("DERIVATIVES_ROOT", repo_root / "derivatives"))
     parser = argparse.ArgumentParser(
-        description="Flag low-tSNR and high-motion task-rest MRIQC runs."
+        description="Flag low-tSNR and high-mean-FD task-rest MRIQC runs."
     )
     parser.add_argument(
         "--mriqcDir",
@@ -576,15 +535,6 @@ def parse_args() -> argparse.Namespace:
         help="Also flag runs above this mean-FD threshold (default: 0.5 mm).",
     )
     parser.add_argument(
-        "--fd-perc-threshold",
-        type=float,
-        default=50,
-        help=(
-            "Review subjects when the mean percentage of volumes above "
-            "0.2-mm FD exceeds this value (default: 50)."
-        ),
-    )
-    parser.add_argument(
         "--tsnr-threshold",
         type=float,
         default=30,
@@ -605,8 +555,6 @@ def main() -> int:
         raise SystemExit(f"BIDS directory not found: {bids_dir}")
     if args.fd_threshold <= 0:
         raise SystemExit("--fd-threshold must be greater than zero")
-    if not 0 < args.fd_perc_threshold <= 100:
-        raise SystemExit("--fd-perc-threshold must be between 0 and 100")
     if args.expected_runs <= 0:
         raise SystemExit("--expected-runs must be greater than zero")
     if args.tsnr_threshold <= 0:
@@ -620,9 +568,6 @@ def main() -> int:
         subject_tsnr = tukey_bounds([subject.mean_tsnr for subject in subjects])
         subject_fd_mean = tukey_bounds(
             [subject.mean_fd_mean for subject in subjects]
-        )
-        subject_fd_perc = tukey_bounds(
-            [subject.mean_fd_perc for subject in subjects]
         )
         condition_contrasts = calculate_condition_contrasts(runs)
         contrast_bounds = condition_contrast_bounds(condition_contrasts)
@@ -652,10 +597,8 @@ def main() -> int:
         subjects,
         subject_tsnr[3],
         subject_fd_mean[4],
-        subject_fd_perc[4],
         args.expected_runs,
         args.fd_threshold,
-        args.fd_perc_threshold,
         args.tsnr_threshold,
     )
     contrast_rows = write_condition_contrast_report(
@@ -687,11 +630,6 @@ def main() -> int:
                 subject_fd_mean,
                 f"value > {fmt(subject_fd_mean[4])} or value > {args.fd_threshold:g}",
             ),
-            (
-                "subject_mean_fd_perc",
-                subject_fd_perc,
-                f"value > {fmt(subject_fd_perc[4])} or value > {args.fd_perc_threshold:g}",
-            ),
         ],
     )
 
@@ -720,10 +658,6 @@ def main() -> int:
     )
     print(f"Low-tSNR fence: {fmt(tsnr[3])}")
     print(f"High-FD fence: {fmt(fd_mean[4])}; absolute threshold: {args.fd_threshold:g}")
-    print(
-        "Subject FD-percent review threshold: "
-        f"{args.fd_perc_threshold:g}% of volumes above 0.2-mm FD"
-    )
     print(f"Wrote {run_report}")
     print(f"Wrote {bounds_report}")
     print(f"Wrote {subject_report}")
