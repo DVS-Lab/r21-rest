@@ -1,4 +1,5 @@
-# Differential-motion QC sensitivity exclusions.
+# Historical exploratory screen; these are not adopted exclusions.
+# Differential-motion QC sensitivity candidates from the earlier rule.
 # For each of seven planned condition contrasts, apply a Tukey 1.5-IQR
 # upper fence to absolute mean-FD and absolute FD>0.20-mm percentage
 # differences. Exclude after paired flags on at least 2 contrasts.

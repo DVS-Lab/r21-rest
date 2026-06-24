@@ -56,32 +56,30 @@ Three cluster-extent maps had peak corrected `1-p > 0.95`:
 | Direct Smith09 ECN map 8 | RTPJ > BOTH | 0.9800 | 0.0200 |
 
 The repeated DMN direction across data-derived and direct Smith09 network
-definitions is encouraging, but all findings remain exploratory. The corrected
-p-values control voxel/cluster inference within each randomise job, not the
-full family of 77 network-by-condition jobs. Bar plots extracted from the same
-significant clusters are descriptive and are not independent ROI tests.
+definitions is encouraging, but all findings remain exploratory. Corrected
+p-values control voxel/cluster inference within each randomise job. Each
+network/contrast is reported as an individual hypothesis. Following Rubin's
+inference-based framework, no blanket across-job alpha adjustment is applied;
+an adjustment would be relevant to an "at least one" disjunctive claim. Bar
+plots extracted from the same significant clusters are descriptive and are not
+independent ROI tests.
 
-## Differential-Motion QC Sensitivity
+## Data-Quality Review
 
-The sensitivity rule is based on the seven prespecified condition comparisons,
-not participant-average motion thresholds or neural effect estimates. For each
-comparison, absolute mean-FD differences and absolute differences in the
-percentage of volumes above 0.20-mm FD are screened with separate Tukey upper
-fences (`Q3 + 1.5 x IQR`). A comparison receives a paired motion flag only when
-both motion metrics exceed their fences. Exclusion requires paired flags in at
-least two comparisons. tSNR and participant-average motion remain diagnostics.
-The contrasts were planned, but this exact exclusion rule was defined after
-reviewing the QC distributions and is therefore a post hoc sensitivity rule.
+No data-quality exclusion was applied to this N=27 first pass. The earlier
+absolute-pairwise screen is retained for provenance but is not an adopted
+sensitivity analysis because its seven comparisons are redundant and discard
+direction.
 
-| Participant | Paired motion flags | Flagged comparisons |
-|---|---:|---|
-| `sub-222` | 4 | BOTH-RTPJ; RTPJ-SHAM; VLPFC-SHAM; BOTH-mean(RTPJ,VLPFC) |
-| `sub-226` | 3 | BOTH-SHAM; BOTH-RTPJ; VLPFC-SHAM |
-| `sub-230` | 2 | BOTH-SHAM; RTPJ-SHAM |
-
-The resulting sensitivity sample contains 24 participants. Known
-stimulation-delivery failures, if confirmed, require a separate technical
-exclusion and a separately labeled analysis.
+The current review centers condition values within participant, summarizes all
+between-condition variation with three orthogonal signed contrasts, and uses
+each participant's four-condition SD as a pair-independent magnitude measure.
+Within-subject label-permutation tests show no consistent group condition
+pattern for tSNR (`p=.58`), mean FD (`p=.75`), or high-motion percentage
+(`p=.96`). Spread flags identify `sub-218` and `sub-230` in two QC metrics;
+`sub-222`, `sub-226`, `sub-236`, and `sub-238` are flagged in one metric. These
+are review targets, not exclusions. Known stimulation-delivery failures, if
+confirmed, remain a separate technical issue.
 
 ## Secondary Networks
 

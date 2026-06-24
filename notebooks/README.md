@@ -7,11 +7,13 @@ contrast, corrected peak p-value, cluster size, and any paired differential-
 motion flags for that comparison, followed by sham, RTPJ, VLPFC, and BOTH
 dual-regression stage-2 beta means with SEM and participant points.
 
-The notebook also plots the absolute condition-level tSNR, mean-FD, and
-high-motion-percentage distributions used for QC review. Every participant,
-Tukey upper fence, metric-specific outlier, and paired motion outlier is shown.
-The QC section explains the N=31 to N=27 data-availability flow and keeps the
-post hoc sensitivity rule distinct from the no-QC-exclusion N=27 analysis.
+The notebook also summarizes condition-level tSNR, mean FD, and high-motion
+percentage without privileging an absolute pairwise contrast. It shows signed
+condition deviations centered within participant, three orthogonal contrasts
+that span all four conditions, and each participant's four-condition spread.
+Within-subject label permutation tests whether condition directions align
+across participants. The QC section explains the N=31 to N=27 data-availability
+flow and does not apply an automatic QC exclusion.
 
 Run the result checker before opening the notebook. Then close any existing
 JupyterLab server and use the project launcher:
@@ -42,5 +44,7 @@ Only cluster-extent results are displayed. The notebook reads both tracked
 randomise summary tables and intentionally ignores TFCE. The region is selected
 from the same group contrast summarized in the bar plot, so the condition means,
 SEM, and participant points are descriptive and must not be treated as
-independent ROI inference. Corrected p-values apply within each randomise job,
-not across the full 175-job primary and secondary family.
+independent ROI inference. Each network/contrast is reported as an individual
+hypothesis. Following Rubin's inference-based framework, an across-job alpha
+adjustment is relevant to a disjunctive claim that at least one result exists,
+not automatically to separate inferences about each reported hypothesis.

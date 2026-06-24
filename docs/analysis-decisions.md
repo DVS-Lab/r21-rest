@@ -1,8 +1,9 @@
 # Analysis Decisions
 
 The repository covers preprocessing through cluster-extent randomise inference
-and portable result visualization. The 27-participant full-sample analysis is
-frozen as a preliminary result; a 24-participant QC sensitivity is planned.
+and portable result visualization. The 27-participant first-pass analysis is
+frozen as a preliminary result while the recoverable N=28 sample and final QC
+criteria are resolved. No QC-exclusion sensitivity is currently adopted.
 
 ## Current Study Context
 
@@ -31,16 +32,18 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   dimensionality estimation.
 - QA will include motion and MRIQC outlier identification consistent with prior
   lab work, including boxplot/IQR-based flags.
-- Differential QA uses absolute Tukey 1.5-IQR upper fences on tSNR, mean FD,
-  and FD percentage differences for `BOTH - SHAM`, `BOTH - RTPJ`,
-  `BOTH - VLPFC`, `RTPJ - VLPFC`, `RTPJ - SHAM`, `VLPFC - SHAM`, and
-  `BOTH - mean(RTPJ, VLPFC)`. A comparison receives a paired motion flag when
-  both absolute mean-FD and FD-percentage differences exceed their fences.
-- The documented post hoc QC sensitivity excludes `sub-222`, `sub-226`, and `sub-230`
-  because each has paired motion flags in at least two comparisons. tSNR and
-  participant-average motion thresholds are diagnostics, not the primary
-  exclusion rule. This does not replace a separate technical exclusion for
-  failed stimulation delivery.
+- Differential QA centers each participant's four condition values to preserve
+  direction and tests group-level condition consistency by permuting condition
+  labels within participant. Three orthogonal contrasts encode active-mean
+  versus SHAM, BOTH versus the single-site mean, and RTPJ versus VLPFC. These
+  span all between-condition variation without seven correlated pairwise tests.
+- Participant-level QC magnitude is summarized by the within-subject SD and
+  range across all four conditions. Tukey spread flags identify records for
+  review but do not automatically exclude anyone. The earlier absolute-pairwise
+  screen is retained for provenance and is not an adopted exclusion rule.
+- No data-quality exclusion is currently applied to the N=27 first-pass
+  analysis. A technical exclusion for failed stimulation delivery remains a
+  separate question.
 - Group MELODIC components will be compared with Smith09 PNAS maps. Primary
   networks are DMN, ECN, and left/right FPN. Secondary analyses cover primary
   visual, occipital-pole, lateral-visual, sensorimotor, and auditory networks;
@@ -70,8 +73,11 @@ The project is not currently being treated as a simple 2 x 2 factorial design.
   expanded primary pass adds ECN and FPN, while running dim-20 component 8 only
   once because it is the best match for both left and right FPN.
 - Automated QA should flag observations rather than silently exclude them.
-- Bonferroni correction may eventually be used across the primary inferential
-  family.
+- Each network/contrast result is treated as an individual hypothesis and all
+  tests are reported. Following Rubin (2021, doi:10.1007/s11229-021-03276-4),
+  no blanket alpha adjustment is made solely because multiple jobs were run.
+  An across-job adjustment would be relevant to a disjunctive claim that at
+  least one effect exists somewhere in a defined family.
 
 ## Planned Comparisons
 
