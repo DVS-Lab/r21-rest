@@ -116,7 +116,42 @@ task-rest_mriqc_condition_contrasts.tsv
 task-rest_mriqc_condition_contrast_bounds.tsv
 task-rest_qc_contrast_average_bounds.tsv
 task-rest_qc_exclusions.tsv
+task-rest_run_covariates.tsv
+task-rest_group_covariates.tsv
 ```
+
+`MakeGroupCovariates.py` combines the MRIQC run metrics with task-rest BIDS
+events. It keeps mean FD and tSNR, then extracts run-level pupil area, blink
+rate, total blinks, and eye-closure fraction from the event TSVs:
+
+```bash
+python3 code/MakeGroupCovariates.py
+```
+
+Create reviewable design spreadsheets for covariate-adjusted group models with
+mean FD as the nuisance EV:
+
+```bash
+python3 code/MakeRandomiseDesignSpreadsheets.py --covariates fdmean
+```
+
+The spreadsheet outputs live under
+`derivatives/qc/randomise_design_spreadsheets`. They are meant for the FSL GLM
+GUI: paste the labeled `EV*` columns from each contrast-specific
+`*_design-matrix.tsv`, use `task-rest_design-contrast-reference.tsv` for the
+positive and negative intercept contrasts, and use
+`task-rest_design-group-reference.tsv` for `design.grp`. When building a design
+for a specific randomise stack on Linux, pass that stack's `subject_order.tsv`
+so the spreadsheet order exactly matches the merged 4D image.
+
+The currently tracked FD-mean spreadsheets use sorted complete participants and
+have N=27. In the local BIDS copy, `sub-233` run 01 is now condition-labeled
+from events, but runs 02-04 are still zero-row task-rest event files, so
+`sub-233` remains incomplete until those files are fixed and the covariate
+tables are regenerated. Pupil and blink-rate columns are extracted into the
+covariate tables, but FD mean is the only generated design EV for now because
+the current local events have missing pupil/blink-derived values for a few
+otherwise usable runs.
 
 ## Verify Outputs
 

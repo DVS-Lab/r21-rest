@@ -32,6 +32,9 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | File | Input | Purpose and output |
 |---|---|---|
 | `OutlierID.py` | MRIQC BOLD IQMs and BIDS events | Writes run-, participant-, and condition-difference QC tables under `derivatives/qc`. |
+| `MakeGroupCovariates.py` | MRIQC run table and BIDS task-rest events | Writes run-level and contrast-level group covariates, including mean FD, tSNR, pupil area, blink rate, and eye closure. |
+| `MakeRandomiseDesignSpreadsheets.py` | Group covariates and, optionally, a `subject_order.tsv` | Writes labeled TSV/CSV tables for building covariate-adjusted `design.mat`, `design.con`, and `design.grp` files in the FSL GUI. |
+| `tsvResting.m` | r21-cardgame BIDS task-rest events | Bart's MATLAB pupil/blink analysis helper; auto-detects the Mac and Linux r21-cardgame locations or reads `R21_CARDGAME_ROOT`. |
 | `MakeConfounds.py` | fMRIPrep confounds and BIDS events | Writes FSL/AFNI confound matrices, the ordered run manifest, and input lists. |
 | `smooth-3dBlurToFWHM.sh` | One fMRIPrep BOLD run and mask | Masks and smooths one run to 5-mm FWHM while adding its condition label. |
 | `run_smooth-3dBlurToFWHM.sh` | Ordered run manifest | Runs the single-run smoothing script across all included runs. |
@@ -96,6 +99,32 @@ python3 code/select_qc_exclusions.py
 
 The generated exclusion list currently contains `sub-218`. Treat an N=26 rerun
 as a sensitivity analysis; the preliminary N=27 outputs remain frozen.
+
+Build reviewable group-level covariate spreadsheets before creating FSL GUI
+design files:
+
+```bash
+python3 code/MakeGroupCovariates.py
+python3 code/MakeRandomiseDesignSpreadsheets.py --covariates fdmean
+```
+
+For the exact design matrix order used by a specific randomise stack, rerun the
+spreadsheet step with that stack's `subject_order.tsv`:
+
+```bash
+python3 code/MakeRandomiseDesignSpreadsheets.py \
+  --subject-order derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0004_stat-beta/subject_order.tsv \
+  --covariates fdmean
+```
+
+Use the `EV*` columns from each `*_design-matrix.tsv` in the FSL GUI, the two
+rows in `task-rest_design-contrast-reference.tsv` for positive and negative
+directions, and `task-rest_design-group-reference.tsv` for exchangeability
+groups. The current tracked spreadsheet set is FD-mean only and has N=27
+because the local BIDS copy still has zero-row task-rest events for
+`sub-233` runs 02-04. Pupil and blink-rate columns are available in
+`task-rest_group_covariates.tsv`; generate `fdmean,pupil,blink` designs after
+reviewing and resolving the currently missing pupil/blink-derived values.
 
 Completed jobs have a `.complete` marker beside their output prefix, so the
 primary run skips DMN tests already finished by the first batch.

@@ -21,6 +21,11 @@ derivatives/qc/*
 !derivatives/qc/*.csv
 !derivatives/qc/*.txt
 !derivatives/qc/*.md
+!derivatives/qc/randomise_design_spreadsheets/
+derivatives/qc/randomise_design_spreadsheets/*
+!derivatives/qc/randomise_design_spreadsheets/*.tsv
+!derivatives/qc/randomise_design_spreadsheets/*.csv
+!derivatives/qc/randomise_design_spreadsheets/*.md
 !derivatives/fsl/
 derivatives/fsl/*
 !derivatives/fsl/diagnostics/

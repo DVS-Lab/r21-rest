@@ -12,7 +12,19 @@
 assert(exist("+lm/disp.m","file"),'The kStats toolbox is needed for this analysis. https://github.com/klabhub/kStats')
 
 %% Read the data
-dataRoot = "../dvs";% Point this to the folder that contains the BIDS folder
+candidateRoots = {getenv('R21_CARDGAME_ROOT'), ...
+    '/Users/tug87422/github/r21-cardgame', ...
+    '/ZPOOL/data/projects/r21-cardgame'};
+dataRoot = '';
+for rootNr = 1:numel(candidateRoots)
+    thisRoot = candidateRoots{rootNr};
+    if ~isempty(thisRoot) && exist(fullfile(thisRoot,'bids'),'dir')
+        dataRoot = thisRoot;
+        break;
+    end
+end
+assert(~isempty(dataRoot), ['Could not find r21-cardgame. Set ' ...
+    'R21_CARDGAME_ROOT to the folder containing the bids directory.']);
 subjects = [ 189   203   207   208   209   210   211   213   214   215   217   218   219   220   221   222   225   226    227   228   230   231   234   235   236   237   238];
 restT=table;
 for sub = subjects(:)'
