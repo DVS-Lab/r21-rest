@@ -15,9 +15,9 @@ else
     scriptDir = fileparts(scriptFile);
 end
 candidateRoots = {getenv('R21_CARDGAME_ROOT'), ...
-    fullfile(scriptDir,'..','..','r21-cardgame'), ...
     '/Users/tug87422/github/r21-cardgame', ...
-    '/ZPOOL/data/projects/r21-cardgame'};
+    '/ZPOOL/data/projects/r21-cardgame', ...
+    fullfile(scriptDir,'..','..','r21-cardgame')};
 dataRoot = '';
 for rootNr = 1:numel(candidateRoots)
     thisRoot = candidateRoots{rootNr};
@@ -28,6 +28,17 @@ for rootNr = 1:numel(candidateRoots)
 end
 assert(~isempty(dataRoot), ['Could not find r21-cardgame. Set ' ...
     'R21_CARDGAME_ROOT to the folder containing the bids directory.']);
+
+% General lab helpers live in r21-cardgame/klab. tsvRead is convenient, but
+% readtable below is kept as a fallback so this script is not path-fragile.
+klabCandidates = {getenv('KLAB_ROOT'), getenv('R21_KLAB_ROOT'), ...
+    fullfile(dataRoot,'klab'), fullfile(scriptDir,'..','..','r21-cardgame','klab')};
+for rootNr = 1:numel(klabCandidates)
+    thisRoot = klabCandidates{rootNr};
+    if ~isempty(thisRoot) && exist(thisRoot,'dir') && exist('tsvRead','file') ~= 2
+        addpath(thisRoot);
+    end
+end
 
 % This analysis uses the kStats LME toolbox. Prefer the r21-cardgame
 % submodule, but allow an explicit checkout via KSTATS_ROOT.
@@ -63,7 +74,13 @@ for sub = subjects(:)'
        filename = sprintf('%s/bids/sub-%3d/func/sub-%3d_task-rest_run-%02d_events.tsv',dataRoot,sub,sub,run);
        if exist(filename,'file')
            try
-            thisT =tsvRead(filename);
+            if exist('tsvRead','file') == 2
+                thisT =tsvRead(filename);
+            else
+                thisT =readtable(filename,'ReadVariableNames',true, ...
+                    'FileType','text','TreatAsEmpty',{'n/a','N/A'}, ...
+                    'Delimiter','\t');
+            end
             restT = [restT;thisT]; %#ok<AGROW>
            catch me
                disp(['Skipping ' filename  '(' me.message ')']);
@@ -71,6 +88,10 @@ for sub = subjects(:)'
        end
     end
 end
+assert(height(restT) > 0, ['No task-rest event rows were read. Check that ' ...
+    'r21-cardgame/klab is on the path or that readtable can read the TSV files.']);
+assert(ismember('target',restT.Properties.VariableNames), ...
+    'Task-rest event table does not contain the required target column.');
 % By sorting the rows sham first, the sham condition becomes the reference
 % in the anova/linear model. 
 [~,shamFirst] = sort(strcmpi(restT.target,'SHAM'),'descend');
