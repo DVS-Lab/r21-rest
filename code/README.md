@@ -34,7 +34,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `OutlierID.py` | MRIQC BOLD IQMs and BIDS events | Writes run-, participant-, and condition-difference QC tables under `derivatives/qc`. |
 | `MakeGroupCovariates.py` | MRIQC run table and BIDS task-rest events | Writes run-level and contrast-level group covariates, including mean FD, tSNR, pupil area, blink rate, and eye closure. |
 | `MakeRandomiseDesignSpreadsheets.py` | Group covariates and, optionally, a `subject_order.tsv` | Writes labeled TSV/CSV tables for building covariate-adjusted `design.mat`, `design.con`, and `design.grp` files in the FSL GUI. |
-| `tsvResting.m` | r21-cardgame BIDS task-rest events | Bart's MATLAB pupil/blink analysis helper; auto-detects the Mac and Linux r21-cardgame locations or reads `R21_CARDGAME_ROOT`. |
+| `tsvResting.m` | r21-cardgame BIDS task-rest events | Bart's MATLAB pupil/blink analysis helper; auto-detects the Mac and Linux r21-cardgame locations, reads `R21_CARDGAME_ROOT`, and adds `klab/kStats` or `KSTATS_ROOT`/`R21_KSTATS_ROOT` when needed. |
 | `MakeConfounds.py` | fMRIPrep confounds and BIDS events | Writes FSL/AFNI confound matrices, the ordered run manifest, and input lists. |
 | `smooth-3dBlurToFWHM.sh` | One fMRIPrep BOLD run and mask | Masks and smooths one run to 5-mm FWHM while adding its condition label. |
 | `run_smooth-3dBlurToFWHM.sh` | Ordered run manifest | Runs the single-run smoothing script across all included runs. |

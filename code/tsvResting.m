@@ -7,12 +7,15 @@
 % the fraction of time the eyes were closed (eyeClosed), the number of
 % blinks (nrBlinks) and the mean pupil size (meanPupilArea)
 
-% This analysis uses some of the kStats LME toolbox
-% Add it to your path.
-assert(exist("+lm/disp.m","file"),'The kStats toolbox is needed for this analysis. https://github.com/klabhub/kStats')
-
-%% Read the data
+%% Locate r21-cardgame and kStats
+scriptFile = mfilename('fullpath');
+if isempty(scriptFile)
+    scriptDir = pwd;
+else
+    scriptDir = fileparts(scriptFile);
+end
 candidateRoots = {getenv('R21_CARDGAME_ROOT'), ...
+    fullfile(scriptDir,'..','..','r21-cardgame'), ...
     '/Users/tug87422/github/r21-cardgame', ...
     '/ZPOOL/data/projects/r21-cardgame'};
 dataRoot = '';
@@ -25,6 +28,34 @@ for rootNr = 1:numel(candidateRoots)
 end
 assert(~isempty(dataRoot), ['Could not find r21-cardgame. Set ' ...
     'R21_CARDGAME_ROOT to the folder containing the bids directory.']);
+
+% This analysis uses the kStats LME toolbox. Prefer the r21-cardgame
+% submodule, but allow an explicit checkout via KSTATS_ROOT.
+if exist('+lm/disp.m','file') ~= 2
+    kStatsCandidates = {getenv('KSTATS_ROOT'), getenv('R21_KSTATS_ROOT'), ...
+        fullfile(dataRoot,'klab','kStats'), ...
+        fullfile(scriptDir,'..','klab','kStats')};
+    for rootNr = 1:numel(kStatsCandidates)
+        thisRoot = kStatsCandidates{rootNr};
+        if ~isempty(thisRoot) && exist(fullfile(thisRoot,'+lm','disp.m'),'file')
+            addpath(thisRoot);
+            break;
+        end
+    end
+end
+if exist('+lm/disp.m','file') ~= 2
+    expectedRoot = fullfile(dataRoot,'klab','kStats');
+    if exist(expectedRoot,'dir')
+        error(['The kStats folder exists but does not contain +lm/disp.m: %s\n' ...
+            'From r21-cardgame, run: git submodule update --init --recursive\n' ...
+            'Or set KSTATS_ROOT/R21_KSTATS_ROOT to another kStats checkout.'], expectedRoot);
+    end
+    error(['The kStats toolbox is needed for this analysis. ' ...
+        'Expected it under %s or set KSTATS_ROOT/R21_KSTATS_ROOT. ' ...
+        'Repository: https://github.com/klabhub/kStats'], expectedRoot);
+end
+
+%% Read the data
 subjects = [ 189   203   207   208   209   210   211   213   214   215   217   218   219   220   221   222   225   226    227   228   230   231   234   235   236   237   238];
 restT=table;
 for sub = subjects(:)'
