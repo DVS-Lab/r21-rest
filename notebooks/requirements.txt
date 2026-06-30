@@ -6,3 +6,4 @@ nibabel>=5.2,<6
 nilearn>=0.11,<0.13
 numpy>=1.26,<3
 pandas>=2.2,<3
+scipy>=1.12,<2

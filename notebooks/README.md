@@ -6,6 +6,9 @@ result includes a plain-language description of the analysis, network, signed
 contrast, corrected peak p-value, and cluster size, followed by sham, RTPJ,
 VLPFC, and BOTH dual-regression stage-2 beta means with SEM.
 
+The notebook also correlates each extracted brain contrast with the matching
+signed pupil and blink-rate deltas from the primary N=27 subject set.
+
 The notebook also audits every planned contrast, so nonsignificant comparisons
 do not disappear. Its QC section uses only tSNR and mean FD. It shows centered
 condition boxplots, three orthogonal signed-contrast boxplots, and participant
