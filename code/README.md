@@ -117,29 +117,31 @@ uses the full dual-regression contrast images and `fslmerge`:
 
 ```bash
 python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink
-python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink,pupil
+python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,pupil
 ```
 
-Small design-template spreadsheets are also written to
+Small FSL `design.mat` templates and labeled TSVs are also written to
 `templates/randomise_covariate_models/model-*`. These are the GitHub-tracked
-copies for FSL GUI review. Each file name includes its contrast-specific N, and
-each spreadsheet is ordered as `participant`, `intercept`, then demeaned
-covariates. The intercept column is all `1`s and is not demeaned. An
-excluded-participants TSV is written only when a contrast actually drops one or
-more participants.
+copies for review and direct reuse. Each file name includes its
+contrast-specific N, and each TSV is ordered as `participant`, `intercept`,
+then demeaned covariates. The intercept column is all `1`s and is not
+demeaned. An excluded-participants TSV is written only when a contrast actually
+drops one or more participants.
 
-To regenerate only the tracked spreadsheet templates without touching the large
+To regenerate only the tracked templates without touching the large
 dual-regression outputs:
 
 ```bash
 python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink
-python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink,pupil
+python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,pupil
 ```
 
-The FD/blink model remains N=27 for each contrast. The pupil-containing model
-uses contrast-specific complete cases because Bart confirmed that three pupil
-runs are not recoverable. Each generated model folder contains its own
-`run_randomise.sh` launcher.
+The FD/blink model remains N=27 for each contrast. The FD/pupil model uses
+contrast-specific complete cases because Bart confirmed that three pupil runs
+are not recoverable. Blink rate and pupil size are intentionally not modeled
+together. Each generated model folder contains its own `run_randomise.sh`
+launcher. The covariate launchers do not pass `-e design.grp`; exchangeability
+blocks are unnecessary for these subject-level one-sample contrast images.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:

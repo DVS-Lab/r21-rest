@@ -57,6 +57,10 @@ class CovariateRandomiseModelTests(unittest.TestCase):
         self.assertEqual(excluded[0]["participant"], "sub-002")
         self.assertEqual(excluded[0]["reason"], "missing_covariate:delta_mean_pupil_area")
 
+    def test_parse_covariates_rejects_blink_and_pupil_together(self):
+        with self.assertRaisesRegex(ValueError, "Do not model"):
+            cov_models.parse_covariates("fdmean,blink,pupil")
+
     def test_demean_covariates_writes_zero_mean_columns(self):
         selected = [
             {"participant": "sub-001", "raw_values": {"delta_fd_mean": 0.1}},
@@ -91,7 +95,8 @@ class CovariateRandomiseModelTests(unittest.TestCase):
                 root, rows, ["delta_fd_mean"]
             )
             self.assertIn("/NumWaves\t2", design_mat.read_text())
-            self.assertIn("1\t-0.1", design_mat.read_text())
+            self.assertIn("1.000000e+00\t-1.000000e-01", design_mat.read_text())
+            self.assertIn("/PPheights\t\t1.000000e+00\t2.000000e-01", design_mat.read_text())
             self.assertIn("1\t0", design_con.read_text())
             self.assertIn("/NumPoints\t2", design_grp.read_text())
 
@@ -133,6 +138,9 @@ class CovariateRandomiseModelTests(unittest.TestCase):
             )
             self.assertEqual(lines[1], "sub-001\t1\t-0.1\t-0.5")
             self.assertIn("_N-02_", tsv.name)
+            design_mat = root / manifest_row["template_mat"]
+            self.assertIn("/NumWaves\t3", design_mat.read_text())
+            self.assertIn("/PPheights\t\t1.000000e+00\t2.000000e-01\t1.000000e+00", design_mat.read_text())
             self.assertEqual(manifest_row["excluded_participants_tsv"], "")
             self.assertFalse(list(root.glob("*_excluded-participants.tsv")))
 
@@ -170,6 +178,7 @@ class CovariateRandomiseModelTests(unittest.TestCase):
             self.assertIn("cmd=(", text)
             self.assertIn('"${cmd[@]}"', text)
             self.assertIn("-n \"$nperm\"", text)
+            self.assertNotIn("        -e ", text)
 
 
 if __name__ == "__main__":

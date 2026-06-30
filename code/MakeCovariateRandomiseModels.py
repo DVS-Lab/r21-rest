@@ -39,6 +39,9 @@ COVARIATE_LABELS = {
     "delta_blink_rate_per_min": "blink",
     "delta_mean_pupil_area": "pupil",
 }
+MUTUALLY_EXCLUSIVE_COVARIATES = (
+    {"delta_blink_rate_per_min", "delta_mean_pupil_area"},
+)
 
 
 def read_tsv(path: Path) -> list[dict[str, str]]:
@@ -86,6 +89,13 @@ def parse_covariates(value: str) -> list[str]:
         covariates.append(covariate)
     if not covariates:
         raise ValueError("At least one covariate is required")
+    for exclusive_set in MUTUALLY_EXCLUSIVE_COVARIATES:
+        overlap = exclusive_set.intersection(covariates)
+        if len(overlap) > 1:
+            labels = sorted(COVARIATE_LABELS[covariate] for covariate in overlap)
+            raise ValueError(
+                "Do not model these covariates together: " + ",".join(labels)
+            )
     return covariates
 
 
@@ -225,6 +235,34 @@ def demean_covariates(
     return rows, means
 
 
+def fsl_float(value: float | str) -> str:
+    return f"{float(value):.6e}"
+
+
+def design_ppheights(audit_rows: list[dict[str, str]], covariates: list[str]) -> list[float]:
+    heights = [1.0]
+    for covariate in covariates:
+        column = f"{covariate}_demeaned"
+        values = [float(row[column]) for row in audit_rows]
+        heights.append(max(values) - min(values))
+    return heights
+
+
+def write_design_mat(path: Path, audit_rows: list[dict[str, str]], covariates: list[str]) -> Path:
+    n_participants = len(audit_rows)
+    ev_columns = [f"{covariate}_demeaned" for covariate in covariates]
+    heights = design_ppheights(audit_rows, covariates)
+    with path.open("w") as stream:
+        stream.write(f"/NumWaves\t{1 + len(covariates)}\n")
+        stream.write(f"/NumPoints\t{n_participants}\n")
+        stream.write("/PPheights\t\t" + "\t".join(fsl_float(value) for value in heights) + "\n\n")
+        stream.write("/Matrix\n")
+        for row in audit_rows:
+            values = [1.0, *[float(row[column]) for column in ev_columns]]
+            stream.write("\t".join(fsl_float(value) for value in values) + "\n")
+    return path
+
+
 def component_metadata(component_dir: Path) -> tuple[str, str]:
     match = re.search(r"component-(\d+)_stat-([A-Za-z0-9]+)$", component_dir.name)
     if not match:
@@ -253,17 +291,9 @@ def write_design_files(
 ) -> tuple[Path, Path, Path]:
     n_participants = len(audit_rows)
     n_waves = 1 + len(covariates)
-    ev_columns = [f"{covariate}_demeaned" for covariate in covariates]
 
     design_mat = output_dir / "design.mat"
-    with design_mat.open("w") as stream:
-        stream.write(f"/NumWaves\t{n_waves}\n")
-        stream.write(f"/NumPoints\t{n_participants}\n")
-        stream.write("/PPheights\t" + "\t".join(["1"] * n_waves) + "\n\n")
-        stream.write("/Matrix\n")
-        for row in audit_rows:
-            values = ["1", *[row[column] for column in ev_columns]]
-            stream.write("\t".join(values) + "\n")
+    write_design_mat(design_mat, audit_rows, covariates)
 
     design_con = output_dir / "design.con"
     with design_con.open("w") as stream:
@@ -311,7 +341,9 @@ def write_design_template(
     rows = template_rows(audit_rows, covariates)
     fields = ["participant", "intercept", *[f"{covariate}_demeaned" for covariate in covariates]]
     tsv = template_dir / f"{stem}.tsv"
+    design_mat = template_dir / f"{stem}.mat"
     write_tsv(tsv, rows, fields)
+    write_design_mat(design_mat, audit_rows, covariates)
     excluded_name = ""
     if excluded:
         excluded_path = template_dir / f"{stem}_excluded-participants.tsv"
@@ -323,6 +355,7 @@ def write_design_template(
         "n_participants": str(n_participants),
         "covariates": ",".join(covariates),
         "template_tsv": tsv.name,
+        "template_mat": design_mat.name,
         "excluded_participants_tsv": excluded_name,
     }
 
@@ -334,14 +367,14 @@ def write_template_root_readme(template_root: Path) -> None:
         "# Randomise Covariate Templates\n\n"
         "These small spreadsheets mirror the covariate design matrices used for "
         "whole-brain randomise follow-up models. They are tracked in GitHub so the "
-        "FSL GLM GUI setup can be reviewed without copying large derivative images.\n\n"
-        "Each model folder contains one TSV per contrast. File names "
+        "FSL model setup can be reviewed without copying large derivative images.\n\n"
+        "Each model folder contains one FSL `design.mat` template plus one labeled "
+        "TSV per contrast. File names "
         "include the analysis task, model label, contrast, and contrast-specific N. "
         "Columns are ordered as `participant`, `intercept`, then demeaned covariates. "
         "The `intercept` column is always `1` and is not demeaned.\n\n"
-        "Use the numeric columns after `participant` as the EV columns in FSL. The "
-        "positive group contrast is `[1 0 ...]`; the negative group contrast is "
-        "`[-1 0 ...]`; all participants are in exchangeability group `1`.\n"
+        "The `.mat` files can be passed directly to FSL. The paired TSV files keep "
+        "the same rows labeled for review.\n"
     )
 
 
@@ -384,6 +417,7 @@ def write_templates(
             "n_participants",
             "covariates",
             "template_tsv",
+            "template_mat",
             "excluded_participants_tsv",
         ],
     )
@@ -392,10 +426,10 @@ def write_templates(
         "# Randomise Covariate Design Templates\n\n"
         f"Model: `{label}`\n\n"
         f"Task: `{task}`\n\n"
-        "Each spreadsheet is ready to paste into the FSL GLM GUI or compare with "
-        "the generated `design.mat` files. Columns are ordered as `participant`, "
-        "`intercept`, then demeaned covariates. The intercept column is intentionally "
-        "not demeaned. File names include the contrast-specific N.\n\n"
+        "Each `.mat` file is ready for FSL. The paired TSV carries the same rows "
+        "with labels and is ordered as `participant`, `intercept`, then demeaned "
+        "covariates. The intercept column is intentionally not demeaned. File names "
+        "include the contrast-specific N.\n\n"
         "An `_excluded-participants.tsv` file is written only when participants were "
         "dropped from that contrast because a required covariate was unavailable.\n"
     )
@@ -446,7 +480,6 @@ def build_run_randomise_script(
                 f'        -m {shlex_quote(str(mask))}',
                 f'        -d {shlex_quote(job["design_mat"])}',
                 f'        -t {shlex_quote(job["design_con"])}',
-                f'        -e {shlex_quote(job["design_grp"])}',
                 '        -n "$nperm" "${tfce_args[@]}" -c "$cluster_threshold"',
                 "    )",
                 '    "${cmd[@]}"',
@@ -678,7 +711,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=repo_root / "derivatives" / "qc" / "task-rest_group_covariates.tsv",
     )
-    parser.add_argument("--covariates", default="fdmean,blink,pupil")
+    parser.add_argument("--covariates", default="fdmean,blink")
     parser.add_argument("--model-label")
     parser.add_argument("--contrasts", default="all")
     parser.add_argument("--task", default="rest")
@@ -687,7 +720,7 @@ def parse_args() -> argparse.Namespace:
         "--template-dir",
         type=Path,
         default=repo_root / "templates" / "randomise_covariate_models",
-        help="Tracked root folder for small design template spreadsheets.",
+        help="Tracked root folder for small design.mat templates and labeled TSVs.",
     )
     parser.add_argument(
         "--template-subject-order",

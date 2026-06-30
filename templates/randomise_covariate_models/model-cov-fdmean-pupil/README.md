@@ -1,6 +1,6 @@
 # Randomise Covariate Design Templates
 
-Model: `cov-fdmean-blink`
+Model: `cov-fdmean-pupil`
 
 Task: `rest`
 

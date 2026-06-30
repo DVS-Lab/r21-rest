@@ -159,14 +159,19 @@ GitHub-tracked design templates live under
 
 ```bash
 python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink
-python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink,pupil
+python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,pupil
 ```
 
-Those template filenames include the contrast-specific N. Each spreadsheet is
-ordered as `participant`, `intercept`, then demeaned covariates; the intercept
-column is all `1`s and is not demeaned. An excluded-participants TSV is written
-only for contrasts where at least one participant was dropped from that
-template.
+Those template filenames include the contrast-specific N. Each contrast has an
+FSL-ready `.mat` file plus a labeled TSV ordered as `participant`, `intercept`,
+then demeaned covariates; the intercept column is all `1`s and is not demeaned.
+An excluded-participants TSV is written only for contrasts where at least one
+participant was dropped from that template.
+
+The covariate-adjusted `randomise` launchers use the generated `design.mat`
+and `design.con` files without passing `-e design.grp`, since these are
+subject-level one-sample contrast images rather than exchangeability-block
+models.
 
 ## Verify Outputs
 
