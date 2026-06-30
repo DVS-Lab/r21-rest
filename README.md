@@ -153,6 +153,19 @@ covariate tables, but FD mean is the only generated design EV for now because
 the current local events have missing pupil/blink-derived values for a few
 otherwise usable runs.
 
+For the covariate-adjusted whole-brain `randomise` follow-up models, the small
+GitHub-tracked design templates live under
+`templates/randomise_covariate_models`. Generate or refresh them with:
+
+```bash
+python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink
+python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink,pupil
+```
+
+Those template filenames include the contrast-specific N. Each spreadsheet is
+ordered as `participant`, `intercept`, then demeaned covariates; the intercept
+column is all `1`s and is not demeaned.
+
 ## Verify Outputs
 
 Check expected outputs for every BIDS run and T1w image:

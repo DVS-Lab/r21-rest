@@ -56,6 +56,14 @@ def write_tsv(path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> 
         writer.writerows(rows)
 
 
+def write_csv(path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fieldnames, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def parse_contrasts(value: str) -> list[str]:
     if value.strip().lower() == "all":
         return list(CONTRASTS)
@@ -124,6 +132,21 @@ def read_subject_order(path: Path) -> list[str]:
     if len(participants) != len(set(participants)):
         raise ValueError(f"{path} contains duplicate participants")
     return participants
+
+
+def primary_participants(covariate_rows: dict[tuple[str, str], dict[str, str]]) -> list[str]:
+    participants = sorted({participant for participant, _contrast in covariate_rows})
+    selected = [
+        participant
+        for participant in participants
+        if all(
+            covariate_rows.get((participant, contrast), {}).get("complete", "") == "true"
+            for contrast in CONTRASTS
+        )
+    ]
+    if not selected:
+        raise ValueError("No participants are complete for the primary contrast family")
+    return selected
 
 
 def load_covariates(path: Path) -> dict[tuple[str, str], dict[str, str]]:
@@ -270,6 +293,125 @@ def write_design_files(
         for _row in audit_rows:
             stream.write("1\n")
     return design_mat, design_con, design_grp
+
+
+def template_rows(audit_rows: list[dict[str, str]], covariates: list[str]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for audit_row in audit_rows:
+        row = {"participant": audit_row["participant"], "intercept": "1"}
+        for covariate in covariates:
+            row[f"{covariate}_demeaned"] = audit_row[f"{covariate}_demeaned"]
+        rows.append(row)
+    return rows
+
+
+def write_design_template(
+    template_dir: Path,
+    task: str,
+    label: str,
+    contrast: str,
+    audit_rows: list[dict[str, str]],
+    excluded: list[dict[str, str]],
+    covariates: list[str],
+) -> dict[str, str]:
+    n_participants = len(audit_rows)
+    stem = f"task-{task}_model-{label}_contrast-{contrast}_N-{n_participants:02d}_design-template"
+    rows = template_rows(audit_rows, covariates)
+    fields = ["participant", "intercept", *[f"{covariate}_demeaned" for covariate in covariates]]
+    tsv = template_dir / f"{stem}.tsv"
+    csv_path = template_dir / f"{stem}.csv"
+    write_tsv(tsv, rows, fields)
+    write_csv(csv_path, rows, fields)
+    excluded_path = template_dir / f"{stem}_excluded-participants.tsv"
+    write_tsv(excluded_path, excluded, ["participant", "reason"])
+    return {
+        "model_label": label,
+        "contrast": contrast,
+        "n_participants": str(n_participants),
+        "covariates": ",".join(covariates),
+        "template_tsv": tsv.name,
+        "template_csv": csv_path.name,
+        "excluded_participants_tsv": excluded_path.name,
+    }
+
+
+def write_template_root_readme(template_root: Path) -> None:
+    template_root.mkdir(parents=True, exist_ok=True)
+    readme = template_root / "README.md"
+    readme.write_text(
+        "# Randomise Covariate Templates\n\n"
+        "These small spreadsheets mirror the covariate design matrices used for "
+        "whole-brain randomise follow-up models. They are tracked in GitHub so the "
+        "FSL GLM GUI setup can be reviewed without copying large derivative images.\n\n"
+        "Each model folder contains one TSV and one CSV per contrast. File names "
+        "include the analysis task, model label, contrast, and contrast-specific N. "
+        "Columns are ordered as `participant`, `intercept`, then demeaned covariates. "
+        "The `intercept` column is always `1` and is not demeaned.\n\n"
+        "Use the numeric columns after `participant` as the EV columns in FSL. The "
+        "positive group contrast is `[1 0 ...]`; the negative group contrast is "
+        "`[-1 0 ...]`; all participants are in exchangeability group `1`.\n"
+    )
+
+
+def write_templates(
+    template_root: Path,
+    task: str,
+    label: str,
+    contrasts: list[str],
+    base_participants: list[str],
+    covariate_rows: dict[tuple[str, str], dict[str, str]],
+    covariates: list[str],
+) -> Path:
+    write_template_root_readme(template_root)
+    template_dir = template_root / f"model-{label}"
+    template_dir.mkdir(parents=True, exist_ok=True)
+    manifest_rows: list[dict[str, str]] = []
+    for contrast in contrasts:
+        selected, excluded = select_participants(base_participants, covariate_rows, contrast, covariates)
+        if len(selected) <= 1 + len(covariates):
+            raise ValueError(
+                f"{contrast}: N={len(selected)} is too small for {1 + len(covariates)} EVs"
+            )
+        audit_rows, _means = demean_covariates(selected, covariates)
+        manifest_rows.append(
+            write_design_template(template_dir, task, label, contrast, audit_rows, excluded, covariates)
+        )
+    manifest = template_dir / f"task-{task}_model-{label}_design-template_manifest.tsv"
+    write_tsv(
+        manifest,
+        manifest_rows,
+        [
+            "model_label",
+            "contrast",
+            "n_participants",
+            "covariates",
+            "template_tsv",
+            "template_csv",
+            "excluded_participants_tsv",
+        ],
+    )
+    readme = template_dir / "README.md"
+    readme.write_text(
+        "# Randomise Covariate Design Templates\n\n"
+        f"Model: `{label}`\n\n"
+        f"Task: `{task}`\n\n"
+        "Each spreadsheet is ready to paste into the FSL GLM GUI or compare with "
+        "the generated `design.mat` files. Columns are ordered as `participant`, "
+        "`intercept`, then demeaned covariates. The intercept column is intentionally "
+        "not demeaned. File names include the contrast-specific N.\n\n"
+        "The `_excluded-participants.tsv` files document participants dropped from a "
+        "given spreadsheet because a required covariate was unavailable for that "
+        "contrast.\n"
+    )
+    return manifest
+
+
+def template_participants(
+    covariate_rows: dict[tuple[str, str], dict[str, str]], subject_order: Path | None
+) -> list[str]:
+    if subject_order:
+        return read_subject_order(subject_order.resolve())
+    return primary_participants(covariate_rows)
 
 
 def build_run_randomise_script(
@@ -545,6 +687,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--contrasts", default="all")
     parser.add_argument("--task", default="rest")
     parser.add_argument("--output-subdir", default="covariate-models")
+    parser.add_argument(
+        "--template-dir",
+        type=Path,
+        default=repo_root / "templates" / "randomise_covariate_models",
+        help="Tracked root folder for small design template spreadsheets.",
+    )
+    parser.add_argument(
+        "--template-subject-order",
+        type=Path,
+        help="Optional subject_order.tsv to define the template participant pool.",
+    )
+    parser.add_argument(
+        "--templates-only",
+        action="store_true",
+        help="Only write design template spreadsheets; do not build component model folders.",
+    )
+    parser.add_argument(
+        "--no-templates",
+        action="store_true",
+        help="Do not write root-level template spreadsheets during model setup.",
+    )
     parser.add_argument("--mask", type=Path)
     parser.add_argument("--n-perm", type=int, default=5000)
     parser.add_argument("--cluster-threshold", type=float, default=3.1)
@@ -566,6 +729,24 @@ def main() -> int:
     covariates = parse_covariates(args.covariates)
     label = model_label(covariates, args.model_label)
     covariate_rows = load_covariates(args.group_covariates.resolve())
+    base_template_participants = template_participants(covariate_rows, args.template_subject_order)
+
+    if args.templates_only:
+        contrasts = parse_contrasts(args.contrasts)
+        manifest = write_templates(
+            args.template_dir.resolve(),
+            args.task,
+            label,
+            contrasts,
+            base_template_participants,
+            covariate_rows,
+            covariates,
+        )
+        print(f"Model label: {label}")
+        print(f"Covariates: {','.join(covariates)}")
+        print(f"Template participants: {len(base_template_participants)}")
+        print(f"Wrote {manifest}")
+        return 0
 
     component_jobs: dict[Path, dict[str, set[str] | set[tuple[str, str]]]] = {}
     if args.summary:
@@ -592,6 +773,25 @@ def main() -> int:
     print(f"Model label: {label}")
     print(f"Covariates: {','.join(covariates)}")
     print(f"Components: {len(component_jobs)}")
+    if not args.no_templates and not args.dry_run:
+        template_contrasts = sorted(
+            {
+                contrast
+                for job_info in component_jobs.values()
+                for contrast in job_info["contrasts"]  # type: ignore[union-attr]
+            },
+            key=list(CONTRASTS).index,
+        )
+        manifest = write_templates(
+            args.template_dir.resolve(),
+            args.task,
+            label,
+            template_contrasts,
+            base_template_participants,
+            covariate_rows,
+            covariates,
+        )
+        print(f"Wrote design templates: {manifest}")
     for component_dir, job_info in sorted(component_jobs.items()):
         write_model(
             component_dir=component_dir,

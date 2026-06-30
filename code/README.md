@@ -35,7 +35,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `MakeGroupCovariates.py` | MRIQC run table and BIDS task-rest events | Writes run-level and contrast-level group covariates, including mean FD, tSNR, pupil area, blink rate, and eye closure. |
 | `MakeCovariateDeltaTables.py` | `task-rest_group_covariates.tsv` | Writes compact complete-case subject-level contrast-delta tables for mean FD, pupil area, and blink rate under `derivatives/qc/covariate_delta_tables`, using the primary N=27 subject scope by default, plus a missingness audit. |
 | `MakeRandomiseDesignSpreadsheets.py` | Group covariates and, optionally, a `subject_order.tsv` | Writes labeled TSV/CSV tables for building covariate-adjusted `design.mat`, `design.con`, and `design.grp` files in the FSL GUI. |
-| `MakeCovariateRandomiseModels.py` | Existing dual-regression contrast images and group covariates | Builds covariate-adjusted whole-brain randomise model folders with per-contrast participant orders, design files, merged group inputs, and launchers. |
+| `MakeCovariateRandomiseModels.py` | Existing dual-regression contrast images and group covariates | Builds covariate-adjusted whole-brain randomise model folders with per-contrast participant orders, design files, merged group inputs, launchers, and tracked review templates under `templates/randomise_covariate_models`. |
 | `tsvResting.m` | r21-cardgame BIDS task-rest events | Bart's MATLAB pupil/blink analysis helper; auto-detects the Mac and Linux r21-cardgame locations, reads `R21_CARDGAME_ROOT`, and adds `klab`, `klab/kStats`, or explicit `KLAB_ROOT`/`KSTATS_ROOT` override paths when needed. |
 | `MakeConfounds.py` | fMRIPrep confounds and BIDS events | Writes FSL/AFNI confound matrices, the ordered run manifest, and input lists. |
 | `smooth-3dBlurToFWHM.sh` | One fMRIPrep BOLD run and mask | Masks and smooths one run to 5-mm FWHM while adding its condition label. |
@@ -118,6 +118,20 @@ uses the full dual-regression contrast images and `fslmerge`:
 ```bash
 python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink
 python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink,pupil
+```
+
+Small design-template spreadsheets are also written to
+`templates/randomise_covariate_models/model-*`. These are the GitHub-tracked
+copies for FSL GUI review. Each file name includes its contrast-specific N, and
+each spreadsheet is ordered as `participant`, `intercept`, then demeaned
+covariates. The intercept column is all `1`s and is not demeaned.
+
+To regenerate only the tracked spreadsheet templates without touching the large
+dual-regression outputs:
+
+```bash
+python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink
+python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmean,blink,pupil
 ```
 
 The FD/blink model remains N=27 for each contrast. The pupil-containing model

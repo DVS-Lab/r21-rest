@@ -95,6 +95,47 @@ class CovariateRandomiseModelTests(unittest.TestCase):
             self.assertIn("1\t0", design_con.read_text())
             self.assertIn("/NumPoints\t2", design_grp.read_text())
 
+    def test_write_design_template_uses_participant_intercept_and_demeaned_columns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rows = [
+                {
+                    "randomise_index": "0",
+                    "participant": "sub-001",
+                    "delta_fd_mean": "0.1",
+                    "delta_fd_mean_demeaned": "-0.1",
+                    "delta_blink_rate_per_min": "1.5",
+                    "delta_blink_rate_per_min_demeaned": "-0.5",
+                },
+                {
+                    "randomise_index": "1",
+                    "participant": "sub-002",
+                    "delta_fd_mean": "0.3",
+                    "delta_fd_mean_demeaned": "0.1",
+                    "delta_blink_rate_per_min": "2.5",
+                    "delta_blink_rate_per_min_demeaned": "0.5",
+                },
+            ]
+            manifest_row = cov_models.write_design_template(
+                root,
+                "rest",
+                "cov-fdmean-blink",
+                "both-minus-sham",
+                rows,
+                [],
+                ["delta_fd_mean", "delta_blink_rate_per_min"],
+            )
+            tsv = root / manifest_row["template_tsv"]
+            lines = tsv.read_text().splitlines()
+            self.assertEqual(
+                lines[0],
+                "participant\tintercept\tdelta_fd_mean_demeaned\tdelta_blink_rate_per_min_demeaned",
+            )
+            self.assertEqual(lines[1], "sub-001\t1\t-0.1\t-0.5")
+            self.assertIn("_N-02_", tsv.name)
+            self.assertTrue((root / manifest_row["template_csv"]).is_file())
+            self.assertTrue((root / manifest_row["excluded_participants_tsv"]).is_file())
+
     def test_run_randomise_launcher_uses_shell_array(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
