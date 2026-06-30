@@ -56,14 +56,6 @@ def write_tsv(path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> 
         writer.writerows(rows)
 
 
-def write_csv(path: Path, rows: list[dict[str, str]], fieldnames: list[str]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fieldnames, lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
-
-
 def parse_contrasts(value: str) -> list[str]:
     if value.strip().lower() == "all":
         return list(CONTRASTS)
@@ -319,19 +311,19 @@ def write_design_template(
     rows = template_rows(audit_rows, covariates)
     fields = ["participant", "intercept", *[f"{covariate}_demeaned" for covariate in covariates]]
     tsv = template_dir / f"{stem}.tsv"
-    csv_path = template_dir / f"{stem}.csv"
     write_tsv(tsv, rows, fields)
-    write_csv(csv_path, rows, fields)
-    excluded_path = template_dir / f"{stem}_excluded-participants.tsv"
-    write_tsv(excluded_path, excluded, ["participant", "reason"])
+    excluded_name = ""
+    if excluded:
+        excluded_path = template_dir / f"{stem}_excluded-participants.tsv"
+        write_tsv(excluded_path, excluded, ["participant", "reason"])
+        excluded_name = excluded_path.name
     return {
         "model_label": label,
         "contrast": contrast,
         "n_participants": str(n_participants),
         "covariates": ",".join(covariates),
         "template_tsv": tsv.name,
-        "template_csv": csv_path.name,
-        "excluded_participants_tsv": excluded_path.name,
+        "excluded_participants_tsv": excluded_name,
     }
 
 
@@ -343,7 +335,7 @@ def write_template_root_readme(template_root: Path) -> None:
         "These small spreadsheets mirror the covariate design matrices used for "
         "whole-brain randomise follow-up models. They are tracked in GitHub so the "
         "FSL GLM GUI setup can be reviewed without copying large derivative images.\n\n"
-        "Each model folder contains one TSV and one CSV per contrast. File names "
+        "Each model folder contains one TSV per contrast. File names "
         "include the analysis task, model label, contrast, and contrast-specific N. "
         "Columns are ordered as `participant`, `intercept`, then demeaned covariates. "
         "The `intercept` column is always `1` and is not demeaned.\n\n"
@@ -365,6 +357,12 @@ def write_templates(
     write_template_root_readme(template_root)
     template_dir = template_root / f"model-{label}"
     template_dir.mkdir(parents=True, exist_ok=True)
+    for stale_path in template_dir.glob(f"task-{task}_model-{label}_contrast-*_design-template.csv"):
+        stale_path.unlink()
+    for stale_path in template_dir.glob(
+        f"task-{task}_model-{label}_contrast-*_design-template_excluded-participants.tsv"
+    ):
+        stale_path.unlink()
     manifest_rows: list[dict[str, str]] = []
     for contrast in contrasts:
         selected, excluded = select_participants(base_participants, covariate_rows, contrast, covariates)
@@ -386,7 +384,6 @@ def write_templates(
             "n_participants",
             "covariates",
             "template_tsv",
-            "template_csv",
             "excluded_participants_tsv",
         ],
     )
@@ -399,9 +396,8 @@ def write_templates(
         "the generated `design.mat` files. Columns are ordered as `participant`, "
         "`intercept`, then demeaned covariates. The intercept column is intentionally "
         "not demeaned. File names include the contrast-specific N.\n\n"
-        "The `_excluded-participants.tsv` files document participants dropped from a "
-        "given spreadsheet because a required covariate was unavailable for that "
-        "contrast.\n"
+        "An `_excluded-participants.tsv` file is written only when participants were "
+        "dropped from that contrast because a required covariate was unavailable.\n"
     )
     return manifest
 

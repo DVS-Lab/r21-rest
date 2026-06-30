@@ -124,7 +124,9 @@ Small design-template spreadsheets are also written to
 `templates/randomise_covariate_models/model-*`. These are the GitHub-tracked
 copies for FSL GUI review. Each file name includes its contrast-specific N, and
 each spreadsheet is ordered as `participant`, `intercept`, then demeaned
-covariates. The intercept column is all `1`s and is not demeaned.
+covariates. The intercept column is all `1`s and is not demeaned. An
+excluded-participants TSV is written only when a contrast actually drops one or
+more participants.
 
 To regenerate only the tracked spreadsheet templates without touching the large
 dual-regression outputs:

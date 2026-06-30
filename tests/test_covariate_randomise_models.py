@@ -133,7 +133,18 @@ class CovariateRandomiseModelTests(unittest.TestCase):
             )
             self.assertEqual(lines[1], "sub-001\t1\t-0.1\t-0.5")
             self.assertIn("_N-02_", tsv.name)
-            self.assertTrue((root / manifest_row["template_csv"]).is_file())
+            self.assertEqual(manifest_row["excluded_participants_tsv"], "")
+            self.assertFalse(list(root.glob("*_excluded-participants.tsv")))
+
+            manifest_row = cov_models.write_design_template(
+                root,
+                "rest",
+                "cov-fdmean-blink",
+                "both-minus-sham",
+                rows,
+                [{"participant": "sub-003", "reason": "missing_covariate:delta_mean_pupil_area"}],
+                ["delta_fd_mean", "delta_blink_rate_per_min"],
+            )
             self.assertTrue((root / manifest_row["excluded_participants_tsv"]).is_file())
 
     def test_run_randomise_launcher_uses_shell_array(self):

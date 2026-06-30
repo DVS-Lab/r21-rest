@@ -6,4 +6,4 @@ Task: `rest`
 
 Each spreadsheet is ready to paste into the FSL GLM GUI or compare with the generated `design.mat` files. Columns are ordered as `participant`, `intercept`, then demeaned covariates. The intercept column is intentionally not demeaned. File names include the contrast-specific N.
 
-The `_excluded-participants.tsv` files document participants dropped from a given spreadsheet because a required covariate was unavailable for that contrast.
+An `_excluded-participants.tsv` file is written only when participants were dropped from that contrast because a required covariate was unavailable.

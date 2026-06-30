@@ -164,7 +164,9 @@ python3 code/MakeCovariateRandomiseModels.py --templates-only --covariates fdmea
 
 Those template filenames include the contrast-specific N. Each spreadsheet is
 ordered as `participant`, `intercept`, then demeaned covariates; the intercept
-column is all `1`s and is not demeaned.
+column is all `1`s and is not demeaned. An excluded-participants TSV is written
+only for contrasts where at least one participant was dropped from that
+template.
 
 ## Verify Outputs
 
