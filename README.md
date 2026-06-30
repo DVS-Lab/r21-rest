@@ -173,6 +173,16 @@ and `design.con` files without passing `-e design.grp`, since these are
 subject-level one-sample contrast images rather than exchangeability-block
 models.
 
+On the Linux box, rebuild the covariate model folders, inspect every path, then
+launch the currently significant follow-up jobs with bounded concurrency:
+
+```bash
+python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink --overwrite
+python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,pupil --overwrite
+code/run_covariate_randomise.sh --dry-run --max-jobs 35
+code/run_covariate_randomise.sh --max-jobs 35
+```
+
 ## Verify Outputs
 
 Check expected outputs for every BIDS run and T1w image:

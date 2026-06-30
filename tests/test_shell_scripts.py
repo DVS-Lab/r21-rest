@@ -360,6 +360,89 @@ class ShellScriptTests(unittest.TestCase):
         )
         self.assertIn("mask coverage", qa.stdout)
 
+    def test_covariate_randomise_launcher_discovers_and_runs_jobs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fsldir = root / "derivatives" / "fsl"
+            model = (
+                fsldir
+                / "dual-regression_denoised_dim-20_task-rest.dr"
+                / "contrasts"
+                / "component-0003_stat-beta"
+                / "covariate-models"
+                / "model-cov-fdmean-blink"
+            )
+            contrast_dir = model / "both-minus-sham"
+            output_prefix = (
+                model
+                / "randomise"
+                / "network-dmn"
+                / "task-rest_network-dmn_component-0003_stat-beta_contrast-both-minus-sham_model-cov-fdmean-blink"
+            )
+            contrast_dir.mkdir(parents=True)
+            output_prefix.parent.mkdir(parents=True)
+            drdir = fsldir / "dual-regression_denoised_dim-20_task-rest.dr"
+            (drdir / "mask.nii.gz").write_text("mask")
+            group_input = contrast_dir / "group.nii.gz"
+            design_mat = contrast_dir / "design.mat"
+            design_con = contrast_dir / "design.con"
+            design_grp = contrast_dir / "design.grp"
+            for path in (group_input, design_mat, design_con, design_grp):
+                path.write_text("x")
+            (model / "randomise_jobs.tsv").write_text(
+                "contrast\tnetwork\tgroup_input\tdesign_mat\tdesign_con\tdesign_grp\toutput_prefix\n"
+                f"both-minus-sham\tdmn\t{group_input}\t{design_mat}\t{design_con}\t{design_grp}\t{output_prefix}\n"
+            )
+
+            env = os.environ | {"FSL_OUTPUT_DIR": str(fsldir)}
+            dry_run = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "run_covariate_randomise.sh"),
+                    "--models",
+                    "fdmean-blink",
+                    "--max-jobs",
+                    "35",
+                    "--dry-run",
+                ],
+                env=env,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn("Model manifests: 1", dry_run.stderr)
+            self.assertIn("Randomise jobs: 1; already complete: 0; pending: 1; maximum concurrent: 35", dry_run.stderr)
+            self.assertIn(str(output_prefix), dry_run.stderr)
+
+            fakebin = root / "bin"
+            fakebin.mkdir()
+            capture = root / "randomise_args.txt"
+            self.write_command(fakebin / "randomise", 'printf "%s\\n" "$*" > "$RANDOMISE_CAPTURE"\n')
+            run = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "run_covariate_randomise.sh"),
+                    "--models",
+                    "fdmean-blink",
+                    "--max-jobs",
+                    "1",
+                    "--n-perm",
+                    "17",
+                ],
+                env=env | {"PATH": f"{fakebin}:{os.environ['PATH']}", "RANDOMISE_CAPTURE": str(capture)},
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn("Covariate randomise jobs complete.", run.stderr)
+            args = capture.read_text()
+            self.assertIn(f"-i {group_input}", args)
+            self.assertIn(f"-m {drdir / 'mask.nii.gz'}", args)
+            self.assertIn(f"-d {design_mat}", args)
+            self.assertIn(f"-t {design_con}", args)
+            self.assertNotIn(" -e ", args)
+            self.assertTrue(Path(f"{output_prefix}.complete").is_file())
+
     def test_dual_regression_contrasts_build_randomise_inputs(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
