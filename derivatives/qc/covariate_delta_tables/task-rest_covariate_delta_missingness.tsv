@@ -1,26 +1,13 @@
 participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
 sub-208	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		false	pupil	-32.25831075	n/a	-0.069793
-sub-212	both-minus-sham	BOTH > SHAM	both=1, sham=-1	false	both	false	blink,pupil,fdmean	n/a	n/a	n/a
-sub-233	both-minus-sham	BOTH > SHAM	both=1, sham=-1	false	both,sham	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-208	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		false	pupil	-12.83966785	n/a	0.001189
-sub-212	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	false	both,rtpj	false	blink,pupil,fdmean	n/a	n/a	n/a
-sub-233	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	false	both	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-208	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		false	pupil	-26.32018435	n/a	-0.035044
-sub-212	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	false	both	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-213	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		false	pupil	98.21799137	n/a	-0.031094
 sub-220	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		false	pupil	10.91348011	n/a	-0.00265
-sub-233	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	false	both,vlpfc	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-208	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		false	pupil	-19.5799261	n/a	-0.0169275
-sub-212	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	false	both,rtpj	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-213	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		false	pupil	55.52617355	n/a	-0.0348695
 sub-220	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		false	pupil	-28.73008805	n/a	0.00618215
-sub-233	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	false	both,vlpfc	false	blink,pupil,fdmean	n/a	n/a	n/a
-sub-212	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	false	rtpj	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-213	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		false	pupil	-85.38363563	n/a	-0.007551
 sub-220	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		false	pupil	-79.28713632	n/a	0.0176643
-sub-233	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	false	vlpfc	false	blink,pupil,fdmean	n/a	n/a	n/a
 sub-213	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		false	pupil	-95.80749753	n/a	-0.01344
 sub-220	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		false	pupil	-12.6794956	n/a	-0.026119
-sub-233	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	false	vlpfc,sham	false	blink,pupil,fdmean	n/a	n/a	n/a
-sub-212	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	false	rtpj	false	blink,pupil,fdmean	n/a	n/a	n/a
-sub-233	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	false	sham	false	blink,pupil,fdmean	n/a	n/a	n/a

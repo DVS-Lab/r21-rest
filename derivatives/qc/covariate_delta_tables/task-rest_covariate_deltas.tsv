@@ -131,7 +131,6 @@ sub-208	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-5.9381264	-2
 sub-209	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		15.88674616	276.957361	0.325295
 sub-210	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-26.16502972	74.7481852	0.009011
 sub-211	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-41.40952463	107.229843	-0.025823
-sub-212	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		3.3675776	-774.5686564	0.123706
 sub-214	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		0.96460617	113.210326	0.010616
 sub-215	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		7.863994355	-175.218463	0.06127
 sub-217	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.96276838	-215.3071911	0.165305

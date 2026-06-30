@@ -112,7 +112,9 @@ class GroupCovariateTests(unittest.TestCase):
                 "delta_blink_rate_per_min": "4",
             }
         ]
-        deltas = delta_tables.build_delta_rows(rows, ["vlpfc-minus-rtpj"])
+        deltas = delta_tables.build_delta_rows(
+            rows, ["vlpfc-minus-rtpj"], subject_scope="all"
+        )
         self.assertEqual(deltas[0]["contrast_label"], "VLPFC > RTPJ")
         self.assertEqual(deltas[0]["complete_delta_covariates"], "true")
         self.assertAlmostEqual(float(deltas[0]["delta_fdmean"]), -0.25)
@@ -131,10 +133,40 @@ class GroupCovariateTests(unittest.TestCase):
                 "delta_blink_rate_per_min": "3",
             }
         ]
-        deltas = delta_tables.build_delta_rows(rows, ["both-minus-sham"])
+        deltas = delta_tables.build_delta_rows(
+            rows, ["both-minus-sham"], subject_scope="all"
+        )
         self.assertEqual(deltas[0]["complete_conditions"], "true")
         self.assertEqual(deltas[0]["complete_delta_covariates"], "false")
         self.assertEqual(deltas[0]["missing_delta_covariates"], "pupil")
+
+    def test_covariate_delta_tables_default_to_primary_subject_scope(self):
+        rows = []
+        for participant, complete_all in (("sub-001", True), ("sub-002", False)):
+            for contrast in (
+                "both-minus-sham",
+                "both-minus-rtpj",
+                "both-minus-vlpfc",
+                "both-minus-mean-rtpj-vlpfc",
+                "rtpj-minus-vlpfc",
+                "rtpj-minus-sham",
+                "vlpfc-minus-sham",
+            ):
+                rows.append(
+                    {
+                        "participant": participant,
+                        "contrast": contrast,
+                        "complete": "true"
+                        if complete_all or contrast == "vlpfc-minus-sham"
+                        else "false",
+                        "missing_conditions": "" if complete_all else "rtpj",
+                        "delta_fd_mean": "0.1",
+                        "delta_mean_pupil_area": "2",
+                        "delta_blink_rate_per_min": "3",
+                    }
+                )
+        deltas = delta_tables.build_delta_rows(rows, ["vlpfc-minus-sham"])
+        self.assertEqual({row["participant"] for row in deltas}, {"sub-001"})
 
 
 if __name__ == "__main__":

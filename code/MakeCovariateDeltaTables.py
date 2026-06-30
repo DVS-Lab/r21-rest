@@ -158,11 +158,81 @@ def index_covariates(rows: list[dict[str, str]]) -> dict[tuple[str, str], dict[s
     return indexed
 
 
+def contrast_sources(contrasts: list[str]) -> list[str]:
+    sources: list[str] = []
+    for contrast in contrasts:
+        source = str(CONTRAST_SPECS[contrast]["source"])
+        if source not in sources:
+            sources.append(source)
+    return sources
+
+
+def participants_complete_for_sources(
+    indexed: dict[tuple[str, str], dict[str, str]], sources: list[str]
+) -> list[str]:
+    participants = sorted({participant for participant, _contrast in indexed})
+    return [
+        participant
+        for participant in participants
+        if all(
+            indexed.get((participant, source), {}).get("complete", "").lower()
+            == "true"
+            for source in sources
+        )
+    ]
+
+
+def read_participant_list(path: Path) -> list[str]:
+    participants: list[str] = []
+    with path.open() as stream:
+        for line in stream:
+            value = line.strip()
+            if value == "" or value.startswith("#"):
+                continue
+            participant = value.split()[0]
+            if participant.isdigit():
+                participant = f"sub-{participant}"
+            elif not participant.startswith("sub-"):
+                participant = f"sub-{participant}"
+            if participant in participants:
+                raise ValueError(f"Duplicate participant in {path}: {participant}")
+            participants.append(participant)
+    if not participants:
+        raise ValueError(f"No participants found in {path}")
+    return participants
+
+
+def choose_participants(
+    indexed: dict[tuple[str, str], dict[str, str]],
+    contrasts: list[str],
+    subject_scope: str,
+    participant_list: Path | None,
+) -> list[str]:
+    if participant_list is not None:
+        participants = read_participant_list(participant_list)
+    elif subject_scope == "all":
+        participants = sorted({participant for participant, _contrast in indexed})
+    elif subject_scope == "requested":
+        participants = participants_complete_for_sources(indexed, contrast_sources(contrasts))
+    elif subject_scope == "primary":
+        participants = participants_complete_for_sources(
+            indexed, contrast_sources(list(CONTRAST_SETS["primary"]))
+        )
+    else:
+        raise ValueError(f"Unknown subject scope: {subject_scope}")
+    if not participants:
+        raise ValueError("No participants selected for covariate delta tables")
+    return participants
+
+
 def build_delta_rows(
-    covariate_rows: list[dict[str, str]], contrasts: list[str]
+    covariate_rows: list[dict[str, str]],
+    contrasts: list[str],
+    subject_scope: str = "primary",
+    participant_list: Path | None = None,
 ) -> list[dict[str, str]]:
     indexed = index_covariates(covariate_rows)
-    participants = sorted({participant for participant, _contrast in indexed})
+    participants = choose_participants(indexed, contrasts, subject_scope, participant_list)
     output: list[dict[str, str]] = []
 
     for contrast in contrasts:
@@ -236,6 +306,21 @@ def parse_args() -> argparse.Namespace:
         help="Contrast set ('primary' or 'core') or comma-separated contrast names.",
     )
     parser.add_argument(
+        "--subject-scope",
+        choices=("primary", "requested", "all"),
+        default="primary",
+        help=(
+            "Participant set to use. 'primary' keeps the N complete for the full "
+            "primary contrast family; 'requested' uses participants complete for "
+            "the requested contrasts; 'all' uses every participant in the input."
+        ),
+    )
+    parser.add_argument(
+        "--participant-list",
+        type=Path,
+        help="Optional explicit participant list; overrides --subject-scope.",
+    )
+    parser.add_argument(
         "--include-incomplete",
         action="store_true",
         help="Keep rows with missing pupil/blink/FD deltas in the main tables.",
@@ -246,7 +331,12 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     contrasts = parse_contrast_list(args.contrasts)
-    all_rows = build_delta_rows(read_tsv(args.input.resolve()), contrasts)
+    all_rows = build_delta_rows(
+        read_tsv(args.input.resolve()),
+        contrasts,
+        subject_scope=args.subject_scope,
+        participant_list=args.participant_list.resolve() if args.participant_list else None,
+    )
     missing_rows = [row for row in all_rows if not is_complete_delta_row(row)]
     rows = all_rows if args.include_incomplete else [row for row in all_rows if is_complete_delta_row(row)]
 
@@ -262,6 +352,8 @@ def main() -> int:
         write_tsv(contrast_path, contrast_rows, FIELDS)
 
     print(f"Contrasts summarized: {len(contrasts)}")
+    print(f"Subject scope: {args.subject_scope}")
+    print(f"Subjects selected: {len({row['participant'] for row in all_rows})}")
     print(f"Rows written: {len(rows)}")
     print(f"Incomplete rows written to missingness audit: {len(missing_rows)}")
     print(f"Wrote {combined}")
