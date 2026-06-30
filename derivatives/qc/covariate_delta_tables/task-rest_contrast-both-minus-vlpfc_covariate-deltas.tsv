@@ -1,0 +1,25 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-15.08405675	182.834053	-0.022458
+sub-203	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-15.24846078	-92.608472	0.052017
+sub-207	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		210.6554726	-414.3065	-0.040296
+sub-209	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-0.32063287	74.609157	-0.385072
+sub-210	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-20.8636738	-103.1870612	0.110475
+sub-211	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-23.59116543	-710.846897	-0.040365
+sub-214	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		20.38092973	-1110.577498	0.059677
+sub-215	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-2.72817484	136.341559	-0.01395
+sub-217	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-16.04884327	-31.8554771	-0.060555
+sub-218	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-2.5721352	-10.933572	0.188336
+sub-219	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-1.44583106	27.8958573	-0.007037
+sub-221	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		14.28332942	-158.049013	-0.053704
+sub-222	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-14.92500405	-38.850482	0.648126
+sub-225	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-21.50542667	-348.592513	-0.089492
+sub-226	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		4.333710852	162.759035	0.032982
+sub-227	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-4.97394845	230.871674	-0.174928
+sub-228	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		0.64160507	308.1875455	0.025461
+sub-230	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		52.64321501	-585.797424	0.095923
+sub-231	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-3.04879417	86.7429229	-0.003667
+sub-234	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		8.3448491	-312.500224	0.009984
+sub-235	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-10.91510466	-61.190371	-0.015244
+sub-236	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		17.49439501	19.271022	0.024991
+sub-237	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-6.74214933	50.527206	0.049868
+sub-238	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		23.75634695	253.1220472	-0.205613

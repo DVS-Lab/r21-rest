@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "code"))
 
 import MakeGroupCovariates as group_covariates  # noqa: E402
+import MakeCovariateDeltaTables as delta_tables  # noqa: E402
 import MakeRandomiseDesignSpreadsheets as design_sheets  # noqa: E402
 
 
@@ -98,6 +99,42 @@ class GroupCovariateTests(unittest.TestCase):
             with output.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
             self.assertEqual(rows[1]["participant"], "sub-002")
+
+    def test_covariate_delta_tables_flip_vlpfc_minus_rtpj(self):
+        rows = [
+            {
+                "participant": "sub-001",
+                "contrast": "rtpj-minus-vlpfc",
+                "complete": "true",
+                "missing_conditions": "",
+                "delta_fd_mean": "0.25",
+                "delta_mean_pupil_area": "-20",
+                "delta_blink_rate_per_min": "4",
+            }
+        ]
+        deltas = delta_tables.build_delta_rows(rows, ["vlpfc-minus-rtpj"])
+        self.assertEqual(deltas[0]["contrast_label"], "VLPFC > RTPJ")
+        self.assertEqual(deltas[0]["complete_delta_covariates"], "true")
+        self.assertAlmostEqual(float(deltas[0]["delta_fdmean"]), -0.25)
+        self.assertAlmostEqual(float(deltas[0]["delta_pupil"]), 20.0)
+        self.assertAlmostEqual(float(deltas[0]["delta_blink"]), -4.0)
+
+    def test_covariate_delta_tables_flag_missing_delta_metrics(self):
+        rows = [
+            {
+                "participant": "sub-001",
+                "contrast": "both-minus-sham",
+                "complete": "true",
+                "missing_conditions": "",
+                "delta_fd_mean": "0.1",
+                "delta_mean_pupil_area": "n/a",
+                "delta_blink_rate_per_min": "3",
+            }
+        ]
+        deltas = delta_tables.build_delta_rows(rows, ["both-minus-sham"])
+        self.assertEqual(deltas[0]["complete_conditions"], "true")
+        self.assertEqual(deltas[0]["complete_delta_covariates"], "false")
+        self.assertEqual(deltas[0]["missing_delta_covariates"], "pupil")
 
 
 if __name__ == "__main__":

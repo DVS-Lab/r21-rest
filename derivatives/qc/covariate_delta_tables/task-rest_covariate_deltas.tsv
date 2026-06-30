@@ -1,0 +1,179 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-17.81491792	176.179124	-0.01244
+sub-203	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-7.05892185	-14.0764327	0.046674
+sub-207	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		325.5504174	493.569762	0.049709
+sub-209	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		15.56611329	351.566518	-0.059777
+sub-210	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-47.02870352	-28.438876	0.119486
+sub-211	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-65.00069006	-603.617054	-0.066188
+sub-213	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		2.41049384	64.9913908	-0.044534
+sub-214	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		21.3455359	-997.367172	0.070293
+sub-215	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		5.135819515	-38.876904	0.04732
+sub-217	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-17.01161165	-247.1626682	0.10475
+sub-218	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		17.17132012	134.856254	0.562343
+sub-219	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-1.92645241	105.4503015	-0.011258
+sub-220	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-1.76601549	-418.209766	-0.028769
+sub-221	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-3.05159952	-14.012769	0.00567
+sub-222	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		21.02522897	177.05648	-0.1074
+sub-225	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-14.92433934	-430.940098	-0.103286
+sub-226	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		4.333462555	-106.959356	-0.494145
+sub-227	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		0.9639105	-148.923411	-0.088454
+sub-228	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-13.96248082	440.1609187	0.055099
+sub-230	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		50.07424504	-156.643368	0.218188
+sub-231	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-3.69182924	80.6389883	-0.042765
+sub-234	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		28.56550415	-546.476844	0.00354
+sub-235	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-4.96760998	319.266558	0.046978
+sub-236	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		2.40707813	92.223785	0.0452456
+sub-237	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-1.60859842	114.153656	-0.031663
+sub-238	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		27.61124462	-13.89797	-0.427761
+sub-189	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		13.48228161	345.475111	-0.001476
+sub-203	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-6.73997204	-35.7579663	0.021752
+sub-207	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		158.8946039	-611.415284	0.10384
+sub-209	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-7.70363706	260.081807	-0.085208
+sub-210	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-42.53349745	-137.8308825	0.080387
+sub-211	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-3.049781128	-247.381887	-0.05052
+sub-213	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		12.83435574	30.9083948	-0.038645
+sub-214	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		7.86316835	-483.931052	-0.018489
+sub-215	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		8.506017186	-3.462804	0.043047
+sub-217	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-11.55454128	-362.8917776	0.15365
+sub-218	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		2.24386838	-5.000682	0.263368
+sub-219	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		2.56663256	-30.8065777	0.008178
+sub-220	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-68.37365621	240.106763	0.0150143
+sub-221	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		24.87365247	-139.380328	0.070086
+sub-222	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-48.14754365	-301.574265	0.677894
+sub-225	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-28.40495632	-192.973333	-0.103678
+sub-226	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		5.777834896	23.95239	-0.291297
+sub-227	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		4.3347327	-42.401263	-0.03799
+sub-228	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-2.88917992	173.2588218	0.020696
+sub-230	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-8.82638271	30.536522	-0.035326
+sub-231	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-4.65455694	-270.8908125	-0.04976
+sub-234	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-33.54702223	-190.934209	0.000224
+sub-235	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-51.50715857	112.604138	0.030865
+sub-236	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		12.67873895	215.330689	0.0330963
+sub-237	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-1.76719093	182.794484	0.017646
+sub-238	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		41.41284501	198.7695708	-0.055142
+sub-189	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-15.08405675	182.834053	-0.022458
+sub-203	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-15.24846078	-92.608472	0.052017
+sub-207	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		210.6554726	-414.3065	-0.040296
+sub-209	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-0.32063287	74.609157	-0.385072
+sub-210	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-20.8636738	-103.1870612	0.110475
+sub-211	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-23.59116543	-710.846897	-0.040365
+sub-214	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		20.38092973	-1110.577498	0.059677
+sub-215	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-2.72817484	136.341559	-0.01395
+sub-217	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-16.04884327	-31.8554771	-0.060555
+sub-218	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-2.5721352	-10.933572	0.188336
+sub-219	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-1.44583106	27.8958573	-0.007037
+sub-221	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		14.28332942	-158.049013	-0.053704
+sub-222	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-14.92500405	-38.850482	0.648126
+sub-225	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-21.50542667	-348.592513	-0.089492
+sub-226	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		4.333710852	162.759035	0.032982
+sub-227	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-4.97394845	230.871674	-0.174928
+sub-228	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		0.64160507	308.1875455	0.025461
+sub-230	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		52.64321501	-585.797424	0.095923
+sub-231	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-3.04879417	86.7429229	-0.003667
+sub-234	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		8.3448491	-312.500224	0.009984
+sub-235	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-10.91510466	-61.190371	-0.015244
+sub-236	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		17.49439501	19.271022	0.024991
+sub-237	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		-6.74214933	50.527206	0.049868
+sub-238	both-minus-vlpfc	BOTH > VLPFC	both=1, vlpfc=-1	true		true		23.75634695	253.1220472	-0.205613
+sub-189	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-0.80088757	264.154582	-0.011967
+sub-203	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-10.99421641	-64.18321915	0.0368845
+sub-207	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		184.7750383	-512.860892	0.031772
+sub-209	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-4.012134965	167.345482	-0.23514
+sub-210	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-31.69858562	-120.5089719	0.095431
+sub-211	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-13.32047328	-479.114392	-0.0454425
+sub-214	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		14.12204904	-797.254275	0.020594
+sub-215	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		2.888921173	66.4393775	0.0145485
+sub-217	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-13.80169227	-197.3736273	0.0465475
+sub-218	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-0.16413341	-7.967127	0.225852
+sub-219	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		0.56040075	-1.4553602	0.0005705
+sub-221	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		19.57849094	-148.7146705	0.008191
+sub-222	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-31.53627385	-170.2123735	0.66301
+sub-225	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-24.95519149	-270.782923	-0.096585
+sub-226	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		5.055772874	93.3557125	-0.1291575
+sub-227	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-0.319607875	94.2352055	-0.106459
+sub-228	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-1.123787425	240.7231836	0.0230785
+sub-230	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		21.90841615	-277.630451	0.0302985
+sub-231	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-3.851675555	-92.0739448	-0.0267135
+sub-234	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-12.60108657	-251.7172165	0.005104
+sub-235	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-31.21113161	25.7068835	0.0078105
+sub-236	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		15.08656698	117.3008555	0.02904365
+sub-237	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-4.25467013	116.660845	0.033757
+sub-238	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		32.58459598	225.945809	-0.1303775
+sub-189	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		28.56633836	162.641058	0.020982
+sub-203	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		8.50848874	56.8505057	-0.030265
+sub-207	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-51.7608687	-197.108784	0.144136
+sub-208	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		13.4805165	148.0779194	0.036233
+sub-209	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-7.38300419	185.47265	0.299864
+sub-210	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-21.66982365	-34.6438213	-0.030088
+sub-211	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		20.5413843	463.46501	-0.010155
+sub-214	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-12.51776138	626.646446	-0.078166
+sub-215	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		11.23419203	-139.804363	0.056997
+sub-217	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.49430199	-331.0363005	0.214205
+sub-218	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.81600358	5.93289	0.075032
+sub-219	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.01246362	-58.702435	0.015215
+sub-221	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		10.59032305	18.668685	0.12379
+sub-222	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-33.2225396	-262.723783	0.029768
+sub-225	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-6.89952965	155.61918	-0.014186
+sub-226	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		1.444124044	-138.806645	-0.324279
+sub-227	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		9.30868115	-273.272937	0.136938
+sub-228	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-3.53078499	-134.9287237	-0.004765
+sub-230	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-61.46959772	616.333946	-0.131249
+sub-231	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-1.60576277	-357.6337354	-0.046093
+sub-234	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-41.89187133	121.566015	-0.00976
+sub-235	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-40.59205391	173.794509	0.046109
+sub-236	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-4.81565606	196.059667	0.0081053
+sub-237	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.9749584	132.267278	-0.032222
+sub-238	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		17.65649806	-54.3524764	0.150471
+sub-189	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-2.73086117	-6.654929	0.010018
+sub-203	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		8.18953893	78.5320393	-0.005343
+sub-207	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		114.8949448	907.876262	0.090005
+sub-208	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-5.9381264	-210.4997441	-0.034749
+sub-209	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		15.88674616	276.957361	0.325295
+sub-210	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-26.16502972	74.7481852	0.009011
+sub-211	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-41.40952463	107.229843	-0.025823
+sub-212	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		3.3675776	-774.5686564	0.123706
+sub-214	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		0.96460617	113.210326	0.010616
+sub-215	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		7.863994355	-175.218463	0.06127
+sub-217	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.96276838	-215.3071911	0.165305
+sub-218	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		19.74345532	145.789826	0.374007
+sub-219	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.48062135	77.5544442	-0.004221
+sub-221	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-17.33492894	144.036244	0.059374
+sub-222	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		35.95023302	215.906962	-0.755526
+sub-225	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		6.58108733	-82.347585	-0.013794
+sub-226	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.000248297	-269.718391	-0.527127
+sub-227	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		5.93785895	-379.795085	0.086474
+sub-228	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-14.60408589	131.9733732	0.029638
+sub-230	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-2.56896997	429.154056	0.122265
+sub-231	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.64303507	-6.1039346	-0.039098
+sub-234	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		20.22065505	-233.97662	-0.006444
+sub-235	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		5.94749468	380.456929	0.062222
+sub-236	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-15.08731688	72.952763	0.0202546
+sub-237	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		5.13355091	63.62645	-0.081531
+sub-238	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		3.85489767	-267.0200172	-0.222148
+sub-189	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-31.29719953	-169.295987	-0.010964
+sub-203	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-0.31894981	21.6815336	0.024922
+sub-207	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		166.6558135	1104.985046	-0.054131
+sub-208	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-19.4186429	-358.5776635	-0.070982
+sub-209	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		23.26975035	91.484711	0.025431
+sub-210	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-4.49520607	109.3920065	0.039099
+sub-211	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-61.95090893	-356.235167	-0.015668
+sub-213	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-10.4238619	34.082996	-0.005889
+sub-214	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		13.48236755	-513.43612	0.088782
+sub-215	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-3.370197671	-35.4141	0.004273
+sub-217	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-5.45707037	115.7291094	-0.0489
+sub-218	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		14.92745174	139.856936	0.298975
+sub-219	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-4.49308497	136.2568792	-0.019436
+sub-220	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		66.60764072	-658.316529	-0.0437833
+sub-221	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-27.92525199	125.367559	-0.064416
+sub-222	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		69.17277262	478.630745	-0.785294
+sub-225	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		13.48061698	-237.966765	0.000392
+sub-226	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-1.444372341	-130.911746	-0.202848
+sub-227	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-3.3708222	-106.522148	-0.050464
+sub-228	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-11.0733009	266.9020969	0.034403
+sub-230	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		58.90062775	-187.17989	0.253514
+sub-231	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		0.9627277	351.5298008	0.006995
+sub-234	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		62.11252638	-355.542635	0.003316
+sub-235	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		46.53954859	206.66242	0.016113
+sub-236	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-10.27166082	-123.106904	0.0121493
+sub-237	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		0.15859251	-68.640828	-0.049309
+sub-238	rtpj-minus-sham	RTPJ > SHAM	rtpj=1, sham=-1	true		true		-13.80160039	-212.6675408	-0.372619

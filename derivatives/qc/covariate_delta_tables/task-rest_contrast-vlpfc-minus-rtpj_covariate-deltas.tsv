@@ -1,0 +1,26 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		28.56633836	162.641058	0.020982
+sub-203	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		8.50848874	56.8505057	-0.030265
+sub-207	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-51.7608687	-197.108784	0.144136
+sub-208	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		13.4805165	148.0779194	0.036233
+sub-209	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-7.38300419	185.47265	0.299864
+sub-210	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-21.66982365	-34.6438213	-0.030088
+sub-211	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		20.5413843	463.46501	-0.010155
+sub-214	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-12.51776138	626.646446	-0.078166
+sub-215	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		11.23419203	-139.804363	0.056997
+sub-217	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.49430199	-331.0363005	0.214205
+sub-218	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.81600358	5.93289	0.075032
+sub-219	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.01246362	-58.702435	0.015215
+sub-221	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		10.59032305	18.668685	0.12379
+sub-222	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-33.2225396	-262.723783	0.029768
+sub-225	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-6.89952965	155.61918	-0.014186
+sub-226	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		1.444124044	-138.806645	-0.324279
+sub-227	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		9.30868115	-273.272937	0.136938
+sub-228	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-3.53078499	-134.9287237	-0.004765
+sub-230	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-61.46959772	616.333946	-0.131249
+sub-231	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-1.60576277	-357.6337354	-0.046093
+sub-234	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-41.89187133	121.566015	-0.00976
+sub-235	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-40.59205391	173.794509	0.046109
+sub-236	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		-4.81565606	196.059667	0.0081053
+sub-237	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		4.9749584	132.267278	-0.032222
+sub-238	vlpfc-minus-rtpj	VLPFC > RTPJ	vlpfc=1, rtpj=-1	true		true		17.65649806	-54.3524764	0.150471

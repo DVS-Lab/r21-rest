@@ -1,0 +1,25 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-0.80088757	264.154582	-0.011967
+sub-203	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-10.99421641	-64.18321915	0.0368845
+sub-207	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		184.7750383	-512.860892	0.031772
+sub-209	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-4.012134965	167.345482	-0.23514
+sub-210	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-31.69858562	-120.5089719	0.095431
+sub-211	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-13.32047328	-479.114392	-0.0454425
+sub-214	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		14.12204904	-797.254275	0.020594
+sub-215	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		2.888921173	66.4393775	0.0145485
+sub-217	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-13.80169227	-197.3736273	0.0465475
+sub-218	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-0.16413341	-7.967127	0.225852
+sub-219	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		0.56040075	-1.4553602	0.0005705
+sub-221	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		19.57849094	-148.7146705	0.008191
+sub-222	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-31.53627385	-170.2123735	0.66301
+sub-225	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-24.95519149	-270.782923	-0.096585
+sub-226	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		5.055772874	93.3557125	-0.1291575
+sub-227	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-0.319607875	94.2352055	-0.106459
+sub-228	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-1.123787425	240.7231836	0.0230785
+sub-230	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		21.90841615	-277.630451	0.0302985
+sub-231	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-3.851675555	-92.0739448	-0.0267135
+sub-234	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-12.60108657	-251.7172165	0.005104
+sub-235	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-31.21113161	25.7068835	0.0078105
+sub-236	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		15.08656698	117.3008555	0.02904365
+sub-237	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		-4.25467013	116.660845	0.033757
+sub-238	both-minus-mean-rtpj-vlpfc	BOTH > mean(RTPJ, VLPFC)	both=1, rtpj=-0.5, vlpfc=-0.5	true		true		32.58459598	225.945809	-0.1303775

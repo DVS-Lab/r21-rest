@@ -1,0 +1,27 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		13.48228161	345.475111	-0.001476
+sub-203	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-6.73997204	-35.7579663	0.021752
+sub-207	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		158.8946039	-611.415284	0.10384
+sub-209	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-7.70363706	260.081807	-0.085208
+sub-210	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-42.53349745	-137.8308825	0.080387
+sub-211	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-3.049781128	-247.381887	-0.05052
+sub-213	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		12.83435574	30.9083948	-0.038645
+sub-214	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		7.86316835	-483.931052	-0.018489
+sub-215	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		8.506017186	-3.462804	0.043047
+sub-217	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-11.55454128	-362.8917776	0.15365
+sub-218	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		2.24386838	-5.000682	0.263368
+sub-219	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		2.56663256	-30.8065777	0.008178
+sub-220	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-68.37365621	240.106763	0.0150143
+sub-221	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		24.87365247	-139.380328	0.070086
+sub-222	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-48.14754365	-301.574265	0.677894
+sub-225	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-28.40495632	-192.973333	-0.103678
+sub-226	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		5.777834896	23.95239	-0.291297
+sub-227	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		4.3347327	-42.401263	-0.03799
+sub-228	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-2.88917992	173.2588218	0.020696
+sub-230	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-8.82638271	30.536522	-0.035326
+sub-231	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-4.65455694	-270.8908125	-0.04976
+sub-234	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-33.54702223	-190.934209	0.000224
+sub-235	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-51.50715857	112.604138	0.030865
+sub-236	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		12.67873895	215.330689	0.0330963
+sub-237	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		-1.76719093	182.794484	0.017646
+sub-238	both-minus-rtpj	BOTH > RTPJ	both=1, rtpj=-1	true		true		41.41284501	198.7695708	-0.055142

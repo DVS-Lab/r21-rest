@@ -1,0 +1,27 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-17.81491792	176.179124	-0.01244
+sub-203	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-7.05892185	-14.0764327	0.046674
+sub-207	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		325.5504174	493.569762	0.049709
+sub-209	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		15.56611329	351.566518	-0.059777
+sub-210	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-47.02870352	-28.438876	0.119486
+sub-211	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-65.00069006	-603.617054	-0.066188
+sub-213	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		2.41049384	64.9913908	-0.044534
+sub-214	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		21.3455359	-997.367172	0.070293
+sub-215	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		5.135819515	-38.876904	0.04732
+sub-217	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-17.01161165	-247.1626682	0.10475
+sub-218	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		17.17132012	134.856254	0.562343
+sub-219	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-1.92645241	105.4503015	-0.011258
+sub-220	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-1.76601549	-418.209766	-0.028769
+sub-221	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-3.05159952	-14.012769	0.00567
+sub-222	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		21.02522897	177.05648	-0.1074
+sub-225	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-14.92433934	-430.940098	-0.103286
+sub-226	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		4.333462555	-106.959356	-0.494145
+sub-227	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		0.9639105	-148.923411	-0.088454
+sub-228	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-13.96248082	440.1609187	0.055099
+sub-230	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		50.07424504	-156.643368	0.218188
+sub-231	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-3.69182924	80.6389883	-0.042765
+sub-234	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		28.56550415	-546.476844	0.00354
+sub-235	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-4.96760998	319.266558	0.046978
+sub-236	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		2.40707813	92.223785	0.0452456
+sub-237	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		-1.60859842	114.153656	-0.031663
+sub-238	both-minus-sham	BOTH > SHAM	both=1, sham=-1	true		true		27.61124462	-13.89797	-0.427761

@@ -1,0 +1,27 @@
+participant	contrast	contrast_label	weights	complete_conditions	missing_conditions	complete_delta_covariates	missing_delta_covariates	delta_blink	delta_pupil	delta_fdmean
+sub-189	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-2.73086117	-6.654929	0.010018
+sub-203	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		8.18953893	78.5320393	-0.005343
+sub-207	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		114.8949448	907.876262	0.090005
+sub-208	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-5.9381264	-210.4997441	-0.034749
+sub-209	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		15.88674616	276.957361	0.325295
+sub-210	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-26.16502972	74.7481852	0.009011
+sub-211	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-41.40952463	107.229843	-0.025823
+sub-212	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		3.3675776	-774.5686564	0.123706
+sub-214	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		0.96460617	113.210326	0.010616
+sub-215	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		7.863994355	-175.218463	0.06127
+sub-217	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.96276838	-215.3071911	0.165305
+sub-218	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		19.74345532	145.789826	0.374007
+sub-219	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.48062135	77.5544442	-0.004221
+sub-221	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-17.33492894	144.036244	0.059374
+sub-222	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		35.95023302	215.906962	-0.755526
+sub-225	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		6.58108733	-82.347585	-0.013794
+sub-226	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.000248297	-269.718391	-0.527127
+sub-227	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		5.93785895	-379.795085	0.086474
+sub-228	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-14.60408589	131.9733732	0.029638
+sub-230	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-2.56896997	429.154056	0.122265
+sub-231	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-0.64303507	-6.1039346	-0.039098
+sub-234	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		20.22065505	-233.97662	-0.006444
+sub-235	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		5.94749468	380.456929	0.062222
+sub-236	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		-15.08731688	72.952763	0.0202546
+sub-237	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		5.13355091	63.62645	-0.081531
+sub-238	vlpfc-minus-sham	VLPFC > SHAM	vlpfc=1, sham=-1	true		true		3.85489767	-267.0200172	-0.222148

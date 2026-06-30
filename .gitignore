@@ -21,6 +21,10 @@ derivatives/qc/*
 !derivatives/qc/*.csv
 !derivatives/qc/*.txt
 !derivatives/qc/*.md
+!derivatives/qc/covariate_delta_tables/
+derivatives/qc/covariate_delta_tables/*
+!derivatives/qc/covariate_delta_tables/*.tsv
+!derivatives/qc/covariate_delta_tables/*.md
 !derivatives/qc/randomise_design_spreadsheets/
 derivatives/qc/randomise_design_spreadsheets/*
 !derivatives/qc/randomise_design_spreadsheets/*.tsv
