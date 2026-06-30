@@ -35,6 +35,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `MakeGroupCovariates.py` | MRIQC run table and BIDS task-rest events | Writes run-level and contrast-level group covariates, including mean FD, tSNR, pupil area, blink rate, and eye closure. |
 | `MakeCovariateDeltaTables.py` | `task-rest_group_covariates.tsv` | Writes compact complete-case subject-level contrast-delta tables for mean FD, pupil area, and blink rate under `derivatives/qc/covariate_delta_tables`, using the primary N=27 subject scope by default, plus a missingness audit. |
 | `MakeRandomiseDesignSpreadsheets.py` | Group covariates and, optionally, a `subject_order.tsv` | Writes labeled TSV/CSV tables for building covariate-adjusted `design.mat`, `design.con`, and `design.grp` files in the FSL GUI. |
+| `MakeCovariateRandomiseModels.py` | Existing dual-regression contrast images and group covariates | Builds covariate-adjusted whole-brain randomise model folders with per-contrast participant orders, design files, merged group inputs, and launchers. |
 | `tsvResting.m` | r21-cardgame BIDS task-rest events | Bart's MATLAB pupil/blink analysis helper; auto-detects the Mac and Linux r21-cardgame locations, reads `R21_CARDGAME_ROOT`, and adds `klab`, `klab/kStats`, or explicit `KLAB_ROOT`/`KSTATS_ROOT` override paths when needed. |
 | `MakeConfounds.py` | fMRIPrep confounds and BIDS events | Writes FSL/AFNI confound matrices, the ordered run manifest, and input lists. |
 | `smooth-3dBlurToFWHM.sh` | One fMRIPrep BOLD run and mask | Masks and smooths one run to 5-mm FWHM while adding its condition label. |
@@ -109,6 +110,20 @@ python3 code/MakeGroupCovariates.py
 python3 code/MakeCovariateDeltaTables.py
 python3 code/MakeRandomiseDesignSpreadsheets.py --covariates fdmean
 ```
+
+Prepare covariate-adjusted whole-brain randomise follow-up models for the
+currently significant cluster-extent jobs. Run this on the Linux box because it
+uses the full dual-regression contrast images and `fslmerge`:
+
+```bash
+python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink
+python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink,pupil
+```
+
+The FD/blink model remains N=27 for each contrast. The pupil-containing model
+uses contrast-specific complete cases because Bart confirmed that three pupil
+runs are not recoverable. Each generated model folder contains its own
+`run_randomise.sh` launcher.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:
