@@ -67,7 +67,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Runs primary or non-cerebellar secondary ICA matches or direct Smith09 maps with up to 24 concurrent jobs. |
 | `run_randomise_qc_sensitivity.sh` | Completed dual regression and `exclude_qc_outliers.txt` | Repeats selected randomise families with a supplied exclusion list without overwriting full-sample outputs. |
 | `run_covariate_randomise.sh` | `randomise_jobs.tsv` files from `MakeCovariateRandomiseModels.py` | Preflights and launches covariate-adjusted randomise jobs across model folders with bounded concurrency. |
-| `check_covariate_randomise_results.py` | Completed covariate-adjusted randomise model folders | Compiles C1-C4 covariate-model peaks, copies significant corrected maps, and writes scatterplot-ready ROI-value TSVs to `derivatives/fsl/covariate_randomise_summary`. |
+| `check_covariate_randomise_results.py` | Completed covariate-adjusted randomise model folders | Compiles C1-C4 covariate-model peaks, copies significant corrected maps, writes C3/C4 scatterplot-ready subject-contrast TSVs, and writes C1/C2 condition-level TSVs for bar plots to `derivatives/fsl/covariate_randomise_summary`. |
 | `check_covariate_model_integrity.py` | Completed covariate-adjusted randomise model folders | Audits model assumptions: mask voxels, demeaned covariates, design/audit row agreement, subject/image order, group input volume counts, and C3/C4 contrast vectors. |
 | `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participants whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; currently `sub-218`. |
 | `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
@@ -158,8 +158,9 @@ covariate column, blink or pupil, is tested by C3/C4.
 `check_covariate_randomise_results.py` compiles the covariate-adjusted
 `randomise` outputs into `derivatives/fsl/covariate_randomise_summary`. It
 audits C1-C4 outputs, records peak corrected-p values, copies significant
-corrected maps, and writes ROI-value TSVs joined to `covariate_audit.tsv` for
-scatterplot follow-up.
+corrected maps, writes ROI-value TSVs joined to `covariate_audit.tsv` for
+C3/C4 scatterplot follow-up, and writes condition-level stage-2 beta TSVs for
+significant C1/C2 maps so the notebook can render four-condition bar plots.
 `check_covariate_model_integrity.py` writes a paired integrity TSV in the same
 summary folder. It verifies the mask exists and records its voxel count, checks
 that all covariate columns are demeaned, confirms design matrix rows match

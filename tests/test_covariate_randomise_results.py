@@ -33,6 +33,7 @@ class CovariateRandomiseResultTests(unittest.TestCase):
             )
             contrast_dir = model_dir / "rtpj-minus-vlpfc"
             randomise_dir = model_dir / "randomise" / "network-dmn"
+            dr_dir = fsl_dir / "dual-regression_smith09_denoised.dr"
             contrast_dir.mkdir(parents=True)
             randomise_dir.mkdir(parents=True)
 
@@ -62,6 +63,22 @@ class CovariateRandomiseResultTests(unittest.TestCase):
                 "0\tsub-001\t0.1\t-0.1\t1.0\t-2.0\n"
                 "1\tsub-002\t0.3\t0.1\t5.0\t2.0\n"
             )
+            input_order_rows = [
+                ("subject00000", "sub-001", "run-01", "sham"),
+                ("subject00001", "sub-001", "run-02", "rtpj"),
+                ("subject00002", "sub-001", "run-03", "vlpfc"),
+                ("subject00003", "sub-001", "run-04", "both"),
+                ("subject00004", "sub-002", "run-01", "sham"),
+                ("subject00005", "sub-002", "run-02", "rtpj"),
+                ("subject00006", "sub-002", "run-03", "vlpfc"),
+                ("subject00007", "sub-002", "run-04", "both"),
+            ]
+            (dr_dir / "input_order.tsv").write_text(
+                "dual_regression_label\tparticipant\trun\tcondition\n"
+                + "".join("\t".join(row) + "\n" for row in input_order_rows)
+            )
+            for label, _participant, _run, _condition in input_order_rows:
+                (dr_dir / f"dr_stage2_{label}.nii.gz").write_text("stage2")
             output_prefix = randomise_dir / (
                 "task-rest_network-dmn_component-0004_stat-beta_"
                 "contrast-rtpj-minus-vlpfc_model-cov-fdmean-blink"
@@ -81,6 +98,7 @@ class CovariateRandomiseResultTests(unittest.TestCase):
             self.write_command(
                 fakebin / "fslstats",
                 'case "$*" in *" -m") echo "0.25";; '
+                '*clustere_corrp_tstat1*) echo "0 0.98";; '
                 '*clustere_corrp_tstat3*) echo "0 0.97";; *) echo "0 0.94";; esac\n',
             )
             self.write_command(fakebin / "fslnvols", "echo 2\n")
@@ -108,8 +126,9 @@ class CovariateRandomiseResultTests(unittest.TestCase):
             )
             self.assertIn("Randomise jobs checked: 1", result.stdout)
             self.assertIn("Summary rows: 4/4", result.stdout)
-            self.assertIn("Significant maps with peak > 0.95: 1", result.stdout)
-            self.assertIn("ROI-value TSVs written: 1 (2 rows)", result.stdout)
+            self.assertIn("Significant maps with peak > 0.95: 2", result.stdout)
+            self.assertIn("ROI-value TSVs written: 2 (4 rows)", result.stdout)
+            self.assertIn("Condition-value TSVs written: 1 (8 rows)", result.stdout)
 
             summary = output_dir / "task-rest_covariate-randomise_peak_summary.tsv"
             with summary.open(newline="") as stream:
@@ -117,20 +136,38 @@ class CovariateRandomiseResultTests(unittest.TestCase):
             self.assertEqual(len(rows), 4)
             self.assertEqual({row["design_contrast"] for row in rows}, {"C1", "C2", "C3", "C4"})
             significant = [row for row in rows if row["peak_gt_threshold"] == "true"]
-            self.assertEqual(len(significant), 1)
-            self.assertEqual(significant[0]["design_contrast"], "C3")
-            self.assertEqual(significant[0]["tested_covariate"], "delta_blink_rate_per_min")
-            self.assertTrue(significant[0]["copied_image"].endswith(".nii.gz"))
-            self.assertTrue(significant[0]["roi_values_tsv"].endswith("_values.tsv"))
+            self.assertEqual(len(significant), 2)
+            by_contrast = {row["design_contrast"]: row for row in significant}
+            self.assertEqual(by_contrast["C1"]["tested_covariate"], "intercept")
+            self.assertEqual(by_contrast["C3"]["tested_covariate"], "delta_blink_rate_per_min")
+            self.assertTrue(by_contrast["C1"]["copied_image"].endswith(".nii.gz"))
+            self.assertTrue(by_contrast["C1"]["roi_values_tsv"].endswith("_values.tsv"))
+            self.assertTrue(by_contrast["C1"]["condition_values_tsv"].endswith("_timeseries.tsv"))
+            self.assertEqual(by_contrast["C3"]["condition_values_tsv"], "")
 
-            roi_path = REPO_ROOT / significant[0]["roi_values_tsv"]
+            roi_path = REPO_ROOT / by_contrast["C3"]["roi_values_tsv"]
             with roi_path.open(newline="") as stream:
                 roi_rows = list(csv.DictReader(stream, delimiter="\t"))
             self.assertEqual(len(roi_rows), 2)
             self.assertEqual({row["subject_contrast_beta"] for row in roi_rows}, {"0.25"})
             self.assertEqual(roi_rows[0]["delta_blink_rate_per_min_demeaned"], "-2.0")
 
-            sidecar = json.loads((REPO_ROOT / significant[0]["copied_sidecar"]).read_text())
+            condition_path = REPO_ROOT / by_contrast["C1"]["condition_values_tsv"]
+            with condition_path.open(newline="") as stream:
+                condition_rows = list(csv.DictReader(stream, delimiter="\t"))
+            self.assertEqual(len(condition_rows), 8)
+            self.assertEqual(
+                {row["condition"] for row in condition_rows},
+                {"sham", "rtpj", "vlpfc", "both"},
+            )
+            self.assertEqual({row["stage2_beta"] for row in condition_rows}, {"0.25"})
+
+            sidecar = json.loads((REPO_ROOT / by_contrast["C1"]["copied_sidecar"]).read_text())
+            self.assertEqual(sidecar["DesignContrast"], "C1")
+            self.assertEqual(sidecar["TestedCovariate"], "intercept")
+            self.assertTrue(sidecar["ConditionValues"].endswith("_timeseries.tsv"))
+
+            sidecar = json.loads((REPO_ROOT / by_contrast["C3"]["copied_sidecar"]).read_text())
             self.assertEqual(sidecar["DesignContrast"], "C3")
             self.assertEqual(sidecar["TestedCovariate"], "delta_blink_rate_per_min")
 

@@ -193,7 +193,9 @@ The compiler writes GitHub-trackable covariate summaries to
 mean-effect rows and C3/C4 covariate-effect rows. Significant corrected maps
 are copied there with JSON sidecars plus small ROI-value TSVs that join each
 participant's subject-level contrast beta to the covariate audit table; those
-TSVs are the portable inputs for the scatterplots.
+TSVs are the portable inputs for C3/C4 scatterplots. For significant C1/C2
+maps, the compiler also writes condition-level stage-2 beta TSVs used for
+four-condition bar plots.
 The integrity checker writes
 `derivatives/fsl/covariate_randomise_summary/task-rest_covariate-randomise_integrity.tsv`
 and verifies the model assumptions that are easy to get wrong: design/audit

@@ -49,6 +49,24 @@ SUMMARY_FIELDS = (
     "copied_image",
     "copied_sidecar",
     "roi_values_tsv",
+    "condition_values_tsv",
+)
+CONDITION_VALUE_FIELDS = (
+    "model_label",
+    "analysis",
+    "network",
+    "component",
+    "map_type",
+    "condition_contrast",
+    "design_contrast",
+    "contrast_name",
+    "direction",
+    "tested_covariate",
+    "participant",
+    "run",
+    "condition",
+    "dual_regression_label",
+    "stage2_beta",
 )
 
 
@@ -274,6 +292,32 @@ def roi_values_name(copied_image: Path) -> str:
     return f"{stem}_stat-subjectContrast_values.tsv"
 
 
+def condition_values_name(copied_image: Path) -> str:
+    stem = copied_image.name.removesuffix("_stat-corrp_statmap.nii.gz")
+    return f"{stem}_stat-stage2Beta_timeseries.tsv"
+
+
+def read_input_order(path: Path) -> list[dict[str, str]]:
+    rows = read_tsv(path)
+    if not rows:
+        raise ValueError(f"Input-order table is empty: {path}")
+    required = {"dual_regression_label", "participant", "run", "condition"}
+    missing = required.difference(rows[0])
+    if missing:
+        raise ValueError(f"{path} is missing columns: {sorted(missing)}")
+    expected_conditions = {"sham", "rtpj", "vlpfc", "both"}
+    seen: set[tuple[str, str]] = set()
+    for row in rows:
+        row["condition"] = row["condition"].lower()
+        key = (row["participant"], row["condition"])
+        if not row["participant"] or row["condition"] not in expected_conditions:
+            raise ValueError(f"Invalid participant or condition in {path}: {row}")
+        if key in seen:
+            raise ValueError(f"Duplicate {row['participant']} {row['condition']} row in {path}")
+        seen.add(key)
+    return rows
+
+
 def extract_roi_values(
     corrp: Path,
     threshold: float,
@@ -337,6 +381,85 @@ def extract_roi_values(
     return len(rows)
 
 
+def extract_condition_values(
+    corrp: Path,
+    threshold: float,
+    dr_dir: Path,
+    component: int,
+    map_type: str,
+    audit_rows: list[dict[str, str]],
+    destination: Path,
+    metadata: dict[str, str],
+    fslmaths: str,
+    fslroi: str,
+    fslstats: str,
+) -> int:
+    included_participants = {row["participant"] for row in audit_rows}
+    stage2_suffix = "" if map_type == "beta" else "_Z"
+    component_index = component - 1
+    rows: list[dict[str, str]] = []
+    participant_conditions: dict[str, set[str]] = {
+        participant: set() for participant in included_participants
+    }
+
+    with tempfile.TemporaryDirectory(prefix="r21_covariate_randomise_condition_roi_") as temporary:
+        temporary_dir = Path(temporary)
+        roi_mask = temporary_dir / "roi_mask.nii.gz"
+        subprocess.run(
+            [
+                fslmaths,
+                str(corrp),
+                "-thr",
+                repr(math.nextafter(threshold, math.inf)),
+                "-bin",
+                str(roi_mask),
+            ],
+            check=True,
+        )
+        component_image = temporary_dir / "component.nii.gz"
+        for item in read_input_order(dr_dir / "input_order.tsv"):
+            if item["participant"] not in included_participants:
+                continue
+            source = dr_dir / f"dr_stage2_{item['dual_regression_label']}{stage2_suffix}.nii.gz"
+            if not source.is_file():
+                raise FileNotFoundError(f"Stage-2 image not found: {source}")
+            subprocess.run(
+                [fslroi, str(source), str(component_image), str(component_index), "1"],
+                check=True,
+            )
+            result = subprocess.run(
+                [fslstats, str(component_image), "-k", str(roi_mask), "-m"],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            value = float(result.stdout.strip())
+            if not math.isfinite(value):
+                raise ValueError(f"Non-finite ROI mean for {source}: {value}")
+            participant_conditions[item["participant"]].add(item["condition"])
+            rows.append(
+                {
+                    **metadata,
+                    "participant": item["participant"],
+                    "run": item["run"],
+                    "condition": item["condition"],
+                    "dual_regression_label": item["dual_regression_label"],
+                    "stage2_beta": f"{value:.10g}",
+                }
+            )
+
+    expected_conditions = {"sham", "rtpj", "vlpfc", "both"}
+    incomplete = {
+        participant: sorted(expected_conditions.difference(conditions))
+        for participant, conditions in participant_conditions.items()
+        if conditions != expected_conditions
+    }
+    if incomplete:
+        raise ValueError(f"Incomplete condition ROI values: {incomplete}")
+    write_tsv(destination, rows, list(CONDITION_VALUE_FIELDS))
+    return len(rows)
+
+
 def write_sidecar(
     path: Path,
     row: dict[str, str],
@@ -346,6 +469,7 @@ def write_sidecar(
     design_mat: Path,
     design_con: Path,
     roi_values: Path,
+    condition_values: Path | None,
     project_root: Path,
     threshold: float,
 ) -> None:
@@ -373,6 +497,8 @@ def write_sidecar(
         "ROIValues": relative_path(roi_values, project_root),
         "GeneratedBy": [{"Name": "FSL randomise"}],
     }
+    if condition_values is not None:
+        payload["ConditionValues"] = relative_path(condition_values, project_root)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
@@ -422,6 +548,8 @@ def main() -> int:
     copied_count = 0
     roi_values_count = 0
     roi_value_rows = 0
+    condition_values_count = 0
+    condition_value_rows = 0
     significant_count = 0
     jobs_checked = 0
 
@@ -429,6 +557,7 @@ def main() -> int:
         model_dir = manifest.parent
         model_label = model_dir.name.removeprefix("model-")
         component_dir = model_dir.parent.parent
+        dr_dir = component_dir.parent.parent
         analysis, component, map_type = parse_component_dir(component_dir)
         for job in read_tsv(manifest):
             jobs_checked += 1
@@ -542,6 +671,7 @@ def main() -> int:
                         "copied_image": "",
                         "copied_sidecar": "",
                         "roi_values_tsv": "",
+                        "condition_values_tsv": "",
                     }
 
                     if significant and status == "ok" and not args.no_copy:
@@ -558,34 +688,57 @@ def main() -> int:
                         )
                         sidecar = destination.with_name(destination.name.removesuffix(".nii.gz") + ".json")
                         roi_values = output_dir / roi_values_name(destination)
+                        condition_values = (
+                            output_dir / condition_values_name(destination)
+                            if tested_covariate == "intercept"
+                            else None
+                        )
                         shutil.copy2(corrp, destination)
                         row["copied_image"] = relative_path(destination, project_root)
                         row["copied_sidecar"] = relative_path(sidecar, project_root)
                         row["roi_values_tsv"] = relative_path(roi_values, project_root)
+                        if condition_values is not None:
+                            row["condition_values_tsv"] = relative_path(condition_values, project_root)
                         try:
                             assert fslmaths is not None and fslroi is not None
+                            metadata = {
+                                "model_label": model_label,
+                                "analysis": analysis,
+                                "network": network,
+                                "component": component,
+                                "map_type": map_type,
+                                "condition_contrast": contrast,
+                                "design_contrast": f"C{number}",
+                                "contrast_name": contrast_name,
+                                "direction": direction,
+                                "tested_covariate": tested_covariate,
+                            }
                             extracted = extract_roi_values(
                                 corrp,
                                 args.threshold,
                                 group_input,
                                 audit_rows,
                                 roi_values,
-                                {
-                                    "model_label": model_label,
-                                    "analysis": analysis,
-                                    "network": network,
-                                    "component": component,
-                                    "map_type": map_type,
-                                    "condition_contrast": contrast,
-                                    "design_contrast": f"C{number}",
-                                    "contrast_name": contrast_name,
-                                    "direction": direction,
-                                    "tested_covariate": tested_covariate,
-                                },
+                                metadata,
                                 str(fslmaths),
                                 str(fslroi),
                                 fslstats,
                             )
+                            condition_rows = 0
+                            if condition_values is not None:
+                                condition_rows = extract_condition_values(
+                                    corrp,
+                                    args.threshold,
+                                    dr_dir,
+                                    int(component),
+                                    map_type,
+                                    audit_rows,
+                                    condition_values,
+                                    metadata,
+                                    str(fslmaths),
+                                    str(fslroi),
+                                    fslstats,
+                                )
                             write_sidecar(
                                 sidecar,
                                 row,
@@ -595,16 +748,23 @@ def main() -> int:
                                 design_mat,
                                 design_con,
                                 roi_values,
+                                condition_values,
                                 project_root,
                                 args.threshold,
                             )
                             copied_count += 1
                             roi_values_count += 1
                             roi_value_rows += extracted
+                            if condition_values is not None:
+                                condition_values_count += 1
+                                condition_value_rows += condition_rows
                         except (OSError, subprocess.CalledProcessError, ValueError) as error:
                             row["status"] = "roi_export_error"
                             row["roi_values_tsv"] = ""
+                            row["condition_values_tsv"] = ""
                             roi_values.unlink(missing_ok=True)
+                            if condition_values is not None:
+                                condition_values.unlink(missing_ok=True)
                             sidecar.unlink(missing_ok=True)
                             errors.append(f"{corrp}: {error}")
                     rows.append(row)
@@ -618,7 +778,9 @@ def main() -> int:
         "p-values below 0.05. The summary includes C1/C2 mean-effect tests and "
         "C3/C4 covariate-effect tests from the four-row covariate `design.con` "
         "files. Significant maps are copied here with JSON sidecars and ROI-value "
-        "TSVs that join subject-level contrast betas to the covariate audit table.\n"
+        "TSVs that join subject-level contrast betas to the covariate audit table. "
+        "For significant C1/C2 intercept tests, a second stage-2 beta timeseries "
+        "TSV is written for four-condition bar plots.\n"
     )
 
     expected_rows = jobs_checked * 4 * len(methods)
@@ -628,6 +790,10 @@ def main() -> int:
     print(f"Significant maps with peak > {args.threshold:g}: {significant_count}")
     print(f"Significant maps copied: {copied_count}/{significant_count}")
     print(f"ROI-value TSVs written: {roi_values_count} ({roi_value_rows} rows)")
+    print(
+        f"Condition-value TSVs written: {condition_values_count} "
+        f"({condition_value_rows} rows)"
+    )
     print(f"Missing or invalid required paths: {len(missing_paths)}")
     print(f"Errors: {len(errors)}")
     print(f"Wrote {output_tsv}")
