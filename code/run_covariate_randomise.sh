@@ -55,21 +55,31 @@ maindir="$(dirname "$scriptdir")"
 derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 
+num_contrasts() {
+    local design_con="$1"
+    awk '$1 == "/NumContrasts" {print $2; found = 1; exit} END {if (!found) exit 1}' "$design_con"
+}
+
 expected_outputs_exist() {
     local prefix="$1"
-    [[ -f "${prefix}_tstat1.nii.gz" ]] || return 1
-    [[ -f "${prefix}_tstat2.nii.gz" ]] || return 1
-    [[ -f "${prefix}_clustere_corrp_tstat1.nii.gz" ]] || return 1
-    [[ -f "${prefix}_clustere_corrp_tstat2.nii.gz" ]] || return 1
-    if [[ "$tfce" == 1 ]]; then
-        [[ -f "${prefix}_tfce_corrp_tstat1.nii.gz" ]] || return 1
-        [[ -f "${prefix}_tfce_corrp_tstat2.nii.gz" ]] || return 1
-    fi
+    local design_con="$2"
+    local contrast_count
+    local contrast_index
+    contrast_count="$(num_contrasts "$design_con")" || return 1
+    [[ "$contrast_count" =~ ^[1-9][0-9]*$ ]] || return 1
+    for ((contrast_index = 1; contrast_index <= contrast_count; contrast_index++)); do
+        [[ -f "${prefix}_tstat${contrast_index}.nii.gz" ]] || return 1
+        [[ -f "${prefix}_clustere_corrp_tstat${contrast_index}.nii.gz" ]] || return 1
+        if [[ "$tfce" == 1 ]]; then
+            [[ -f "${prefix}_tfce_corrp_tstat${contrast_index}.nii.gz" ]] || return 1
+        fi
+    done
 }
 
 job_complete() {
     local prefix="$1"
-    [[ -f "${prefix}.complete" ]] && expected_outputs_exist "$prefix"
+    local design_con="$2"
+    [[ -f "${prefix}.complete" ]] && expected_outputs_exist "$prefix" "$design_con"
 }
 
 declare -a model_labels=()
@@ -121,7 +131,17 @@ for model in "${model_labels[@]}"; do
                     missing_count=$((missing_count + 1))
                 fi
             done
-            if job_complete "$output_prefix"; then
+            if [[ -f "$design_con" ]]; then
+                contrast_count="$(num_contrasts "$design_con" || true)"
+                if [[ ! "$contrast_count" =~ ^[1-9][0-9]*$ ]]; then
+                    echo "ERROR: Could not read /NumContrasts from ${design_con}" >&2
+                    missing_count=$((missing_count + 1))
+                elif [[ "$contrast_count" -ne 4 ]]; then
+                    echo "ERROR: Expected four covariate contrasts in ${design_con}; found ${contrast_count}. Rebuild with MakeCovariateRandomiseModels.py --overwrite." >&2
+                    missing_count=$((missing_count + 1))
+                fi
+            fi
+            if [[ -f "$design_con" ]] && job_complete "$output_prefix" "$design_con"; then
                 complete_count=$((complete_count + 1))
             elif [[ -f "${output_prefix}.complete" ]]; then
                 stale_complete_count=$((stale_complete_count + 1))
@@ -181,7 +201,7 @@ wait_for_one() {
 }
 
 while IFS=$'\t' read -r model contrast network mask group_input design_mat design_con output_prefix; do
-    if job_complete "$output_prefix"; then
+    if job_complete "$output_prefix" "$design_con"; then
         echo "Already complete: ${output_prefix}" >&2
         continue
     elif [[ -f "${output_prefix}.complete" ]]; then
@@ -208,7 +228,7 @@ while IFS=$'\t' read -r model contrast network mask group_input design_mat desig
                 -t "$design_con" \
                 -n "$nperm" -c "$cluster_threshold"
         fi
-        if ! expected_outputs_exist "$output_prefix"; then
+        if ! expected_outputs_exist "$output_prefix" "$design_con"; then
             echo "ERROR: randomise finished but expected outputs are missing for ${output_prefix}" >&2
             exit 1
         fi

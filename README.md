@@ -171,7 +171,10 @@ participant was dropped from that template.
 The covariate-adjusted `randomise` launchers use the generated `design.mat`
 and `design.con` files without passing `-e design.grp`, since these are
 subject-level one-sample contrast images rather than exchangeability-block
-models.
+models. Each generated `design.con` has four contrasts: C1 `mean_pos`, C2
+`mean_neg`, C3 `cov_pos`, and C4 `cov_neg`. In the `fdmean,blink` and
+`fdmean,pupil` models, FD mean is the adjustment covariate and the final
+covariate column, blink or pupil, is tested by C3/C4.
 
 On the Linux box, rebuild the covariate model folders, inspect every path, then
 launch the currently significant follow-up jobs with bounded concurrency:

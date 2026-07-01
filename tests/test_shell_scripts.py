@@ -387,8 +387,21 @@ class ShellScriptTests(unittest.TestCase):
             design_mat = contrast_dir / "design.mat"
             design_con = contrast_dir / "design.con"
             design_grp = contrast_dir / "design.grp"
-            for path in (group_input, design_mat, design_con, design_grp):
+            for path in (group_input, design_mat, design_grp):
                 path.write_text("x")
+            design_con.write_text(
+                "/ContrastName1\tmean_pos\n"
+                "/ContrastName2\tmean_neg\n"
+                "/ContrastName3\tcov_pos\n"
+                "/ContrastName4\tcov_neg\n"
+                "/NumWaves\t3\n"
+                "/NumContrasts\t4\n\n"
+                "/Matrix\n"
+                "1\t0\t0\n"
+                "-1\t0\t0\n"
+                "0\t0\t1\n"
+                "0\t0\t-1\n"
+            )
             (model / "randomise_jobs.tsv").write_text(
                 "contrast\tnetwork\tgroup_input\tdesign_mat\tdesign_con\tdesign_grp\toutput_prefix\n"
                 f"both-minus-sham\tdmn\t{group_input}\t{design_mat}\t{design_con}\t{design_grp}\t{output_prefix}\n"
@@ -455,8 +468,12 @@ class ShellScriptTests(unittest.TestCase):
                 'printf "%s\\n" "$args" > "$RANDOMISE_CAPTURE"\n'
                 ': > "${out}_tstat1.nii.gz"\n'
                 ': > "${out}_tstat2.nii.gz"\n'
+                ': > "${out}_tstat3.nii.gz"\n'
+                ': > "${out}_tstat4.nii.gz"\n'
                 ': > "${out}_clustere_corrp_tstat1.nii.gz"\n'
-                ': > "${out}_clustere_corrp_tstat2.nii.gz"\n',
+                ': > "${out}_clustere_corrp_tstat2.nii.gz"\n'
+                ': > "${out}_clustere_corrp_tstat3.nii.gz"\n'
+                ': > "${out}_clustere_corrp_tstat4.nii.gz"\n',
             )
             run = subprocess.run(
                 [

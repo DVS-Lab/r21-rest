@@ -291,21 +291,39 @@ def write_design_files(
 ) -> tuple[Path, Path, Path]:
     n_participants = len(audit_rows)
     n_waves = 1 + len(covariates)
+    ppheights = design_ppheights(audit_rows, covariates)
+    covariate_of_interest_column = n_waves - 1
 
     design_mat = output_dir / "design.mat"
     write_design_mat(design_mat, audit_rows, covariates)
 
     design_con = output_dir / "design.con"
     with design_con.open("w") as stream:
-        stream.write("/ContrastName1\tPositive\n")
-        stream.write("/ContrastName2\tNegative\n")
+        stream.write("/ContrastName1\tmean_pos\n")
+        stream.write("/ContrastName2\tmean_neg\n")
+        stream.write("/ContrastName3\tcov_pos\n")
+        stream.write("/ContrastName4\tcov_neg\n")
         stream.write(f"/NumWaves\t{n_waves}\n")
-        stream.write("/NumContrasts\t2\n")
-        stream.write("/PPheights\t1\t1\n")
-        stream.write("/RequiredEffect\t1\t1\n\n")
+        stream.write("/NumContrasts\t4\n")
+        covariate_height = ppheights[covariate_of_interest_column]
+        stream.write(
+            "/PPheights\t\t"
+            + "\t".join(
+                fsl_float(value)
+                for value in (1.0, 1.0, covariate_height, covariate_height)
+            )
+            + "\n"
+        )
+        stream.write("/RequiredEffect\t0.943\t0.943\t5.012\t5.012\n\n")
         stream.write("/Matrix\n")
         stream.write("\t".join(["1", *["0"] * len(covariates)]) + "\n")
         stream.write("\t".join(["-1", *["0"] * len(covariates)]) + "\n")
+        covariate_positive = ["0"] * n_waves
+        covariate_positive[covariate_of_interest_column] = "1"
+        covariate_negative = ["0"] * n_waves
+        covariate_negative[covariate_of_interest_column] = "-1"
+        stream.write("\t".join(covariate_positive) + "\n")
+        stream.write("\t".join(covariate_negative) + "\n")
 
     design_grp = output_dir / "design.grp"
     with design_grp.open("w") as stream:
@@ -461,6 +479,26 @@ def build_run_randomise_script(
         f'cluster_threshold="${{CLUSTER_THRESHOLD:-{cluster_threshold:g}}}"',
         "command -v randomise >/dev/null 2>&1 || { echo \"ERROR: randomise is not on PATH.\" >&2; exit 1; }",
         "",
+        "num_contrasts() {",
+        "    awk '$1 == \"/NumContrasts\" {print $2; found = 1; exit} END {if (!found) exit 1}' \"$1\"",
+        "}",
+        "",
+        "expected_outputs_exist() {",
+        "    local prefix=\"$1\"",
+        "    local design_con=\"$2\"",
+        "    local contrast_count",
+        "    local contrast_index",
+        "    contrast_count=\"$(num_contrasts \"$design_con\")\" || return 1",
+        "    [[ \"$contrast_count\" == \"4\" ]] || return 1",
+        "    for ((contrast_index = 1; contrast_index <= contrast_count; contrast_index++)); do",
+        "        [[ -f \"${prefix}_tstat${contrast_index}.nii.gz\" ]] || return 1",
+        "        [[ -f \"${prefix}_clustere_corrp_tstat${contrast_index}.nii.gz\" ]] || return 1",
+        "        if [[ \"${TFCE:-0}\" == \"1\" ]]; then",
+        "            [[ -f \"${prefix}_tfce_corrp_tstat${contrast_index}.nii.gz\" ]] || return 1",
+        "        fi",
+        "    done",
+        "}",
+        "",
     ]
     for job in jobs:
         output_prefix = Path(job["output_prefix"])
@@ -468,21 +506,27 @@ def build_run_randomise_script(
             [
                 f'mkdir -p {shlex_quote(str(output_prefix.parent))}',
                 f'complete={shlex_quote(str(output_prefix))}.complete',
-                'if [[ -f "$complete" ]]; then',
+                f'output_prefix={shlex_quote(str(output_prefix))}',
+                f'design_con={shlex_quote(job["design_con"])}',
+                'if expected_outputs_exist "$output_prefix" "$design_con" && [[ -f "$complete" ]]; then',
                 f'    echo "Already complete: {output_prefix}" >&2',
                 "else",
+                '    if [[ -f "$complete" ]]; then',
+                f'        echo "Rerunning stale complete marker with missing outputs: {output_prefix}" >&2',
+                "    fi",
                 "    cmd=(",
                 "        randomise",
                 f'        -i {shlex_quote(job["group_input"])}',
-                f'        -o {shlex_quote(str(output_prefix))}',
+                '        -o "$output_prefix"',
                 f'        -m {shlex_quote(str(mask))}',
                 f'        -d {shlex_quote(job["design_mat"])}',
-                f'        -t {shlex_quote(job["design_con"])}',
+                '        -t "$design_con"',
                 '        -n "$nperm"',
                 "    )",
                 f'    [[ "${{TFCE:-{1 if tfce else 0}}}" == "1" ]] && cmd+=(-T)',
                 '    cmd+=(-c "$cluster_threshold")',
                 '    "${cmd[@]}"',
+                '    expected_outputs_exist "$output_prefix" "$design_con" || { echo "ERROR: randomise finished without all four expected output contrasts for $output_prefix" >&2; exit 1; }',
                 '    date -u +%Y-%m-%dT%H:%M:%SZ >"$complete"',
                 "fi",
                 "",

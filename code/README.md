@@ -146,7 +146,10 @@ together. Each generated model folder contains its own `run_randomise.sh`
 launcher, and `code/run_covariate_randomise.sh` can launch all model-folder
 jobs together. The covariate launchers do not pass `-e design.grp`;
 exchangeability blocks are unnecessary for these subject-level one-sample
-contrast images.
+contrast images. Each generated `design.con` has four contrasts: C1 `mean_pos`,
+C2 `mean_neg`, C3 `cov_pos`, and C4 `cov_neg`. In the `fdmean,blink` and
+`fdmean,pupil` models, FD mean is the adjustment covariate and the final
+covariate column, blink or pupil, is tested by C3/C4.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:
