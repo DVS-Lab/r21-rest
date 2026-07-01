@@ -67,6 +67,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Runs primary or non-cerebellar secondary ICA matches or direct Smith09 maps with up to 24 concurrent jobs. |
 | `run_randomise_qc_sensitivity.sh` | Completed dual regression and `exclude_qc_outliers.txt` | Repeats selected randomise families with a supplied exclusion list without overwriting full-sample outputs. |
 | `run_covariate_randomise.sh` | `randomise_jobs.tsv` files from `MakeCovariateRandomiseModels.py` | Preflights and launches covariate-adjusted randomise jobs across model folders with bounded concurrency. |
+| `check_covariate_randomise_results.py` | Completed covariate-adjusted randomise model folders | Compiles C1-C4 covariate-model peaks, copies significant corrected maps, and writes scatterplot-ready ROI-value TSVs to `derivatives/fsl/covariate_randomise_summary`. |
 | `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participants whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; currently `sub-218`. |
 | `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
 | `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
@@ -121,6 +122,7 @@ python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink --overwri
 python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,pupil --overwrite
 code/run_covariate_randomise.sh --dry-run --max-jobs 35
 code/run_covariate_randomise.sh --max-jobs 35
+python3 code/check_covariate_randomise_results.py --fail-on-missing
 ```
 
 Small FSL `design.mat` templates and labeled TSVs are also written to
@@ -150,6 +152,12 @@ contrast images. Each generated `design.con` has four contrasts: C1 `mean_pos`,
 C2 `mean_neg`, C3 `cov_pos`, and C4 `cov_neg`. In the `fdmean,blink` and
 `fdmean,pupil` models, FD mean is the adjustment covariate and the final
 covariate column, blink or pupil, is tested by C3/C4.
+
+`check_covariate_randomise_results.py` compiles the covariate-adjusted
+`randomise` outputs into `derivatives/fsl/covariate_randomise_summary`. It
+audits C1-C4 outputs, records peak corrected-p values, copies significant
+corrected maps, and writes ROI-value TSVs joined to `covariate_audit.tsv` for
+scatterplot follow-up.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:

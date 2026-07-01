@@ -44,6 +44,12 @@ derivatives/fsl/randomise_summary/*
 !derivatives/fsl/randomise_summary/*.md
 !derivatives/fsl/randomise_summary/*.nii.gz
 !derivatives/fsl/randomise_summary/*.json
+!derivatives/fsl/covariate_randomise_summary/
+derivatives/fsl/covariate_randomise_summary/*
+!derivatives/fsl/covariate_randomise_summary/*.tsv
+!derivatives/fsl/covariate_randomise_summary/*.md
+!derivatives/fsl/covariate_randomise_summary/*.nii.gz
+!derivatives/fsl/covariate_randomise_summary/*.json
 work/
 logs/
 *.log

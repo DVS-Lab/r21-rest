@@ -184,7 +184,15 @@ python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,blink --overwri
 python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,pupil --overwrite
 code/run_covariate_randomise.sh --dry-run --max-jobs 35
 code/run_covariate_randomise.sh --max-jobs 35
+python3 code/check_covariate_randomise_results.py --fail-on-missing
 ```
+
+The compiler writes GitHub-trackable covariate summaries to
+`derivatives/fsl/covariate_randomise_summary`. The peak summary includes C1/C2
+mean-effect rows and C3/C4 covariate-effect rows. Significant corrected maps
+are copied there with JSON sidecars plus small ROI-value TSVs that join each
+participant's subject-level contrast beta to the covariate audit table; those
+TSVs are the portable inputs for the scatterplots.
 
 ## Verify Outputs
 
