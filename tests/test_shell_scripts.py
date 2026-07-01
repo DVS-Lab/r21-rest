@@ -411,13 +411,53 @@ class ShellScriptTests(unittest.TestCase):
                 check=True,
             )
             self.assertIn("Model manifests: 1", dry_run.stderr)
-            self.assertIn("Randomise jobs: 1; already complete: 0; pending: 1; maximum concurrent: 35", dry_run.stderr)
+            self.assertIn(
+                "Randomise jobs: 1; already complete: 0; stale complete markers: 0; pending: 1; maximum concurrent: 35",
+                dry_run.stderr,
+            )
             self.assertIn(str(output_prefix), dry_run.stderr)
+            Path(f"{output_prefix}.complete").write_text("stale\n")
+            stale_dry_run = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "code" / "run_covariate_randomise.sh"),
+                    "--models",
+                    "fdmean-blink",
+                    "--max-jobs",
+                    "35",
+                    "--dry-run",
+                ],
+                env=env,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn("Ignoring stale complete marker", stale_dry_run.stderr)
+            self.assertIn(
+                "Randomise jobs: 1; already complete: 0; stale complete markers: 1; pending: 1; maximum concurrent: 35",
+                stale_dry_run.stderr,
+            )
 
             fakebin = root / "bin"
             fakebin.mkdir()
             capture = root / "randomise_args.txt"
-            self.write_command(fakebin / "randomise", 'printf "%s\\n" "$*" > "$RANDOMISE_CAPTURE"\n')
+            self.write_command(
+                fakebin / "randomise",
+                'args="$*"\n'
+                'out=""\n'
+                'while [ "$#" -gt 0 ]; do\n'
+                '    if [ "$1" = "-o" ]; then\n'
+                '        shift\n'
+                '        out="$1"\n'
+                '    fi\n'
+                '    shift\n'
+                'done\n'
+                'printf "%s\\n" "$args" > "$RANDOMISE_CAPTURE"\n'
+                ': > "${out}_tstat1.nii.gz"\n'
+                ': > "${out}_tstat2.nii.gz"\n'
+                ': > "${out}_clustere_corrp_tstat1.nii.gz"\n'
+                ': > "${out}_clustere_corrp_tstat2.nii.gz"\n',
+            )
             run = subprocess.run(
                 [
                     "bash",
@@ -434,6 +474,7 @@ class ShellScriptTests(unittest.TestCase):
                 capture_output=True,
                 check=True,
             )
+            self.assertIn("Rerunning stale complete marker", run.stderr)
             self.assertIn("Covariate randomise jobs complete.", run.stderr)
             args = capture.read_text()
             self.assertIn(f"-i {group_input}", args)

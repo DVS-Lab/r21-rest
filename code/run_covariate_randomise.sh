@@ -55,6 +55,23 @@ maindir="$(dirname "$scriptdir")"
 derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 
+expected_outputs_exist() {
+    local prefix="$1"
+    [[ -f "${prefix}_tstat1.nii.gz" ]] || return 1
+    [[ -f "${prefix}_tstat2.nii.gz" ]] || return 1
+    [[ -f "${prefix}_clustere_corrp_tstat1.nii.gz" ]] || return 1
+    [[ -f "${prefix}_clustere_corrp_tstat2.nii.gz" ]] || return 1
+    if [[ "$tfce" == 1 ]]; then
+        [[ -f "${prefix}_tfce_corrp_tstat1.nii.gz" ]] || return 1
+        [[ -f "${prefix}_tfce_corrp_tstat2.nii.gz" ]] || return 1
+    fi
+}
+
+job_complete() {
+    local prefix="$1"
+    [[ -f "${prefix}.complete" ]] && expected_outputs_exist "$prefix"
+}
+
 declare -a model_labels=()
 IFS=',' read -r -a requested_models <<<"$models_csv"
 for model in "${requested_models[@]}"; do
@@ -78,6 +95,7 @@ trap cleanup EXIT
 
 missing_count=0
 complete_count=0
+stale_complete_count=0
 job_count=0
 manifest_count=0
 
@@ -103,8 +121,11 @@ for model in "${model_labels[@]}"; do
                     missing_count=$((missing_count + 1))
                 fi
             done
-            if [[ -f "${output_prefix}.complete" ]]; then
+            if job_complete "$output_prefix"; then
                 complete_count=$((complete_count + 1))
+            elif [[ -f "${output_prefix}.complete" ]]; then
+                stale_complete_count=$((stale_complete_count + 1))
+                echo "WARN: Ignoring stale complete marker with missing outputs: ${output_prefix}.complete" >&2
             fi
             printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
                 "$model" "$contrast" "$network" "$mask" "$group_input" "$design_mat" "$design_con" "$output_prefix" >>"$plan"
@@ -123,8 +144,8 @@ fi
 printf 'FSL output root: %s\n' "$fsldir" >&2
 printf 'Models: %s\n' "$(IFS=','; echo "${model_labels[*]}")" >&2
 printf 'Model manifests: %d\n' "$manifest_count" >&2
-printf 'Randomise jobs: %d; already complete: %d; pending: %d; maximum concurrent: %d\n' \
-    "$job_count" "$complete_count" "$((job_count - complete_count))" "$maxjobs" >&2
+printf 'Randomise jobs: %d; already complete: %d; stale complete markers: %d; pending: %d; maximum concurrent: %d\n' \
+    "$job_count" "$complete_count" "$stale_complete_count" "$((job_count - complete_count))" "$maxjobs" >&2
 printf 'Permutations: %d; TFCE: %s; cluster threshold: %s\n' \
     "$nperm" "$([[ "$tfce" == 1 ]] && echo yes || echo no)" "$cluster_threshold" >&2
 
@@ -160,9 +181,11 @@ wait_for_one() {
 }
 
 while IFS=$'\t' read -r model contrast network mask group_input design_mat design_con output_prefix; do
-    if [[ -f "${output_prefix}.complete" ]]; then
+    if job_complete "$output_prefix"; then
         echo "Already complete: ${output_prefix}" >&2
         continue
+    elif [[ -f "${output_prefix}.complete" ]]; then
+        echo "Rerunning stale complete marker with missing outputs: ${output_prefix}" >&2
     fi
     mkdir -p "$(dirname "$output_prefix")"
     log_prefix="${fsldir}/logs/covariate_randomise/$(basename "$output_prefix")"
@@ -184,6 +207,10 @@ while IFS=$'\t' read -r model contrast network mask group_input design_mat desig
                 -d "$design_mat" \
                 -t "$design_con" \
                 -n "$nperm" -c "$cluster_threshold"
+        fi
+        if ! expected_outputs_exist "$output_prefix"; then
+            echo "ERROR: randomise finished but expected outputs are missing for ${output_prefix}" >&2
+            exit 1
         fi
         date -u +%Y-%m-%dT%H:%M:%SZ >"${output_prefix}.complete"
     ) >"${log_prefix}.stdout.log" 2>"${log_prefix}.stderr.log" &
