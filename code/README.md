@@ -69,6 +69,8 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `run_covariate_randomise.sh` | `randomise_jobs.tsv` files from `MakeCovariateRandomiseModels.py` | Preflights and launches covariate-adjusted randomise jobs across model folders with bounded concurrency. |
 | `check_covariate_randomise_results.py` | Completed covariate-adjusted randomise model folders | Compiles C1-C4 covariate-model peaks, copies significant corrected maps, writes C3/C4 scatterplot-ready subject-contrast TSVs, and writes C1/C2 condition-level TSVs for bar plots to `derivatives/fsl/covariate_randomise_summary`. |
 | `check_covariate_model_integrity.py` | Completed covariate-adjusted randomise model folders | Audits model assumptions: mask voxels, demeaned covariates, design/audit row agreement, subject/image order, group input volume counts, and C3/C4 contrast vectors. |
+| `MakeNetworkCorrelationTables.py` | Dual-regression stage-1 timecourses | Writes full and partial Smith09 network-correlation run values, condition deltas, and sign-flip summaries under `derivatives/fsl/network_correlation_summary`. |
+| `run_smith09_dmn_ecn_ppi.sh` | Completed Smith09 denoised dual regression | Appends a centered DMN x ECN stage-1 interaction timecourse, reruns stage 2, and writes an 11-map dual-regression-like folder for component-11 contrast testing. |
 | `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participants whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; currently `sub-218`. |
 | `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
 | `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
@@ -168,6 +170,41 @@ that all covariate columns are demeaned, confirms design matrix rows match
 follow the same participant order as the merged group input. The design/audit
 comparison allows small differences from FSL `.mat` values written in
 six-decimal scientific notation and reports the maximum difference in the TSV.
+
+Extract Smith09 network-to-network correlations from the dual-regression stage-1
+timecourses. Start with DMN and ECN, then broaden to all non-cerebellar networks
+if the focused table looks sensible:
+
+```bash
+python3 code/MakeNetworkCorrelationTables.py \
+  --network-set dmn-ecn \
+  --fail-on-missing
+python3 code/MakeNetworkCorrelationTables.py \
+  --network-set all-noncerebellar \
+  --fail-on-missing
+```
+
+The script writes run-level full and partial correlations, subject-level
+condition differences, and one-sample sign-flip summaries to
+`derivatives/fsl/network_correlation_summary`. Correlations are Fisher-z
+transformed before constructing condition contrasts.
+
+Build the DMN-by-ECN physio-physio interaction stage-2 maps without modifying
+the original FSL `dual_regression` script:
+
+```bash
+code/run_smith09_dmn_ecn_ppi.sh --dry-run
+code/run_smith09_dmn_ecn_ppi.sh --max-jobs 24
+DUAL_REGRESSION_DIR=derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr \
+  code/make_dual_regression_contrasts.sh smith09 11 \
+  --output-dir derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta
+derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta/run_randomise.sh
+```
+
+Component 11 is the centered product of z-scored Smith09 DMN and ECN stage-1
+timecourses. The first ten columns remain the original Smith09 timecourses, and
+stage 2 uses the same `fsl_glm --demean --des_norm` normalization as FSL dual
+regression.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:

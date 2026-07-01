@@ -204,6 +204,47 @@ volume counts, C3/C4 contrast targets, and mask voxel counts. It allows small
 rounding differences from FSL's six-decimal `.mat` formatting and reports the
 maximum design-vs-audit difference for each job.
 
+## Network Correlations and DMN x ECN Interaction
+
+The current covariate-adjusted results are frozen as a follow-up extension of
+the N=27 preliminary randomise analyses. The next non-image analysis uses the
+Smith09 dual-regression stage-1 timecourses to test whether network-to-network
+coupling changes by stimulation condition. Start with the primary DMN/ECN pair:
+
+```bash
+python3 code/MakeNetworkCorrelationTables.py \
+  --network-set dmn-ecn \
+  --fail-on-missing
+```
+
+Then generate the broader non-cerebellar Smith09 table:
+
+```bash
+python3 code/MakeNetworkCorrelationTables.py \
+  --network-set all-noncerebellar \
+  --fail-on-missing
+```
+
+Outputs are small TSVs under `derivatives/fsl/network_correlation_summary`.
+They include run-level Pearson and partial correlations, Fisher-z
+condition-difference tables, and deterministic sign-flip summaries.
+
+For the physio-physio interaction sensitivity analysis, do not edit the FSL
+`dual_regression` file. Instead, reuse the Smith09 stage-1 timecourses, append
+a centered DMN x ECN product column, rerun stage 2, and analyze component 11:
+
+```bash
+code/run_smith09_dmn_ecn_ppi.sh --dry-run
+code/run_smith09_dmn_ecn_ppi.sh --max-jobs 24
+DUAL_REGRESSION_DIR=derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr \
+  code/make_dual_regression_contrasts.sh smith09 11 \
+  --output-dir derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta
+derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta/run_randomise.sh
+```
+
+Component 11 is the DMN-by-ECN interaction map; components 1-10 remain the
+original Smith09 networks.
+
 ## Verify Outputs
 
 Check expected outputs for every BIDS run and T1w image:

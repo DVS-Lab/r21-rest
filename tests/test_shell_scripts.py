@@ -190,6 +190,20 @@ class ShellScriptTests(unittest.TestCase):
         self.assertIn("PNAS_Smith09_rsn10_resampled.nii.gz", smith_dual.stderr)
         self.assertIn("1 -1 0", smith_dual.stderr)
 
+        ppi = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_smith09_dmn_ecn_ppi.sh"),
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("dual-regression_smith09_denoised.dr", ppi.stderr)
+        self.assertIn("dual-regression_smith09_denoised_ppi-dmn-ecn.dr", ppi.stderr)
+        self.assertIn("output component 11", ppi.stderr)
+
         for dimension, label in (("0", "dim-00"), ("20", "dim-20")):
             melodic_dual = subprocess.run(
                 [
