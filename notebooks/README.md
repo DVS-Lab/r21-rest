@@ -70,3 +70,25 @@ independent ROI inference. Each network/contrast is reported as an individual
 hypothesis. Following Rubin's inference-based framework, an across-job alpha
 adjustment is relevant to a disjunctive claim that at least one result exists,
 not automatically to separate inferences about each reported hypothesis.
+
+## Covariate Randomise Scatterplots
+
+`plot_covariate_randomise_scatterplots.ipynb` is separate from the main
+brain-map notebook. It reads
+`derivatives/fsl/covariate_randomise_summary/task-rest_covariate-randomise_peak_summary.tsv`
+and focuses only on C3/C4, the blink or pupil covariate-effect contrasts. C1/C2
+mean-effect rows are intentionally ignored for the scatterplot workflow.
+
+Launch it with:
+
+```bash
+bash notebooks/run_covariate_randomise_notebook.sh
+```
+
+The current covariate summary has complete C3/C4 rows, but no C3/C4 map crossed
+the `1-p > 0.95` corrected threshold, so no C3/C4 ROI-value TSVs were copied by
+the compiler. The notebook therefore shows the sorted C3/C4 peak audit and will
+automatically render scatterplots once C3/C4 ROI-value TSVs are available. In
+those scatterplots, the y axis is subject-level brain contrast beta from the
+corrected ROI and the x axis is the raw blink or pupil contrast delta; mean FD
+is included in the randomise model but is not plotted on the x axis.
