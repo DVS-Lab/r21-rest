@@ -76,8 +76,10 @@ not automatically to separate inferences about each reported hypothesis.
 `plot_covariate_randomise_scatterplots.ipynb` is separate from the main
 brain-map notebook. It reads
 `derivatives/fsl/covariate_randomise_summary/task-rest_covariate-randomise_peak_summary.tsv`
-and focuses only on C3/C4, the blink or pupil covariate-effect contrasts. C1/C2
-mean-effect rows are intentionally ignored for the scatterplot workflow.
+and reviews both pieces of the covariate models: C3/C4, the blink or pupil
+covariate-effect contrasts, and C1/C2, the adjusted main-effect contrasts.
+The C1/C2 section compares the original 12 significant cluster-extent results
+against the FD+blink and FD+pupil adjusted versions.
 
 Launch it with:
 
@@ -92,3 +94,8 @@ automatically render scatterplots once C3/C4 ROI-value TSVs are available. In
 those scatterplots, the y axis is subject-level brain contrast beta from the
 corrected ROI and the x axis is the raw blink or pupil contrast delta; mean FD
 is included in the randomise model but is not plotted on the x axis.
+
+The C1/C2 scatterplots are descriptive checks for adjusted main-effect ROIs,
+not the formal covariate-effect tests. The notebook also reads the optional
+`task-rest_covariate-randomise_integrity.tsv` file written by
+`code/check_covariate_model_integrity.py` when it is available.

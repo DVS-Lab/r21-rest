@@ -185,6 +185,7 @@ python3 code/MakeCovariateRandomiseModels.py --covariates fdmean,pupil --overwri
 code/run_covariate_randomise.sh --dry-run --max-jobs 35
 code/run_covariate_randomise.sh --max-jobs 35
 python3 code/check_covariate_randomise_results.py --fail-on-missing
+python3 code/check_covariate_model_integrity.py --fail-on-error
 ```
 
 The compiler writes GitHub-trackable covariate summaries to
@@ -193,6 +194,11 @@ mean-effect rows and C3/C4 covariate-effect rows. Significant corrected maps
 are copied there with JSON sidecars plus small ROI-value TSVs that join each
 participant's subject-level contrast beta to the covariate audit table; those
 TSVs are the portable inputs for the scatterplots.
+The integrity checker writes
+`derivatives/fsl/covariate_randomise_summary/task-rest_covariate-randomise_integrity.tsv`
+and verifies the model assumptions that are easy to get wrong: design/audit
+row order, demeaned covariate columns, subject and image-list order, group input
+volume counts, C3/C4 contrast targets, and mask voxel counts.
 
 ## Verify Outputs
 
