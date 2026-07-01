@@ -198,7 +198,9 @@ The integrity checker writes
 `derivatives/fsl/covariate_randomise_summary/task-rest_covariate-randomise_integrity.tsv`
 and verifies the model assumptions that are easy to get wrong: design/audit
 row order, demeaned covariate columns, subject and image-list order, group input
-volume counts, C3/C4 contrast targets, and mask voxel counts.
+volume counts, C3/C4 contrast targets, and mask voxel counts. It allows small
+rounding differences from FSL's six-decimal `.mat` formatting and reports the
+maximum design-vs-audit difference for each job.
 
 ## Verify Outputs
 

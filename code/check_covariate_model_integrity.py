@@ -32,6 +32,7 @@ FIELDS = (
     "design_con_valid",
     "intercept_all_ones",
     "covariate_columns_demeaned",
+    "max_abs_covariate_column_sum",
     "design_matches_covariate_audit",
     "max_abs_design_audit_delta",
     "subject_order_matches_audit",
@@ -54,7 +55,16 @@ def parse_args() -> argparse.Namespace:
         help="Tracked summary directory (default: derivatives/fsl/covariate_randomise_summary).",
     )
     parser.add_argument("--task", default="rest")
-    parser.add_argument("--tolerance", type=float, default=1e-6)
+    parser.add_argument(
+        "--tolerance",
+        type=float,
+        default=1e-3,
+        help=(
+            "Absolute tolerance for comparing design.mat values to audit TSV "
+            "values. The default allows for FSL design.mat values written at "
+            "six decimal places in scientific notation."
+        ),
+    )
     parser.add_argument("--fail-on-error", action="store_true")
     return parser.parse_args()
 
@@ -245,9 +255,17 @@ def main() -> int:
             group_volumes = fslnvols(group_input, fslnvols_command)
 
             intercept_all_ones = all(abs(design_row[0] - 1.0) <= args.tolerance for design_row in matrix)
-            covariate_columns_demeaned = all(
-                abs(sum(design_row[column] for design_row in matrix)) <= args.tolerance
+            covariate_column_sums = [
+                sum(design_row[column] for design_row in matrix)
                 for column in range(1, num_waves)
+            ]
+            max_abs_covariate_column_sum = max(
+                (abs(value) for value in covariate_column_sums),
+                default=0.0,
+            )
+            demean_sum_tolerance = args.tolerance * max(1, len(matrix))
+            covariate_columns_demeaned = (
+                max_abs_covariate_column_sum <= demean_sum_tolerance
             )
             max_delta = 0.0
             design_matches_audit = True
@@ -303,6 +321,7 @@ def main() -> int:
                     "design_con_valid": bool_text(design_con_shape_valid),
                     "intercept_all_ones": bool_text(intercept_all_ones),
                     "covariate_columns_demeaned": bool_text(covariate_columns_demeaned),
+                    "max_abs_covariate_column_sum": f"{max_abs_covariate_column_sum:.8g}",
                     "design_matches_covariate_audit": bool_text(design_matches_audit),
                     "max_abs_design_audit_delta": f"{max_delta:.8g}",
                     "subject_order_matches_audit": bool_text(subject_order_matches),

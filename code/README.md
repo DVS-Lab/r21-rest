@@ -164,7 +164,9 @@ scatterplot follow-up.
 summary folder. It verifies the mask exists and records its voxel count, checks
 that all covariate columns are demeaned, confirms design matrix rows match
 `covariate_audit.tsv`, and checks that `subject_order.tsv` and `image_list.txt`
-follow the same participant order as the merged group input.
+follow the same participant order as the merged group input. The design/audit
+comparison allows small differences from FSL `.mat` values written in
+six-decimal scientific notation and reports the maximum difference in the TSV.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:
