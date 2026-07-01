@@ -1,0 +1,37 @@
+{
+  "Analysis": "denoised_dim-20_task-rest",
+  "Component": "0017",
+  "ConditionContrast": "both-minus-sham",
+  "ContrastName": "mean_neg",
+  "ContrastVector": [
+    "-1",
+    "0",
+    "0"
+  ],
+  "Covariates": [
+    "delta_fd_mean",
+    "delta_blink_rate_per_min"
+  ],
+  "Description": "FSL randomise covariate model FWE-corrected 1-p statistical map",
+  "DesignContrast": "C2",
+  "DesignContrasts": "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0017_stat-beta/covariate-models/model-cov-fdmean-blink/both-minus-sham/design.con",
+  "DesignMatrix": "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0017_stat-beta/covariate-models/model-cov-fdmean-blink/both-minus-sham/design.mat",
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "GroupInput": "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0017_stat-beta/covariate-models/model-cov-fdmean-blink/both-minus-sham/group_task-rest_component-0017_stat-beta_contrast-both-minus-sham_model-cov-fdmean-blink.nii.gz",
+  "InferenceMethod": "cluster-extent",
+  "MapType": "beta",
+  "ModelLabel": "cov-fdmean-blink",
+  "Network": "occipital-pole",
+  "PeakOneMinusP": 0.9968,
+  "ROIValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-DenoisedDim20TaskRestCovFdmeanBlinkOccipitalPoleComp0017BothMinusShamMeanNegClusterExtentCorrp_stat-subjectContrast_values.tsv",
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0017_stat-beta/covariate-models/model-cov-fdmean-blink/randomise/network-occipital-pole/task-rest_network-occipital-pole_component-0017_stat-beta_contrast-both-minus-sham_model-cov-fdmean-blink_clustere_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest",
+  "TestedCovariate": "intercept"
+}

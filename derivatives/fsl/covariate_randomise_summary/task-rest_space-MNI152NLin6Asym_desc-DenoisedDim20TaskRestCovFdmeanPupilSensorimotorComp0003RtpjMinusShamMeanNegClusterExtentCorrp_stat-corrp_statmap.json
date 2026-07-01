@@ -1,0 +1,37 @@
+{
+  "Analysis": "denoised_dim-20_task-rest",
+  "Component": "0003",
+  "ConditionContrast": "rtpj-minus-sham",
+  "ContrastName": "mean_neg",
+  "ContrastVector": [
+    "-1",
+    "0",
+    "0"
+  ],
+  "Covariates": [
+    "delta_fd_mean",
+    "delta_mean_pupil_area"
+  ],
+  "Description": "FSL randomise covariate model FWE-corrected 1-p statistical map",
+  "DesignContrast": "C2",
+  "DesignContrasts": "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0003_stat-beta/covariate-models/model-cov-fdmean-pupil/rtpj-minus-sham/design.con",
+  "DesignMatrix": "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0003_stat-beta/covariate-models/model-cov-fdmean-pupil/rtpj-minus-sham/design.mat",
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "GroupInput": "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0003_stat-beta/covariate-models/model-cov-fdmean-pupil/rtpj-minus-sham/group_task-rest_component-0003_stat-beta_contrast-rtpj-minus-sham_model-cov-fdmean-pupil.nii.gz",
+  "InferenceMethod": "cluster-extent",
+  "MapType": "beta",
+  "ModelLabel": "cov-fdmean-pupil",
+  "Network": "sensorimotor",
+  "PeakOneMinusP": 0.955,
+  "ROIValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-DenoisedDim20TaskRestCovFdmeanPupilSensorimotorComp0003RtpjMinusShamMeanNegClusterExtentCorrp_stat-subjectContrast_values.tsv",
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_denoised_dim-20_task-rest.dr/contrasts/component-0003_stat-beta/covariate-models/model-cov-fdmean-pupil/randomise/network-sensorimotor/task-rest_network-sensorimotor_component-0003_stat-beta_contrast-rtpj-minus-sham_model-cov-fdmean-pupil_clustere_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest",
+  "TestedCovariate": "intercept"
+}

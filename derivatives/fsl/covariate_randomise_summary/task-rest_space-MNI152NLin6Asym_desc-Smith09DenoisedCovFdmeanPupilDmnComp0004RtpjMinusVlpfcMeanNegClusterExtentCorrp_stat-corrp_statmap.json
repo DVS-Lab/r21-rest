@@ -1,0 +1,37 @@
+{
+  "Analysis": "smith09_denoised",
+  "Component": "0004",
+  "ConditionContrast": "rtpj-minus-vlpfc",
+  "ContrastName": "mean_neg",
+  "ContrastVector": [
+    "-1",
+    "0",
+    "0"
+  ],
+  "Covariates": [
+    "delta_fd_mean",
+    "delta_mean_pupil_area"
+  ],
+  "Description": "FSL randomise covariate model FWE-corrected 1-p statistical map",
+  "DesignContrast": "C2",
+  "DesignContrasts": "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0004_stat-beta/covariate-models/model-cov-fdmean-pupil/rtpj-minus-vlpfc/design.con",
+  "DesignMatrix": "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0004_stat-beta/covariate-models/model-cov-fdmean-pupil/rtpj-minus-vlpfc/design.mat",
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "GroupInput": "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0004_stat-beta/covariate-models/model-cov-fdmean-pupil/rtpj-minus-vlpfc/group_task-rest_component-0004_stat-beta_contrast-rtpj-minus-vlpfc_model-cov-fdmean-pupil.nii.gz",
+  "InferenceMethod": "cluster-extent",
+  "MapType": "beta",
+  "ModelLabel": "cov-fdmean-pupil",
+  "Network": "dmn",
+  "PeakOneMinusP": 0.9826,
+  "ROIValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-Smith09DenoisedCovFdmeanPupilDmnComp0004RtpjMinusVlpfcMeanNegClusterExtentCorrp_stat-subjectContrast_values.tsv",
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09_denoised.dr/contrasts/component-0004_stat-beta/covariate-models/model-cov-fdmean-pupil/randomise/network-dmn/task-rest_network-dmn_component-0004_stat-beta_contrast-rtpj-minus-vlpfc_model-cov-fdmean-pupil_clustere_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest",
+  "TestedCovariate": "intercept"
+}
