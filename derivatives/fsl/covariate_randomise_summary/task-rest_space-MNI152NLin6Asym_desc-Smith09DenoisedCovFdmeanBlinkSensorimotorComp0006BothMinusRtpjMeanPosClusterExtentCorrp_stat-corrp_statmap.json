@@ -2,6 +2,7 @@
   "Analysis": "smith09_denoised",
   "Component": "0006",
   "ConditionContrast": "both-minus-rtpj",
+  "ConditionValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-Smith09DenoisedCovFdmeanBlinkSensorimotorComp0006BothMinusRtpjMeanPosClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
   "ContrastName": "mean_pos",
   "ContrastVector": [
     "1",

@@ -2,6 +2,7 @@
   "Analysis": "denoised_dim-20_task-rest",
   "Component": "0006",
   "ConditionContrast": "both-minus-vlpfc",
+  "ConditionValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-DenoisedDim20TaskRestCovFdmeanBlinkPrimaryVisualLateralVisualComp0006BothMinusVlpfcMeanPosClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
   "ContrastName": "mean_pos",
   "ContrastVector": [
     "1",

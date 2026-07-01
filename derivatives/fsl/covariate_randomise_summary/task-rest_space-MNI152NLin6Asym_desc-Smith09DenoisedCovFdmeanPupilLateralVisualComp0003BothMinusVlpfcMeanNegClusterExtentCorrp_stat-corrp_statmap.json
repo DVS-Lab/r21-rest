@@ -2,6 +2,7 @@
   "Analysis": "smith09_denoised",
   "Component": "0003",
   "ConditionContrast": "both-minus-vlpfc",
+  "ConditionValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-Smith09DenoisedCovFdmeanPupilLateralVisualComp0003BothMinusVlpfcMeanNegClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
   "ContrastName": "mean_neg",
   "ContrastVector": [
     "-1",

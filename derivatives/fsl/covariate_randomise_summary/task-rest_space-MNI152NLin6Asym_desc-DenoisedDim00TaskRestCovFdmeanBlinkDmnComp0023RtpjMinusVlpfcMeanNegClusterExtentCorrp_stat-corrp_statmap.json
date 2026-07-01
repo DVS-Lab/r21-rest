@@ -2,6 +2,7 @@
   "Analysis": "denoised_dim-00_task-rest",
   "Component": "0023",
   "ConditionContrast": "rtpj-minus-vlpfc",
+  "ConditionValues": "derivatives/fsl/covariate_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-DenoisedDim00TaskRestCovFdmeanBlinkDmnComp0023RtpjMinusVlpfcMeanNegClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
   "ContrastName": "mean_neg",
   "ContrastVector": [
     "-1",
