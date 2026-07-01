@@ -95,10 +95,12 @@ those scatterplots, the y axis is subject-level brain contrast beta from the
 corrected ROI and the x axis is the raw blink or pupil contrast delta; mean FD
 is included in the randomise model but is not plotted on the x axis.
 
-The C1/C2 displays are four-condition bar plots, not scatterplots. They require
-the `condition_values_tsv` files written by
-`code/check_covariate_randomise_results.py` for significant C1/C2 maps. Each bar
-plot shows sham, RTPJ, VLPFC, and BOTH stage-2 beta means with SEM from the
+The C1/C2 displays are covariate-adjusted brain maps paired with
+four-condition bar plots, not scatterplots. They require the copied
+`copied_image` corrected maps and `condition_values_tsv` files written by
+`code/check_covariate_randomise_results.py` for significant C1/C2 maps. Each
+brain panel thresholds the adjusted corrp map at `1-p > 0.95`; each bar plot
+shows sham, RTPJ, VLPFC, and BOTH stage-2 beta means with SEM from that same
 adjusted main-effect ROI. The notebook also reads the optional
 `task-rest_covariate-randomise_integrity.tsv` file written by
 `code/check_covariate_model_integrity.py` when it is available.
