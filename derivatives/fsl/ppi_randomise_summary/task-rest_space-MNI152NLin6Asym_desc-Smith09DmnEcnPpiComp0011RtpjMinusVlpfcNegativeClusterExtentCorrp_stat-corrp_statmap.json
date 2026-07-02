@@ -1,0 +1,23 @@
+{
+  "Analysis": "smith09_ppi-dmn-ecn",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 11,
+  "ConditionContrast": "rtpj-minus-vlpfc",
+  "Description": "FSL randomise FWE-corrected 1-p map for Smith09 DMN x ECN interaction stage-2 maps",
+  "DesignContrast": "C2",
+  "Direction": "negative",
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "dmn-x-ecn",
+  "PeakOneMinusP": 0.9816,
+  "ROIValues": "derivatives/fsl/ppi_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-Smith09DmnEcnPpiComp0011RtpjMinusVlpfcNegativeClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta/randomise/task-rest_component-0011_stat-beta_contrast-rtpj-minus-vlpfc_clustere_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest"
+}
