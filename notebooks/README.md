@@ -104,3 +104,24 @@ shows sham, RTPJ, VLPFC, and BOTH stage-2 beta means with SEM from that same
 adjusted main-effect ROI. The notebook also reads the optional
 `task-rest_covariate-randomise_integrity.tsv` file written by
 `code/check_covariate_model_integrity.py` when it is available.
+
+## Network Correlation and PPI Results
+
+`plot_network_correlation_ppi_results.ipynb` reviews the Smith09 stage-1
+network-correlation analysis and the DMN x ECN interaction randomise analysis.
+It reads the tracked summaries in
+`derivatives/fsl/network_correlation_summary` and
+`derivatives/fsl/ppi_randomise_summary`, so it can run on a local computer
+without the large Linux-side dual-regression folders.
+
+Launch it with:
+
+```bash
+bash notebooks/run_network_correlation_ppi_notebook.sh
+```
+
+The first section plots full and partial DMN-ECN timecourse correlations by
+condition, then audits the broader non-cerebellar Smith09 network-pair scan.
+The second section plots significant component-11 DMN x ECN interaction maps
+from `check_ppi_randomise_results.py` and four-condition stage-2 beta means
+from the same corrected ROI. TFCE is intentionally ignored.
