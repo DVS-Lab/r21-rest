@@ -71,6 +71,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `check_covariate_model_integrity.py` | Completed covariate-adjusted randomise model folders | Audits model assumptions: mask voxels, demeaned covariates, design/audit row agreement, subject/image order, group input volume counts, and C3/C4 contrast vectors. |
 | `MakeNetworkCorrelationTables.py` | Dual-regression stage-1 timecourses | Writes full and partial Smith09 network-correlation run values, condition deltas, and sign-flip summaries under `derivatives/fsl/network_correlation_summary`. |
 | `run_smith09_dmn_ecn_ppi.sh` | Completed Smith09 denoised dual regression | Appends a centered DMN x ECN stage-1 interaction timecourse, reruns stage 2, and writes an 11-map dual-regression-like folder for component-11 contrast testing. |
+| `check_ppi_randomise_results.py` | Completed component-11 PPI randomise outputs | Compiles DMN x ECN interaction peaks, copies significant corrected maps, and writes portable condition-level ROI TSVs under `derivatives/fsl/ppi_randomise_summary`. |
 | `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participants whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; currently `sub-218`. |
 | `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
 | `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
@@ -187,7 +188,14 @@ python3 code/MakeNetworkCorrelationTables.py \
 The script writes run-level full and partial correlations, subject-level
 condition differences, and one-sample sign-flip summaries to
 `derivatives/fsl/network_correlation_summary`. Correlations are Fisher-z
-transformed before constructing condition contrasts.
+transformed before constructing condition contrasts. The output folder is
+GitHub-tracked by `.gitignore`, so add and push it after running the script:
+
+```bash
+git add derivatives/fsl/network_correlation_summary
+git commit -m "Add network correlation summaries"
+git push
+```
 
 Build the DMN-by-ECN physio-physio interaction stage-2 maps without modifying
 the original FSL `dual_regression` script:
@@ -199,12 +207,20 @@ DUAL_REGRESSION_DIR=derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn
   code/make_dual_regression_contrasts.sh smith09 11 \
   --output-dir derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta
 derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta/run_randomise.sh
+python3 code/check_ppi_randomise_results.py --fail-on-missing
 ```
 
 Component 11 is the centered product of z-scored Smith09 DMN and ECN stage-1
 timecourses. The first ten columns remain the original Smith09 timecourses, and
 stage 2 uses the same `fsl_glm --demean --des_norm` normalization as FSL dual
-regression.
+regression. The checker writes `derivatives/fsl/ppi_randomise_summary`, which is
+also GitHub-tracked:
+
+```bash
+git add derivatives/fsl/ppi_randomise_summary
+git commit -m "Add DMN ECN PPI randomise summaries"
+git push
+```
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:

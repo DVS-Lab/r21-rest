@@ -227,7 +227,14 @@ python3 code/MakeNetworkCorrelationTables.py \
 
 Outputs are small TSVs under `derivatives/fsl/network_correlation_summary`.
 They include run-level Pearson and partial correlations, Fisher-z
-condition-difference tables, and deterministic sign-flip summaries.
+condition-difference tables, and deterministic sign-flip summaries. This folder
+is explicitly GitHub-tracked, so add and push it after the script runs:
+
+```bash
+git add derivatives/fsl/network_correlation_summary
+git commit -m "Add network correlation summaries"
+git push
+```
 
 For the physio-physio interaction sensitivity analysis, do not edit the FSL
 `dual_regression` file. Instead, reuse the Smith09 stage-1 timecourses, append
@@ -240,10 +247,19 @@ DUAL_REGRESSION_DIR=derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn
   code/make_dual_regression_contrasts.sh smith09 11 \
   --output-dir derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta
 derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta/run_randomise.sh
+python3 code/check_ppi_randomise_results.py --fail-on-missing
 ```
 
 Component 11 is the DMN-by-ECN interaction map; components 1-10 remain the
-original Smith09 networks.
+original Smith09 networks. The checker writes compact GitHub-tracked summaries,
+copied significant corrected maps, JSON sidecars, and condition-level ROI TSVs
+to `derivatives/fsl/ppi_randomise_summary`:
+
+```bash
+git add derivatives/fsl/ppi_randomise_summary
+git commit -m "Add DMN ECN PPI randomise summaries"
+git push
+```
 
 ## Verify Outputs
 

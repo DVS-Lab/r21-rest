@@ -50,6 +50,16 @@ derivatives/fsl/covariate_randomise_summary/*
 !derivatives/fsl/covariate_randomise_summary/*.md
 !derivatives/fsl/covariate_randomise_summary/*.nii.gz
 !derivatives/fsl/covariate_randomise_summary/*.json
+!derivatives/fsl/network_correlation_summary/
+derivatives/fsl/network_correlation_summary/*
+!derivatives/fsl/network_correlation_summary/*.tsv
+!derivatives/fsl/network_correlation_summary/*.md
+!derivatives/fsl/ppi_randomise_summary/
+derivatives/fsl/ppi_randomise_summary/*
+!derivatives/fsl/ppi_randomise_summary/*.tsv
+!derivatives/fsl/ppi_randomise_summary/*.md
+!derivatives/fsl/ppi_randomise_summary/*.nii.gz
+!derivatives/fsl/ppi_randomise_summary/*.json
 work/
 logs/
 *.log
