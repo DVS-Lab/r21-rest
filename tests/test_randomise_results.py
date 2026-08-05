@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import importlib.util
 import json
 import os
 import subprocess
@@ -11,6 +12,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CHECKER = REPO_ROOT / "code" / "check_randomise_results.py"
+CHECKER_SPEC = importlib.util.spec_from_file_location("check_randomise_results", CHECKER)
+assert CHECKER_SPEC is not None and CHECKER_SPEC.loader is not None
+CHECKER_MODULE = importlib.util.module_from_spec(CHECKER_SPEC)
+CHECKER_SPEC.loader.exec_module(CHECKER_MODULE)
 CONTRASTS = (
     "both-minus-sham",
     "both-minus-rtpj",
@@ -28,6 +33,21 @@ class RandomiseResultTests(unittest.TestCase):
     def write_command(path: Path, body: str) -> None:
         path.write_text("#!/bin/sh\n" + body)
         path.chmod(0o755)
+
+    def test_reward_analysis_has_portable_map_name(self):
+        name = CHECKER_MODULE.copied_name(
+            "rest",
+            "MNI152NLin6Asym",
+            "smith09-reward",
+            "brain-reward-signature",
+            11,
+            "mean-stimulation-minus-sham",
+            "positive",
+            "cluster-extent",
+            "",
+        )
+        self.assertIn("smith09RewardBrainRewardSignatureComp0011", name)
+        self.assertTrue(name.endswith("_stat-corrp_statmap.nii.gz"))
 
     def test_checks_both_directions_and_copies_significant_maps(self):
         with tempfile.TemporaryDirectory() as tmp:

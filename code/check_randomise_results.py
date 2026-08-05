@@ -404,6 +404,7 @@ def copied_name(
         "0": "dim00",
         "20": "dim20",
         "smith09": "smith09",
+        "smith09-reward": "smith09Reward",
     }[analysis]
     sensitivity = camel_label(sensitivity_label) if sensitivity_label else ""
     description = (
