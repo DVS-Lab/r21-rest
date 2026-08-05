@@ -1,0 +1,26 @@
+{
+  "AnalysisDimension": "smith09-reward",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 11,
+  "ConditionContrast": "rtpj-minus-sham",
+  "Description": "FSL randomise FWE-corrected 1-p statistical map",
+  "DesignContrast": "C1",
+  "Direction": "positive",
+  "ExcludedParticipants": [],
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "brain-reward-signature",
+  "NumberOfPermutations": 5000,
+  "PeakOneMinusP": 0.9626,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-smith09RewardBrainRewardSignatureComp0011RtpjMinusShamPositiveClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SensitivityLabel": null,
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09-reward_denoised.dr/contrasts/component-0011_stat-beta/randomise/network-brain-reward-signature/task-rest_network-brain-reward-signature_component-0011_stat-beta_contrast-rtpj-minus-sham_clustere_corrp_tstat1.nii.gz"
+  ],
+  "TaskName": "rest"
+}

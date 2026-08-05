@@ -1,0 +1,26 @@
+{
+  "AnalysisDimension": "smith09-reward",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 2,
+  "ConditionContrast": "both-minus-vlpfc",
+  "Description": "FSL randomise FWE-corrected 1-p statistical map",
+  "DesignContrast": "C1",
+  "Direction": "positive",
+  "ExcludedParticipants": [],
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "occipital-pole",
+  "NumberOfPermutations": 5000,
+  "PeakOneMinusP": 0.9898,
+  "ROIValues": "derivatives/fsl/randomise_summary/task-rest_space-MNI152NLin6Asym_desc-smith09RewardOccipitalPoleComp0002BothMinusVlpfcPositiveClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SensitivityLabel": null,
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09-reward_denoised.dr/contrasts/component-0002_stat-beta/randomise/network-occipital-pole/task-rest_network-occipital-pole_component-0002_stat-beta_contrast-both-minus-vlpfc_clustere_corrp_tstat1.nii.gz"
+  ],
+  "TaskName": "rest"
+}

@@ -1,0 +1,24 @@
+{
+  "Analysis": "smith09-reward_ppi-dmn-ecn",
+  "ClusterFormingTThreshold": 3.1,
+  "Component": 12,
+  "ConditionContrast": "rtpj-minus-vlpfc",
+  "Description": "FSL randomise FWE-corrected 1-p map for a network-timeseries interaction",
+  "DesignContrast": "C2",
+  "Direction": "negative",
+  "GeneratedBy": [
+    {
+      "Name": "FSL randomise"
+    }
+  ],
+  "InferenceMethod": "cluster-extent",
+  "Network": "dmn-x-ecn",
+  "PPI": "dmn-ecn",
+  "PeakOneMinusP": 0.9872,
+  "ROIValues": "derivatives/fsl/ppi_randomise_summary/task-rest_space-MNI152NLin6Asym_desc-Smith09DmnEcnPpiComp0012RtpjMinusVlpfcNegativeClusterExtentCorrp_stat-stage2Beta_timeseries.tsv",
+  "SignificanceThresholdOneMinusP": 0.95,
+  "Sources": [
+    "derivatives/fsl/dual-regression_smith09-reward_denoised_ppi-dmn-ecn.dr/contrasts/component-0012_stat-beta/randomise/network-dmn-x-ecn/task-rest_network-dmn-x-ecn_component-0012_stat-beta_contrast-rtpj-minus-vlpfc_clustere_corrp_tstat2.nii.gz"
+  ],
+  "TaskName": "rest"
+}
