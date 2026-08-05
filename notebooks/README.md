@@ -1,10 +1,12 @@
 # Randomise Results Notebook
 
-`plot_randomise_results.ipynb` displays every significant N=27 primary and
-secondary cluster-extent result in its own interactive NiiVue MNI viewer. Each
+`plot_randomise_results.ipynb` displays every significant N=27 primary,
+secondary, and Smith09-plus-reward cluster-extent result on MNI anatomy. Each
 result includes a plain-language description of the analysis, network, signed
 contrast, corrected peak p-value, and cluster size, followed by sham, RTPJ,
-VLPFC, and BOTH dual-regression stage-2 beta means with SEM.
+VLPFC, and BOTH dual-regression stage-2 beta means with SEM. Every result has
+an orthogonal static brain panel; a whole-brain glass view is added only when
+the corrected map contains multiple disconnected clusters.
 
 The notebook also correlates each extracted brain contrast with the matching
 signed pupil and blink-rate deltas from the primary N=27 subject set.
@@ -34,20 +36,15 @@ notebook reads only these tracked files and therefore does not require the
 large dual-regression directories, FSL, or Neurodesk on another computer.
 
 The launcher installs `notebooks/requirements.txt` before starting JupyterLab.
-This ordering is required because IPyNiiVue uses AnyWidget in both the Python
-kernel and the JupyterLab browser frontend. Installing from a cell in an
-already-running Lab session can leave the frontend unregistered. If Lab was
-already open during installation, stop it with `Ctrl-C`, rerun the launcher,
-and refresh the browser tab.
+If Lab was already open during installation, stop it with `Ctrl-C`, rerun the
+launcher, and refresh the browser tab.
 
 ## Sharing Rendered Output
 
 Running every cell, saving the notebook, and committing the resulting `.ipynb`
-allows collaborators to view saved text, tables, bar plots, boxplots, and the
-static brain-map fallback on GitHub without executing Python. NiiVue is a live
-widget and GitHub's static notebook renderer does not execute it; collaborators
-must run the notebook to use NiiVue interactively. A saved notebook can also be
-exported as a convenient standalone static HTML file:
+allows collaborators to view saved text, tables, bar plots, boxplots, and brain
+maps on GitHub without executing Python. A saved notebook can also be exported
+as a convenient standalone static HTML file:
 
 ```bash
 python3 -m jupyter nbconvert \
@@ -126,6 +123,7 @@ contrasts, including `mean(RTPJ,VLPFC,BOTH)-sham`, and then audits the broader
 non-cerebellar scan. The second section retains the legacy component-11 DMN x
 ECN result for provenance and adds the standardized component-12 DMN x ECN,
 DMN x reward, DMN x left-FPN, and DMN x right-FPN analyses when their tracked
-summary is present. Significant cluster-extent maps are shown with interactive
-NiiVue views, static brain panels, and four-condition stage-2 beta means from
-the same corrected ROI. TFCE is intentionally ignored.
+summary is present. Significant cluster-extent maps are shown with static brain
+panels and four-condition stage-2 beta means from the same corrected ROI. A
+whole-brain glass view is added only for maps with multiple disconnected
+clusters. TFCE is intentionally ignored.
