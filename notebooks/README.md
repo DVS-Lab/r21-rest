@@ -107,9 +107,9 @@ adjusted main-effect ROI. The notebook also reads the optional
 
 ## Network Correlation and PPI Results
 
-`plot_network_correlation_ppi_results.ipynb` reviews the Smith09 stage-1
-network-correlation analysis and the DMN x ECN interaction randomise analysis.
-It reads the tracked summaries in
+`plot_network_correlation_ppi_results.ipynb` reviews the standardized
+Smith09-plus-reward stage-1 network correlations and the secondary DMN
+interaction randomise analyses. It reads the tracked summaries in
 `derivatives/fsl/network_correlation_summary` and
 `derivatives/fsl/ppi_randomise_summary`, so it can run on a local computer
 without the large Linux-side dual-regression folders.
@@ -120,8 +120,12 @@ Launch it with:
 bash notebooks/run_network_correlation_ppi_notebook.sh
 ```
 
-The first section plots full and partial DMN-ECN timecourse correlations by
-condition, then audits the broader non-cerebellar Smith09 network-pair scan.
-The second section plots significant component-11 DMN x ECN interaction maps
-from `check_ppi_randomise_results.py` and four-condition stage-2 beta means
-from the same corrected ROI. TFCE is intentionally ignored.
+The first section plots full and partial DMN coupling with ECN, left FPN, right
+FPN, and the Brain Reward Signature by condition. It includes all eight
+contrasts, including `mean(RTPJ,VLPFC,BOTH)-sham`, and then audits the broader
+non-cerebellar scan. The second section retains the legacy component-11 DMN x
+ECN result for provenance and adds the standardized component-12 DMN x ECN,
+DMN x reward, DMN x left-FPN, and DMN x right-FPN analyses when their tracked
+summary is present. Significant cluster-extent maps are shown with interactive
+NiiVue views, static brain panels, and four-condition stage-2 beta means from
+the same corrected ROI. TFCE is intentionally ignored.
