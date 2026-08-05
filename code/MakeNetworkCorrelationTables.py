@@ -22,8 +22,14 @@ CONTRAST_WEIGHTS = {
     "rtpj-minus-sham": {"rtpj": 1.0, "sham": -1.0},
     "vlpfc-minus-sham": {"vlpfc": 1.0, "sham": -1.0},
     "both-minus-mean-rtpj-vlpfc": {"both": 1.0, "rtpj": -0.5, "vlpfc": -0.5},
+    "mean-stimulation-minus-sham": {
+        "rtpj": 1.0 / 3.0,
+        "vlpfc": 1.0 / 3.0,
+        "both": 1.0 / 3.0,
+        "sham": -1.0,
+    },
 }
-SMITH09_LABELS = (
+DEFAULT_NETWORK_LABELS = (
     ("primary-visual", 1),
     ("occipital-pole", 2),
     ("lateral-visual", 3),
@@ -36,7 +42,7 @@ SMITH09_LABELS = (
     ("left-fpn", 10),
 )
 PRIMARY_NETWORKS = {"dmn", "ecn", "right-fpn", "left-fpn"}
-NONCEREBELLAR_NETWORKS = {name for name, _component in SMITH09_LABELS if name != "cerebellum"}
+DMN_TARGETS = {"ecn", "right-fpn", "left-fpn", "brain-reward-signature"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -49,9 +55,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--network-set",
-        choices=("dmn-ecn", "primary", "all-noncerebellar", "all"),
+        choices=("dmn-ecn", "dmn-targets", "primary", "all-noncerebellar", "all"),
         default="all-noncerebellar",
-        help="Network pairs to summarize. dmn-ecn reports only the DMN/ECN pair.",
+        help=(
+            "Network pairs to summarize. dmn-targets reports DMN coupling with ECN, "
+            "left/right FPN, and the reward signature when present."
+        ),
     )
     parser.add_argument(
         "--dr-dir",
@@ -84,16 +93,44 @@ def write_tsv(path: Path, rows: list[dict[str, object]], fieldnames: list[str]) 
             writer.writerow({field: row.get(field, "") for field in fieldnames})
 
 
-def selected_networks(network_set: str) -> list[tuple[str, int]]:
+def read_network_labels(dr_dir: Path) -> list[tuple[str, int]]:
+    path = dr_dir / "network_labels.tsv"
+    if not path.is_file():
+        return list(DEFAULT_NETWORK_LABELS)
+    rows = read_tsv(path)
+    labels: list[tuple[str, int]] = []
+    for row in rows:
+        try:
+            component = int(row["component"])
+            network = row["network"].strip()
+        except (KeyError, ValueError) as error:
+            raise ValueError(f"Invalid network-label table: {path}") from error
+        if not network:
+            raise ValueError(f"Blank network label for component {component}: {path}")
+        labels.append((network, component))
+    labels.sort(key=lambda item: item[1])
+    components = [component for _network, component in labels]
+    if components != list(range(1, len(labels) + 1)):
+        raise ValueError(f"Network components must be contiguous and 1-based: {path}")
+    if len({network for network, _component in labels}) != len(labels):
+        raise ValueError(f"Network labels must be unique: {path}")
+    return labels
+
+
+def selected_networks(
+    network_set: str, labels: list[tuple[str, int]]
+) -> list[tuple[str, int]]:
     if network_set == "dmn-ecn":
         keep = {"dmn", "ecn"}
+    elif network_set == "dmn-targets":
+        keep = {"dmn"}.union(DMN_TARGETS)
     elif network_set == "primary":
         keep = PRIMARY_NETWORKS
     elif network_set == "all-noncerebellar":
-        keep = NONCEREBELLAR_NETWORKS
+        keep = {name for name, _component in labels if name != "cerebellum"}
     else:
-        keep = {name for name, _component in SMITH09_LABELS}
-    return [(name, component) for name, component in SMITH09_LABELS if name in keep]
+        keep = {name for name, _component in labels}
+    return [(name, component) for name, component in labels if name in keep]
 
 
 def read_stage1(path: Path, expected_columns: int) -> np.ndarray:
@@ -116,6 +153,17 @@ def correlation_matrices(matrix: np.ndarray) -> dict[str, np.ndarray]:
     partial = -precision / denom
     np.fill_diagonal(partial, 1.0)
     return {"full": full, "partial": partial}
+
+
+def standardize_timecourses(matrix: np.ndarray) -> np.ndarray:
+    means = np.mean(matrix, axis=0)
+    standard_deviations = np.std(matrix, axis=0, ddof=0)
+    if np.any(~np.isfinite(matrix)) or np.any(~np.isfinite(standard_deviations)):
+        raise ValueError("Stage-1 matrix contains non-finite values")
+    if np.any(standard_deviations <= 0):
+        columns = np.flatnonzero(standard_deviations <= 0) + 1
+        raise ValueError(f"Stage-1 matrix has constant column(s): {columns.tolist()}")
+    return (matrix - means) / standard_deviations
 
 
 def fisher_z(value: float) -> float:
@@ -165,11 +213,23 @@ def main() -> int:
         print(message, file=sys.stderr)
         return 0
 
-    networks = selected_networks(args.network_set)
-    component_to_network = {component: name for name, component in networks}
+    network_labels = read_network_labels(dr_dir)
+    networks = selected_networks(args.network_set, network_labels)
     pairs = list(combinations(networks, 2))
     if args.network_set == "dmn-ecn":
-        pairs = [(("dmn", 4), ("ecn", 8))]
+        by_name = {name: component for name, component in network_labels}
+        pairs = [(("dmn", by_name["dmn"]), ("ecn", by_name["ecn"]))]
+    elif args.network_set == "dmn-targets":
+        by_name = {name: component for name, component in networks}
+        if "dmn" not in by_name:
+            raise ValueError("The network-label table does not contain DMN")
+        pairs = [
+            (("dmn", by_name["dmn"]), (target, by_name[target]))
+            for target in ("ecn", "right-fpn", "left-fpn", "brain-reward-signature")
+            if target in by_name
+        ]
+    if not pairs:
+        raise ValueError(f"No network pairs selected for {args.network_set}")
 
     raw_rows: list[dict[str, object]] = []
     missing: list[str] = []
@@ -179,7 +239,8 @@ def main() -> int:
         if not stage1.is_file():
             missing.append(str(stage1))
             continue
-        matrix = read_stage1(stage1, len(SMITH09_LABELS))
+        matrix = read_stage1(stage1, len(network_labels))
+        matrix = standardize_timecourses(matrix)
         matrices = correlation_matrices(matrix)
         for corr_type, corr in matrices.items():
             for (network_a, component_a), (network_b, component_b) in pairs:
@@ -199,6 +260,7 @@ def main() -> int:
                         "condition_order": item.get("condition_order", ""),
                         "dual_regression_label": label,
                         "n_timepoints": matrix.shape[0],
+                        "timecourse_scaling": "within-run-zscore",
                         "r": format_float(r_value),
                         "fisher_z": format_float(fisher_z(r_value)),
                     }
@@ -225,6 +287,7 @@ def main() -> int:
         "condition_order",
         "dual_regression_label",
         "n_timepoints",
+        "timecourse_scaling",
         "r",
         "fisher_z",
     ]
@@ -346,7 +409,10 @@ def main() -> int:
         readme.write_text(
             "# Network Correlation Summary\n\n"
             "Generated by `code/MakeNetworkCorrelationTables.py` from dual-regression "
-            "stage-1 timecourse files. The run-values table contains Pearson full "
+            "stage-1 timecourse files. Each run-level timecourse column is z-scored "
+            "before analysis. This is explicit provenance: Pearson and correlation-"
+            "matrix partial correlations are invariant to this scaling. The run-values "
+            "table contains Pearson full "
             "correlations and precision-matrix partial correlations among Smith09 "
             "network timecourses. The condition-contrast table applies the same "
             "within-participant condition contrasts used for the randomise analyses "
@@ -355,6 +421,7 @@ def main() -> int:
         )
 
     print(f"Network pairs: {len(pairs)}")
+    print(f"Stage-1 columns: {len(network_labels)}; scaling: within-run z-score")
     print(f"Run correlation rows: {len(raw_rows)}")
     print(f"Wrote {raw_path}")
     print(f"Wrote {contrast_path}")

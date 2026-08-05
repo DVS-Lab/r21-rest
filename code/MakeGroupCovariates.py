@@ -23,6 +23,10 @@ CONTRASTS: tuple[tuple[str, dict[str, float]], ...] = (
         "both-minus-mean-rtpj-vlpfc",
         {"both": 1.0, "rtpj": -0.5, "vlpfc": -0.5},
     ),
+    (
+        "mean-stimulation-minus-sham",
+        {"rtpj": 1.0 / 3.0, "vlpfc": 1.0 / 3.0, "both": 1.0 / 3.0, "sham": -1.0},
+    ),
 )
 RUN_FIELDS = (
     "participant",

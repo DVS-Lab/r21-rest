@@ -68,6 +68,20 @@ class GroupCovariateTests(unittest.TestCase):
             self.assertAlmostEqual(
                 float(both_minus_sham["delta_blink_rate_per_min"]), 45.0
             )
+            stimulation_minus_sham = next(
+                row
+                for row in contrast_rows
+                if row["contrast"] == "mean-stimulation-minus-sham"
+            )
+            self.assertAlmostEqual(
+                float(stimulation_minus_sham["delta_fd_mean"]), 0.20
+            )
+            self.assertAlmostEqual(
+                float(stimulation_minus_sham["delta_mean_pupil_area"]), 200.0
+            )
+            self.assertAlmostEqual(
+                float(stimulation_minus_sham["delta_blink_rate_per_min"]), 30.0
+            )
 
     def test_design_spreadsheets_demean_fdmean_ev(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -144,6 +158,7 @@ class GroupCovariateTests(unittest.TestCase):
         rows = []
         for participant, complete_all in (("sub-001", True), ("sub-002", False)):
             for contrast in (
+                "mean-stimulation-minus-sham",
                 "both-minus-sham",
                 "both-minus-rtpj",
                 "both-minus-vlpfc",

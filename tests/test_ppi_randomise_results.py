@@ -19,6 +19,7 @@ CONTRASTS = (
     "rtpj-minus-sham",
     "vlpfc-minus-sham",
     "both-minus-mean-rtpj-vlpfc",
+    "mean-stimulation-minus-sham",
 )
 
 
@@ -110,27 +111,27 @@ class PPIRandomiseResultTests(unittest.TestCase):
                 check=True,
             )
 
-            self.assertIn("t-stat images present: 14/14", result.stdout)
-            self.assertIn("corrp images present: 14/14", result.stdout)
-            self.assertIn("Corrected maps with peak > 0.95: 7", result.stdout)
-            self.assertIn("ROI-value TSVs written: 7 (56 rows)", result.stdout)
+            self.assertIn("t-stat images present: 16/16", result.stdout)
+            self.assertIn("corrp images present: 16/16", result.stdout)
+            self.assertIn("Corrected maps with peak > 0.95: 8", result.stdout)
+            self.assertIn("ROI-value TSVs written: 8 (64 rows)", result.stdout)
 
             summary = output_dir / "task-rest_ppi-dmn-ecn_randomise_peak_summary.tsv"
             with summary.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
-            self.assertEqual(len(rows), 14)
+            self.assertEqual(len(rows), 16)
             self.assertEqual({row["network"] for row in rows}, {"dmn-x-ecn"})
             self.assertEqual({row["component"] for row in rows}, {"11"})
             self.assertEqual(
                 len([row for row in rows if row["peak_gt_threshold"] == "true"]),
-                7,
+                8,
             )
             copied_images = list(output_dir.glob("*.nii.gz"))
             copied_sidecars = list(output_dir.glob("*.json"))
             roi_values = list(output_dir.glob("*_timeseries.tsv"))
-            self.assertEqual(len(copied_images), 7)
-            self.assertEqual(len(copied_sidecars), 7)
-            self.assertEqual(len(roi_values), 7)
+            self.assertEqual(len(copied_images), 8)
+            self.assertEqual(len(copied_sidecars), 8)
+            self.assertEqual(len(roi_values), 8)
 
 
 if __name__ == "__main__":

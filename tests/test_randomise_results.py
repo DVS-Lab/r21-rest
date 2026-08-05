@@ -19,6 +19,7 @@ CONTRASTS = (
     "rtpj-minus-sham",
     "vlpfc-minus-sham",
     "both-minus-mean-rtpj-vlpfc",
+    "mean-stimulation-minus-sham",
 )
 
 
@@ -137,32 +138,32 @@ class RandomiseResultTests(unittest.TestCase):
             )
 
             self.assertIn("Design contrasts verified (+1/-1): 2/2", result.stdout)
-            self.assertIn("Completion markers present: 14/14", result.stdout)
-            self.assertIn("t-stat images present: 28/28", result.stdout)
-            self.assertIn("corrp images present: 28/28", result.stdout)
+            self.assertIn("Completion markers present: 16/16", result.stdout)
+            self.assertIn("t-stat images present: 32/32", result.stdout)
+            self.assertIn("corrp images present: 32/32", result.stdout)
             self.assertNotIn("TFCE maps", result.stdout)
-            self.assertIn("Cluster-extent maps with peak > 0.95: 14", result.stdout)
-            self.assertIn("ROI-value TSVs written: 14 (112 rows)", result.stdout)
+            self.assertIn("Cluster-extent maps with peak > 0.95: 16", result.stdout)
+            self.assertIn("ROI-value TSVs written: 16 (128 rows)", result.stdout)
 
             summary = output_dir / "task-rest_randomise_peak_summary.tsv"
             with summary.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
-            self.assertEqual(len(rows), 28)
+            self.assertEqual(len(rows), 32)
             self.assertEqual({row["design_contrast"] for row in rows}, {"C1", "C2"})
             self.assertEqual(
                 {row["inference"] for row in rows}, {"cluster-extent"}
             )
             significant = [row for row in rows if row["peak_gt_threshold"] == "true"]
-            self.assertEqual(len(significant), 14)
+            self.assertEqual(len(significant), 16)
             self.assertTrue(all(row["copied_image"] for row in significant))
             self.assertTrue(all(row["roi_values_tsv"] for row in significant))
 
             copied_images = list(output_dir.glob("*.nii.gz"))
             copied_sidecars = list(output_dir.glob("*.json"))
             roi_values = list(output_dir.glob("*_timeseries.tsv"))
-            self.assertEqual(len(copied_images), 14)
-            self.assertEqual(len(copied_sidecars), 14)
-            self.assertEqual(len(roi_values), 14)
+            self.assertEqual(len(copied_images), 16)
+            self.assertEqual(len(copied_sidecars), 16)
+            self.assertEqual(len(roi_values), 16)
             with roi_values[0].open(newline="") as stream:
                 roi_rows = list(csv.DictReader(stream, delimiter="\t"))
             self.assertEqual(len(roi_rows), 8)

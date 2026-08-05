@@ -5,21 +5,24 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_randomise.sh {dmn|primary|secondary|smith09|smith09-secondary} [options]
+Usage: code/run_randomise.sh {dmn|primary|secondary|smith09|smith09-secondary|smith09-reward-primary|smith09-reward-secondary} [options]
 
-Prepare selected dual-regression maps and launch all seven condition contrasts.
+Prepare selected dual-regression maps and launch condition contrasts.
 
-  dmn      DMN only: 2 components x 7 contrasts = 14 jobs
+  dmn      DMN only: two data-derived ICA components
   primary  DMN, ECN, and left/right FPN; shared components are run once
   secondary  ICA matches for all remaining non-cerebellar Smith09 networks
-  smith09  Direct Smith09 maps 4, 8, 9, and 10 x 7 contrasts = 28 jobs
-  smith09-secondary  Direct Smith09 maps 1, 2, 3, 6, and 7 x 7 = 35 jobs
+  smith09  Direct Smith09 maps 4, 8, 9, and 10
+  smith09-secondary  Direct Smith09 maps 1, 2, 3, 6, and 7
+  smith09-reward-primary  New 11-map model: DMN, ECN, FPNs, and reward
+  smith09-reward-secondary  New 11-map model: visual, sensorimotor, auditory
 
 Options:
   --max-jobs N              Concurrent randomise processes (default: 24)
   --map-type {beta|z}       Stage-2 map type (default: beta)
   --n-perm N                Permutations per job (default: 5000)
   --cluster-threshold VALUE Cluster-forming t threshold (default: 3.1)
+  --contrasts LIST          Comma-separated contrasts or all (default: all)
   --exclude-list PATH       Participant exclusions for a sensitivity analysis
   --sensitivity-label NAME  Output label used with --exclude-list
   --tfce                     Also calculate TFCE inference (default: off)
@@ -35,7 +38,7 @@ if [[ -z "$network_set" || "$network_set" == "--help" || "$network_set" == "-h" 
 fi
 shift
 case "$network_set" in
-    dmn|primary|secondary|smith09|smith09-secondary) ;;
+    dmn|primary|secondary|smith09|smith09-secondary|smith09-reward-primary|smith09-reward-secondary) ;;
     *) echo "ERROR: Unknown network set: $network_set" >&2; usage >&2; exit 1 ;;
 esac
 
@@ -43,6 +46,7 @@ maxjobs="${RANDOMISE_MAX_JOBS:-24}"
 map_type="beta"
 nperm="${N_PERM:-5000}"
 cluster_threshold="${CLUSTER_THRESHOLD:-3.1}"
+contrast_selection="all"
 exclude_list=""
 sensitivity_label=""
 tfce=0
@@ -53,6 +57,7 @@ while (($#)); do
         --map-type) map_type="${2:-}"; shift 2 ;;
         --n-perm) nperm="${2:-}"; shift 2 ;;
         --cluster-threshold) cluster_threshold="${2:-}"; shift 2 ;;
+        --contrasts) contrast_selection="${2:-}"; shift 2 ;;
         --exclude-list) exclude_list="${2:-}"; shift 2 ;;
         --sensitivity-label) sensitivity_label="${2:-}"; shift 2 ;;
         --tfce) tfce=1; shift ;;
@@ -99,6 +104,10 @@ if [[ "$network_set" == "smith09" ]]; then
     printf 'smith09\tdmn\t4\nsmith09\tecn\t8\nsmith09\tright-fpn\t9\nsmith09\tleft-fpn\t10\n' >"$plan"
 elif [[ "$network_set" == "smith09-secondary" ]]; then
     printf 'smith09\tprimary-visual\t1\nsmith09\toccipital-pole\t2\nsmith09\tlateral-visual\t3\nsmith09\tsensorimotor\t6\nsmith09\tauditory\t7\n' >"$plan"
+elif [[ "$network_set" == "smith09-reward-primary" ]]; then
+    printf 'smith09-reward\tdmn\t4\nsmith09-reward\tecn\t8\nsmith09-reward\tright-fpn\t9\nsmith09-reward\tleft-fpn\t10\nsmith09-reward\tbrain-reward-signature\t11\n' >"$plan"
+elif [[ "$network_set" == "smith09-reward-secondary" ]]; then
+    printf 'smith09-reward\tprimary-visual\t1\nsmith09-reward\toccipital-pole\t2\nsmith09-reward\tlateral-visual\t3\nsmith09-reward\tsensorimotor\t6\nsmith09-reward\tauditory\t7\n' >"$plan"
 elif [[ ! -f "$comparison" ]]; then
     echo "ERROR: Smith09 comparison table not found: $comparison" >&2
     exit 1
@@ -171,7 +180,7 @@ elif ! awk -F $'\t' -v network_set="$network_set" '
     exit 1
 fi
 
-contrasts=(
+all_contrasts=(
     both-minus-sham
     both-minus-rtpj
     both-minus-vlpfc
@@ -179,7 +188,23 @@ contrasts=(
     rtpj-minus-sham
     vlpfc-minus-sham
     both-minus-mean-rtpj-vlpfc
+    mean-stimulation-minus-sham
 )
+contrasts=()
+if [[ "$contrast_selection" == "all" ]]; then
+    contrasts=("${all_contrasts[@]}")
+else
+    IFS=',' read -r -a requested_contrasts <<<"$contrast_selection"
+    for contrast in "${requested_contrasts[@]}"; do
+        valid=0
+        for known in "${all_contrasts[@]}"; do
+            [[ "$contrast" == "$known" ]] && valid=1
+        done
+        ((valid)) || { echo "ERROR: Unknown contrast: $contrast" >&2; exit 1; }
+        contrasts+=("$contrast")
+    done
+fi
+((${#contrasts[@]} > 0)) || { echo "ERROR: Select at least one contrast." >&2; exit 1; }
 component_count="$(wc -l <"$plan" | tr -d ' ')"
 job_count=$((component_count * ${#contrasts[@]}))
 
@@ -206,6 +231,7 @@ component_path() {
     local analysis_label drdir component_padded
     case "$analysis" in
         smith09) analysis_label="smith09_denoised" ;;
+        smith09-reward) analysis_label="smith09-reward_denoised" ;;
         0) analysis_label="denoised_dim-00_task-rest" ;;
         20) analysis_label="denoised_dim-20_task-rest" ;;
         *) return 1 ;;
@@ -241,7 +267,8 @@ while IFS=$'\t' read -r analysis _network component; do
         printf 'Contrast inputs already prepared: dim=%s component=%s\n' "$analysis" "$component" >&2
         continue
     fi
-    args=("$analysis" "$component" --map-type "$map_type" --output-dir "$component_dir")
+    args=("$analysis" "$component" --map-type "$map_type" --output-dir "$component_dir" --contrasts "$(IFS=','; echo "${contrasts[*]}")")
+    [[ -d "$component_dir" ]] && args+=(--resume)
     [[ -n "$exclude_list" ]] && args+=(--exclude-list "$exclude_list")
     ((dryrun)) && args+=(--dry-run)
     bash "${scriptdir}/make_dual_regression_contrasts.sh" "${args[@]}"

@@ -5,9 +5,9 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/make_dual_regression_contrasts.sh {smith09|0|20} COMPONENT [options]
+Usage: code/make_dual_regression_contrasts.sh {smith09|smith09-reward|0|20} COMPONENT [options]
 
-Create all seven within-participant condition contrasts for one 1-based
+Create within-participant condition contrasts for one 1-based
 dual-regression component, merge each contrast across participants, and write
 one-sample FSL design files plus a run_randomise.sh launcher.
 
@@ -15,6 +15,8 @@ Options:
   --map-type {beta|z}  Stage-2 map type (default: beta)
   --output-dir PATH    Override the component contrast output directory
   --exclude-list PATH  Exclude listed participants from this sensitivity run
+  --contrasts LIST     Comma-separated contrasts or all (default: all)
+  --resume             Add selected missing contrasts to an existing output
   --dry-run            Print resolved paths and planned operations only
 
 The primary analysis should use beta: dr_stage2_subjectNNNNN.nii.gz. The z
@@ -38,20 +40,25 @@ shift 2
 
 case "$analysis" in
     smith09) analysis_label="smith09_denoised" ;;
+    smith09-reward) analysis_label="smith09-reward_denoised" ;;
     0) analysis_label="denoised_dim-00_task-rest" ;;
     20) analysis_label="denoised_dim-20_task-rest" ;;
-    *) echo "ERROR: Analysis must be smith09, 0, or 20." >&2; usage >&2; exit 1 ;;
+    *) echo "ERROR: Analysis must be smith09, smith09-reward, 0, or 20." >&2; usage >&2; exit 1 ;;
 esac
 
 map_type="beta"
 outputdir=""
 exclude_list=""
+contrast_selection="all"
+resume=0
 dryrun=0
 while (($#)); do
     case "$1" in
         --map-type) map_type="${2:-}"; shift 2 ;;
         --output-dir) outputdir="${2:-}"; shift 2 ;;
         --exclude-list) exclude_list="${2:-}"; shift 2 ;;
+        --contrasts) contrast_selection="${2:-}"; shift 2 ;;
+        --resume) resume=1; shift ;;
         --dry-run|--render-only) dryrun=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -81,7 +88,7 @@ if [[ -n "$exclude_list" ]]; then
     [[ -f "$exclude_list" ]] || { echo "ERROR: Exclusion list not found: $exclude_list" >&2; exit 1; }
 fi
 
-contrasts=(
+all_contrasts=(
     both-minus-sham
     both-minus-rtpj
     both-minus-vlpfc
@@ -89,7 +96,31 @@ contrasts=(
     rtpj-minus-sham
     vlpfc-minus-sham
     both-minus-mean-rtpj-vlpfc
+    mean-stimulation-minus-sham
 )
+contrasts=()
+if [[ "$contrast_selection" == "all" ]]; then
+    contrasts=("${all_contrasts[@]}")
+else
+    IFS=',' read -r -a requested_contrasts <<<"$contrast_selection"
+    for contrast in "${requested_contrasts[@]}"; do
+        valid=0
+        for known in "${all_contrasts[@]}"; do
+            [[ "$contrast" == "$known" ]] && valid=1
+        done
+        ((valid)) || { echo "ERROR: Unknown contrast: $contrast" >&2; exit 1; }
+        if ((${#contrasts[@]})); then
+            for selected in "${contrasts[@]}"; do
+                [[ "$contrast" != "$selected" ]] || {
+                    echo "ERROR: Duplicate contrast: $contrast" >&2
+                    exit 1
+                }
+            done
+        fi
+        contrasts+=("$contrast")
+    done
+fi
+((${#contrasts[@]} > 0)) || { echo "ERROR: Select at least one contrast." >&2; exit 1; }
 
 printf 'Analysis: %s\n' "$analysis" >&2
 printf 'Dual regression: %s\n' "$drdir" >&2
@@ -99,6 +130,7 @@ printf 'Stage-2 map type: %s (dr_stage2_subjectNNNNN%s.nii.gz)\n' \
     "$map_type" "$stage2_suffix" >&2
 printf 'Output: %s\n' "$outputdir" >&2
 printf 'Exclude list: %s\n' "${exclude_list:-none}" >&2
+printf 'Resume existing output: %s\n' "$([[ "$resume" == 1 ]] && echo yes || echo no)" >&2
 printf 'Contrasts: %s\n' "${contrasts[*]}" >&2
 printf 'Operations: fslroi, fslmaths subtraction, fslmerge, one-sample FSL designs\n' >&2
 
@@ -117,7 +149,11 @@ for command in fslroi fslmaths fslmerge fslnvols; do
 done
 [[ -f "$mapping" ]] || { echo "ERROR: Input-order table not found: $mapping" >&2; exit 1; }
 [[ -f "$mask" ]] || { echo "ERROR: Dual-regression mask not found: $mask" >&2; exit 1; }
-[[ ! -e "$outputdir" ]] || { echo "ERROR: Output already exists: $outputdir" >&2; exit 1; }
+if ((resume)); then
+    [[ -d "$outputdir" ]] || { echo "ERROR: Resume output not found: $outputdir" >&2; exit 1; }
+else
+    [[ ! -e "$outputdir" ]] || { echo "ERROR: Output already exists: $outputdir" >&2; exit 1; }
+fi
 
 mkdir -p "${scratchroot}/r21-rest"
 workdir="$(mktemp -d "${scratchroot}/r21-rest/dr_contrasts.XXXXXX")"
@@ -246,23 +282,33 @@ while IFS=$'\t' read -r participant sham_label rtpj_label vlpfc_label both_label
 done <"$plan"
 
 mkdir -p "$outputdir"
+expected_exclusions="${workdir}/excluded_participants.tsv"
 {
     printf 'participant\treason\n'
     while IFS= read -r participant; do
         [[ "$participant" == sub-* ]] || continue
         printf '%s\tdifferential_motion_qc_sensitivity\n' "$participant"
     done <"$clean_exclusions"
-} >"${outputdir}/excluded_participants.tsv"
+} >"$expected_exclusions"
+if ((resume)) && [[ -f "${outputdir}/excluded_participants.tsv" ]]; then
+    cmp -s "$expected_exclusions" "${outputdir}/excluded_participants.tsv" || {
+        echo "ERROR: Existing exclusions do not match this resumed run." >&2
+        exit 1
+    }
+else
+    cp "$expected_exclusions" "${outputdir}/excluded_participants.tsv"
+fi
 for contrast in "${contrasts[@]}"; do
     mkdir -p "${outputdir}/${contrast}"
 done
 
 subject_order="${outputdir}/subject_order.tsv"
-printf 'randomise_index\tparticipant\n' >"$subject_order"
+expected_subject_order="${workdir}/subject_order.tsv"
+printf 'randomise_index\tparticipant\n' >"$expected_subject_order"
 randomise_index=0
 while IFS=$'\t' read -r participant sham_label rtpj_label vlpfc_label both_label; do
     [[ "$participant" == "participant" ]] && continue
-    printf '%d\t%s\n' "$randomise_index" "$participant" >>"$subject_order"
+    printf '%d\t%s\n' "$randomise_index" "$participant" >>"$expected_subject_order"
     randomise_index=$((randomise_index + 1))
 
     participant_work="${workdir}/${participant}"
@@ -277,21 +323,36 @@ while IFS=$'\t' read -r participant sham_label rtpj_label vlpfc_label both_label
     fslroi "${drdir}/dr_stage2_${both_label}${stage2_suffix}.nii.gz" "$both" "$component_index" 1
 
     stem="${participant}_task-${task}_component-${component_padded}_stat-${map_type}"
-    fslmaths "$both" -sub "$sham" \
-        "${outputdir}/both-minus-sham/${stem}_contrast-both-minus-sham.nii.gz" -odt float
-    fslmaths "$both" -sub "$rtpj" \
-        "${outputdir}/both-minus-rtpj/${stem}_contrast-both-minus-rtpj.nii.gz" -odt float
-    fslmaths "$both" -sub "$vlpfc" \
-        "${outputdir}/both-minus-vlpfc/${stem}_contrast-both-minus-vlpfc.nii.gz" -odt float
-    fslmaths "$rtpj" -sub "$vlpfc" \
-        "${outputdir}/rtpj-minus-vlpfc/${stem}_contrast-rtpj-minus-vlpfc.nii.gz" -odt float
-    fslmaths "$rtpj" -sub "$sham" \
-        "${outputdir}/rtpj-minus-sham/${stem}_contrast-rtpj-minus-sham.nii.gz" -odt float
-    fslmaths "$vlpfc" -sub "$sham" \
-        "${outputdir}/vlpfc-minus-sham/${stem}_contrast-vlpfc-minus-sham.nii.gz" -odt float
-    fslmaths "$both" -mul 2 -sub "$rtpj" -sub "$vlpfc" -div 2 \
-        "${outputdir}/both-minus-mean-rtpj-vlpfc/${stem}_contrast-both-minus-mean-rtpj-vlpfc.nii.gz" -odt float
+    for contrast in "${contrasts[@]}"; do
+        destination="${outputdir}/${contrast}/${stem}_contrast-${contrast}.nii.gz"
+        case "$contrast" in
+            both-minus-sham) fslmaths "$both" -sub "$sham" "$destination" -odt float ;;
+            both-minus-rtpj) fslmaths "$both" -sub "$rtpj" "$destination" -odt float ;;
+            both-minus-vlpfc) fslmaths "$both" -sub "$vlpfc" "$destination" -odt float ;;
+            rtpj-minus-vlpfc) fslmaths "$rtpj" -sub "$vlpfc" "$destination" -odt float ;;
+            rtpj-minus-sham) fslmaths "$rtpj" -sub "$sham" "$destination" -odt float ;;
+            vlpfc-minus-sham) fslmaths "$vlpfc" -sub "$sham" "$destination" -odt float ;;
+            both-minus-mean-rtpj-vlpfc)
+                fslmaths "$both" -mul 2 -sub "$rtpj" -sub "$vlpfc" -div 2 \
+                    "$destination" -odt float
+                ;;
+            mean-stimulation-minus-sham)
+                fslmaths "$rtpj" -add "$vlpfc" -add "$both" -div 3 -sub "$sham" \
+                    "$destination" -odt float
+                ;;
+        esac
+    done
 done <"$plan"
+
+if ((resume)); then
+    [[ -f "$subject_order" ]] || { echo "ERROR: Existing subject order not found: $subject_order" >&2; exit 1; }
+    cmp -s "$expected_subject_order" "$subject_order" || {
+        echo "ERROR: Existing subject order does not match this resumed run." >&2
+        exit 1
+    }
+else
+    cp "$expected_subject_order" "$subject_order"
+fi
 
 for contrast in "${contrasts[@]}"; do
     images=()
@@ -306,6 +367,9 @@ for contrast in "${contrasts[@]}"; do
 done
 
 design_mat="${outputdir}/design.mat"
+design_con="${outputdir}/design.con"
+design_grp="${outputdir}/design.grp"
+if ((!resume)); then
 {
     printf '/NumWaves\t1\n'
     printf '/NumPoints\t%d\n' "$participant_count"
@@ -314,7 +378,6 @@ design_mat="${outputdir}/design.mat"
     for ((_index = 0; _index < participant_count; _index++)); do printf '1\n'; done
 } >"$design_mat"
 
-design_con="${outputdir}/design.con"
 cat >"$design_con" <<'EOF'
 /ContrastName1	Positive
 /ContrastName2	Negative
@@ -328,13 +391,17 @@ cat >"$design_con" <<'EOF'
 -1
 EOF
 
-design_grp="${outputdir}/design.grp"
 {
     printf '/NumWaves\t1\n'
     printf '/NumPoints\t%d\n\n' "$participant_count"
     printf '/Matrix\n'
     for ((_index = 0; _index < participant_count; _index++)); do printf '1\n'; done
 } >"$design_grp"
+else
+    for design in "$design_mat" "${outputdir}/design.con" "${outputdir}/design.grp"; do
+        [[ -f "$design" ]] || { echo "ERROR: Existing design file not found: $design" >&2; exit 1; }
+    done
+fi
 
 randomise_script="${outputdir}/run_randomise.sh"
 {

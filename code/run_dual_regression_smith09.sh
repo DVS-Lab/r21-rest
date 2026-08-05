@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run standard FSL dual regression with the original Smith09 network maps.
+# Run standard FSL dual regression with the Smith09 network maps.
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_dual_regression_smith09.sh {smoothed|denoised} [--dry-run]
+Usage: code/run_dual_regression_smith09.sh {smoothed|denoised} [options]
 
 Resample the 10 Smith09 maps to the analysis grid and run stages 1 and 2 of
 the original FSL dual_regression script. No randomise permutations are run.
+
+Options:
+  --include-reward  Append BrainRewardSignature_2mm.nii as component 11
+  --dry-run         Print resolved paths and exit
 USAGE
 }
 
@@ -26,9 +30,11 @@ case "$data_set" in
     *) echo "ERROR: Data set must be smoothed or denoised." >&2; usage >&2; exit 1 ;;
 esac
 
+include_reward=0
 dryrun=0
 while (($#)); do
     case "$1" in
+        --include-reward) include_reward=1; shift ;;
         --dry-run|--render-only) dryrun=1; shift ;;
         --help|-h) usage; exit 0 ;;
         *) echo "ERROR: Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -41,14 +47,24 @@ derivdir="${DERIVATIVES_ROOT:-${maindir}/derivatives}"
 fsldir="${FSL_OUTPUT_DIR:-${derivdir}/fsl}"
 inputlist="${DUAL_REGRESSION_FILELIST:-${fsldir}/${filelist_name}}"
 smith_maps="${SMITH09_MAPS:-${maindir}/masks/PNAS_Smith09_rsn10.nii.gz}"
+reward_map="${REWARD_SIGNATURE_MAP:-${maindir}/masks/BrainRewardSignature_2mm.nii}"
 reference_dir="${SMITH09_REFERENCE_DIR:-${fsldir}/smith09_reference}"
+network_count=10
+analysis_label="smith09_${data_set}"
 resampled_maps="${reference_dir}/PNAS_Smith09_rsn10_resampled.nii.gz"
-outputdir="${DUAL_REGRESSION_OUTPUT_DIR:-${fsldir}/dual-regression_smith09_${data_set}.dr}"
+if ((include_reward)); then
+    network_count=11
+    analysis_label="smith09-reward_${data_set}"
+    resampled_maps="${reference_dir}/PNAS_Smith09_rsn10_reward-signature_resampled.nii.gz"
+fi
+outputdir="${DUAL_REGRESSION_OUTPUT_DIR:-${fsldir}/dual-regression_${analysis_label}.dr}"
 scratchroot="${WORK_ROOT:-/ZPOOL/data/scratch/${USER:-$(whoami)}}"
 
 printf 'Data set: %s\n' "$data_set" >&2
 printf 'Input list: %s\n' "$inputlist" >&2
 printf 'Smith09 maps: %s\n' "$smith_maps" >&2
+printf 'Reward signature: %s\n' "$([[ "$include_reward" == 1 ]] && echo "$reward_map" || echo 'not included')" >&2
+printf 'Spatial regressors: %d\n' "$network_count" >&2
 printf 'Resampled maps: %s\n' "$resampled_maps" >&2
 printf 'Output: %s\n' "$outputdir" >&2
 printf 'Dual regression: %s 1 -1 0 %s <ordered inputs>\n' \
@@ -70,6 +86,9 @@ done
 }
 [[ -f "$inputlist" ]] || { echo "ERROR: Input list not found: $inputlist" >&2; exit 1; }
 [[ -f "$smith_maps" ]] || { echo "ERROR: Smith09 maps not found: $smith_maps" >&2; exit 1; }
+if ((include_reward)); then
+    [[ -f "$reward_map" ]] || { echo "ERROR: Reward signature not found: $reward_map" >&2; exit 1; }
+fi
 [[ ! -e "$outputdir" ]] || { echo "ERROR: Output already exists: $outputdir" >&2; exit 1; }
 
 inputs=()
@@ -87,7 +106,7 @@ if [[ -f "$resampled_maps" ]]; then
     reference_match="$(3dinfo -same_grid "$resampled_maps" "$reference" | tr -d '[:space:]')"
 fi
 
-if [[ "$reference_match" != "11" || "$(fslnvols "$resampled_maps" 2>/dev/null || true)" != "10" ]]; then
+if [[ "$reference_match" != "11" || "$(fslnvols "$resampled_maps" 2>/dev/null || true)" != "$network_count" ]]; then
     mkdir -p "$reference_dir" "${scratchroot}/r21-rest"
     workdir="$(mktemp -d "${scratchroot}/r21-rest/smith09_reference.XXXXXX")"
     cleanup() { rm -rf "$workdir"; }
@@ -95,7 +114,18 @@ if [[ "$reference_match" != "11" || "$(fslnvols "$resampled_maps" 2>/dev/null ||
 
     reference_volume="${workdir}/reference.nii.gz"
     fslroi "$reference" "$reference_volume" 0 1
-    fslsplit "$smith_maps" "${workdir}/smith" -t
+    source_maps="$smith_maps"
+    if ((include_reward)); then
+        reward_clean="${workdir}/BrainRewardSignature_2mm_clean.nii.gz"
+        source_maps="${workdir}/smith09_reward_source.nii.gz"
+        fslmaths "$reward_map" -nan "$reward_clean"
+        [[ "$(fslnvols "$reward_clean")" == "1" ]] || {
+            echo "ERROR: Reward signature must contain exactly one map." >&2
+            exit 1
+        }
+        fslmerge -t "$source_maps" "$smith_maps" "$reward_clean"
+    fi
+    fslsplit "$source_maps" "${workdir}/smith" -t
 
     resampled_parts=()
     for map in "${workdir}"/smith????.nii.gz; do
@@ -111,16 +141,16 @@ if [[ "$reference_match" != "11" || "$(fslnvols "$resampled_maps" 2>/dev/null ||
             -out "$resampled"
         resampled_parts+=("$resampled")
     done
-    ((${#resampled_parts[@]} == 10)) || {
-        echo "ERROR: Expected 10 Smith09 maps; found ${#resampled_parts[@]}" >&2
+    ((${#resampled_parts[@]} == network_count)) || {
+        echo "ERROR: Expected $network_count maps; found ${#resampled_parts[@]}" >&2
         exit 1
     }
     fslmerge -t "${workdir}/smith09_merged.nii.gz" "${resampled_parts[@]}"
     fslmaths "${workdir}/smith09_merged.nii.gz" -nan "$resampled_maps"
 fi
 
-[[ "$(fslnvols "$resampled_maps")" == "10" ]] || {
-    echo "ERROR: Resampled Smith09 image does not contain 10 maps." >&2
+[[ "$(fslnvols "$resampled_maps")" == "$network_count" ]] || {
+    echo "ERROR: Resampled network image does not contain $network_count maps." >&2
     exit 1
 }
 [[ "$(3dinfo -same_grid "$resampled_maps" "$reference" | tr -d '[:space:]')" == "11" ]] || {
@@ -151,3 +181,22 @@ for index in "${!inputs[@]}"; do
         "$condition_order" "${inputs[$index]}" >>"$mapping"
 done
 echo "Wrote $mapping" >&2
+
+labels="${outputdir}/network_labels.tsv"
+cat >"$labels" <<'EOF'
+component	network	source
+1	primary-visual	Smith et al. 2009 PNAS
+2	occipital-pole	Smith et al. 2009 PNAS
+3	lateral-visual	Smith et al. 2009 PNAS
+4	dmn	Smith et al. 2009 PNAS
+5	cerebellum	Smith et al. 2009 PNAS
+6	sensorimotor	Smith et al. 2009 PNAS
+7	auditory	Smith et al. 2009 PNAS
+8	ecn	Smith et al. 2009 PNAS
+9	right-fpn	Smith et al. 2009 PNAS
+10	left-fpn	Smith et al. 2009 PNAS
+EOF
+if ((include_reward)); then
+    printf '11\tbrain-reward-signature\tSpeer et al. 2023 NeuroImage; PMID 36878456\n' >>"$labels"
+fi
+echo "Wrote $labels" >&2

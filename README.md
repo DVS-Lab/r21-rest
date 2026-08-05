@@ -204,16 +204,17 @@ volume counts, C3/C4 contrast targets, and mask voxel counts. It allows small
 rounding differences from FSL's six-decimal `.mat` formatting and reports the
 maximum design-vs-audit difference for each job.
 
-## Network Correlations and DMN x ECN Interaction
+## Network Correlations and PPI
 
 The current covariate-adjusted results are frozen as a follow-up extension of
-the N=27 preliminary randomise analyses. The next non-image analysis uses the
-Smith09 dual-regression stage-1 timecourses to test whether network-to-network
-coupling changes by stimulation condition. Start with the primary DMN/ECN pair:
+the N=27 preliminary randomise analyses. Use the new 11-map dual-regression
+timecourses to test whether DMN coupling with ECN, left/right FPN, and the Brain
+Reward Signature changes by stimulation condition:
 
 ```bash
 python3 code/MakeNetworkCorrelationTables.py \
-  --network-set dmn-ecn \
+  --analysis smith09-reward_denoised \
+  --network-set dmn-targets \
   --fail-on-missing
 ```
 
@@ -221,12 +222,14 @@ Then generate the broader non-cerebellar Smith09 table:
 
 ```bash
 python3 code/MakeNetworkCorrelationTables.py \
+  --analysis smith09-reward_denoised \
   --network-set all-noncerebellar \
   --fail-on-missing
 ```
 
 Outputs are small TSVs under `derivatives/fsl/network_correlation_summary`.
-They include run-level Pearson and partial correlations, Fisher-z
+They include run-level Pearson and partial correlations from explicitly
+z-scored timecourses, Fisher-z
 condition-difference tables, and deterministic sign-flip summaries. This folder
 is explicitly GitHub-tracked, so add and push it after the script runs:
 
@@ -236,28 +239,27 @@ git commit -m "Add network correlation summaries"
 git push
 ```
 
-For the physio-physio interaction sensitivity analysis, do not edit the FSL
-`dual_regression` file. Instead, reuse the Smith09 stage-1 timecourses, append
-a centered DMN x ECN product column, rerun stage 2, and analyze component 11:
+For the physio-physio interaction analyses, do not edit the FSL
+`dual_regression` file. Reuse the 11-map stage-1 timecourses and run four
+parallel models: DMN x ECN, DMN x reward, DMN x left FPN, and DMN x right FPN.
 
 ```bash
-code/run_smith09_dmn_ecn_ppi.sh --dry-run
-code/run_smith09_dmn_ecn_ppi.sh --max-jobs 24
-DUAL_REGRESSION_DIR=derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr \
-  code/make_dual_regression_contrasts.sh smith09 11 \
-  --output-dir derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta
-derivatives/fsl/dual-regression_smith09_denoised_ppi-dmn-ecn.dr/contrasts/component-0011_stat-beta/run_randomise.sh
-python3 code/check_ppi_randomise_results.py --fail-on-missing
+code/run_smith09_ppi.sh all --dry-run
+code/run_smith09_ppi.sh all --max-jobs 24
+code/run_smith09_ppi_randomise.sh all --max-jobs 35
+python3 code/check_ppi_randomise_results.py --ppi-set all --fail-on-missing
 ```
 
-Component 11 is the DMN-by-ECN interaction map; components 1-10 remain the
-original Smith09 networks. The checker writes compact GitHub-tracked summaries,
-copied significant corrected maps, JSON sidecars, and condition-level ROI TSVs
-to `derivatives/fsl/ppi_randomise_summary`:
+Components 1-11 are the explicitly z-scored Smith09-plus-reward timecourses;
+component 12 is the z-scored interaction. Stage 2 uses
+`fsl_glm --demean --des_norm`. The randomise launcher runs 32 jobs (four PPIs by
+eight contrasts) with at most 35 active processes. The checker writes compact
+GitHub-tracked summaries, copied significant maps, JSON sidecars, and
+condition-level ROI TSVs to `derivatives/fsl/ppi_randomise_summary`:
 
 ```bash
 git add derivatives/fsl/ppi_randomise_summary
-git commit -m "Add DMN ECN PPI randomise summaries"
+git commit -m "Add Smith09 reward PPI summaries"
 git push
 ```
 
@@ -513,6 +515,24 @@ no `randomise` permutations are launched. Outputs are written to
 maps FSL's `subject00000` labels back to participant, acquired run, condition,
 and canonical condition order.
 
+Append the Brain Reward Signature as component 11 in a separate analysis so the
+frozen 10-map results remain intact:
+
+```bash
+code/run_dual_regression_smith09.sh denoised --include-reward --dry-run
+code/run_dual_regression_smith09.sh denoised --include-reward
+```
+
+This writes `derivatives/fsl/dual-regression_smith09-reward_denoised.dr` and a
+`network_labels.tsv` recording all 11 components. The launcher sets the source
+reward image's 163 non-finite voxels to zero in the generated analysis copy.
+
+FSL is called with `des_norm=1`, so stage-1 timecourses are variance-normalized
+when used as stage-2 regressors. The correlation compiler also z-scores each
+stage-1 column explicitly within run. Pearson and correlation-matrix partial
+correlations are invariant to this scaling, but the explicit step makes the
+procedure auditable. PPI products are constructed from these z-scored columns.
+
 Run the same sensitivity analysis on the smoothed but not nuisance-regressed
 data with:
 
@@ -531,7 +551,7 @@ recommended for group inference by Nickerson et al. (2017). The corresponding
 are available as a sensitivity analysis but are not the primary effect
 estimates for paired subtraction.
 
-Build all seven contrasts for one selected component at a time. Component
+Build all eight contrasts for one selected component at a time. Component
 numbers are 1-based, matching the MELODIC and Smith09 matching tables:
 
 ```bash
@@ -549,10 +569,32 @@ code/make_dual_regression_contrasts.sh 0 23
 The script extracts that component from the four stage-2 images for each
 participant and creates `BOTH-SHAM`, `BOTH-RTPJ`, `BOTH-VLPFC`,
 `RTPJ-VLPFC`, `RTPJ-SHAM`, `VLPFC-SHAM`, and
-`BOTH-mean(RTPJ,VLPFC)`. For each comparison it merges the participant maps in
+`BOTH-mean(RTPJ,VLPFC)`, and `mean(RTPJ,VLPFC,BOTH)-SHAM`. For each comparison it merges the participant maps in
 the recorded order, then writes `subject_order.tsv`, one-sample `design.mat`,
 `design.con`, `design.grp`, and a `run_randomise.sh` launcher. The design
 contains positive and negative rows for two-sided interpretation.
+
+Add only the newly specified stimulation-average contrast to the existing
+N=27 analyses without rebuilding the other seven contrasts:
+
+```bash
+code/run_randomise.sh primary --contrasts mean-stimulation-minus-sham --max-jobs 35
+code/run_randomise.sh smith09 --contrasts mean-stimulation-minus-sham --max-jobs 35
+code/run_randomise.sh secondary --contrasts mean-stimulation-minus-sham --max-jobs 35
+code/run_randomise.sh smith09-secondary --contrasts mean-stimulation-minus-sham --max-jobs 35
+```
+
+For the new 11-map model, run all eight contrasts for the primary/reward and
+secondary non-cerebellar maps:
+
+```bash
+code/run_randomise.sh smith09-reward-primary --max-jobs 35
+code/run_randomise.sh smith09-reward-secondary --max-jobs 35
+python3 code/check_randomise_results.py \
+  --analysis-set smith09-reward \
+  --network-set all \
+  --fail-on-missing
+```
 
 The stable batch launcher in `code` reads the committed Smith09 matching table,
 prepares missing component contrasts, and runs 5,000 permutations with
@@ -565,7 +607,7 @@ code/run_randomise.sh dmn --dry-run
 code/run_randomise.sh dmn
 ```
 
-This launches 14 jobs: two ICA solutions by seven condition contrasts. Expand
+This launches 16 jobs: two ICA solutions by eight condition contrasts. Expand
 to all primary networks after that batch completes:
 
 ```bash
@@ -573,7 +615,7 @@ code/run_randomise.sh primary
 code/run_randomise.sh smith09
 ```
 
-The primary plan contains seven unique ICA components and 49 jobs, with at
+The primary plan contains seven unique ICA components and 56 jobs, with at
 most 24 active processes. Automatic dimensionality contributes separate DMN,
 ECN, right-FPN, and left-FPN components. Dim-20 contributes DMN, ECN, and one
 bilateral FPN component because both lateralized Smith09 maps select component
@@ -603,8 +645,8 @@ python3 code/check_randomise_results.py --analysis-set all --fail-on-missing
 ```
 
 The checker verifies that every component uses C1=`1` and C2=`-1`, confirms
-the participant count in each merged input, and expects 77 jobs, 154 t-stat
-images, and 154 cluster-extent corrected-p images (two directions).
+the participant count in each merged input, and expects 88 jobs, 176 t-stat
+images, and 176 cluster-extent corrected-p images (two directions).
 Because FSL corrp images contain `1-p`, a peak above 0.95 indicates corrected
 `p < 0.05`. Results are written to the GitHub-tracked directory:
 

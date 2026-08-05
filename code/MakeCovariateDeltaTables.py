@@ -33,6 +33,12 @@ CONTRAST_SPECS: dict[str, dict[str, str | float]] = {
         "label": "BOTH > mean(RTPJ, VLPFC)",
         "weights": "both=1, rtpj=-0.5, vlpfc=-0.5",
     },
+    "mean-stimulation-minus-sham": {
+        "source": "mean-stimulation-minus-sham",
+        "sign": 1.0,
+        "label": "mean(RTPJ, VLPFC, BOTH) > SHAM",
+        "weights": "rtpj=0.333333, vlpfc=0.333333, both=0.333333, sham=-1",
+    },
     "vlpfc-minus-rtpj": {
         "source": "rtpj-minus-vlpfc",
         "sign": -1.0,
@@ -55,6 +61,7 @@ CONTRAST_SPECS: dict[str, dict[str, str | float]] = {
 
 CONTRAST_SETS = {
     "core": (
+        "mean-stimulation-minus-sham",
         "both-minus-sham",
         "both-minus-mean-rtpj-vlpfc",
         "vlpfc-minus-rtpj",
@@ -62,6 +69,7 @@ CONTRAST_SETS = {
         "rtpj-minus-sham",
     ),
     "primary": (
+        "mean-stimulation-minus-sham",
         "both-minus-sham",
         "both-minus-rtpj",
         "both-minus-vlpfc",

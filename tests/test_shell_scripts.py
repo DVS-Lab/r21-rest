@@ -200,9 +200,9 @@ class ShellScriptTests(unittest.TestCase):
             capture_output=True,
             check=True,
         )
-        self.assertIn("dual-regression_smith09_denoised.dr", ppi.stderr)
-        self.assertIn("dual-regression_smith09_denoised_ppi-dmn-ecn.dr", ppi.stderr)
-        self.assertIn("output component 11", ppi.stderr)
+        self.assertIn("dual-regression_smith09-reward_denoised.dr", ppi.stderr)
+        self.assertIn("dual-regression_smith09-reward_denoised_ppi-dmn-ecn.dr", ppi.stderr)
+        self.assertIn("component 12", ppi.stderr)
 
         for dimension, label in (("0", "dim-00"), ("20", "dim-20")):
             melodic_dual = subprocess.run(
@@ -283,7 +283,7 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertIn("Unique ICA components: 2", dmn_randomise.stderr)
-        self.assertIn("Randomise jobs: 14; maximum concurrent: 24", dmn_randomise.stderr)
+        self.assertIn("Randomise jobs: 16; maximum concurrent: 24", dmn_randomise.stderr)
         self.assertIn("dim=0 network=dmn component=23", dmn_randomise.stderr)
         self.assertIn("dim=20 network=dmn component=10", dmn_randomise.stderr)
 
@@ -299,7 +299,7 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertIn("Unique ICA components: 7", primary_randomise.stderr)
-        self.assertIn("Randomise jobs: 49; maximum concurrent: 24", primary_randomise.stderr)
+        self.assertIn("Randomise jobs: 56; maximum concurrent: 24", primary_randomise.stderr)
         self.assertIn("dim=20 network=bilateral-fpn component=8", primary_randomise.stderr)
 
         direct_randomise = subprocess.run(
@@ -314,7 +314,7 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertIn("Smith09 maps: 4", direct_randomise.stderr)
-        self.assertIn("Randomise jobs: 28; maximum concurrent: 24", direct_randomise.stderr)
+        self.assertIn("Randomise jobs: 32; maximum concurrent: 24", direct_randomise.stderr)
         self.assertIn("dim=smith09 network=dmn component=4", direct_randomise.stderr)
         self.assertIn("dim=smith09 network=left-fpn component=10", direct_randomise.stderr)
 
@@ -330,7 +330,7 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertIn("Unique ICA components: 9", secondary_randomise.stderr)
-        self.assertIn("Randomise jobs: 63; maximum concurrent: 24", secondary_randomise.stderr)
+        self.assertIn("Randomise jobs: 72; maximum concurrent: 24", secondary_randomise.stderr)
         self.assertIn("dim=20 network=sensorimotor component=3", secondary_randomise.stderr)
 
         direct_secondary = subprocess.run(
@@ -345,7 +345,7 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertIn("Smith09 maps: 5", direct_secondary.stderr)
-        self.assertIn("Randomise jobs: 35; maximum concurrent: 24", direct_secondary.stderr)
+        self.assertIn("Randomise jobs: 40; maximum concurrent: 24", direct_secondary.stderr)
         self.assertIn("dim=smith09 network=auditory component=7", direct_secondary.stderr)
 
         sensitivity_randomise = subprocess.run(
@@ -360,10 +360,10 @@ class ShellScriptTests(unittest.TestCase):
             check=True,
         )
         self.assertEqual(sensitivity_randomise.stderr.count("Sensitivity label: qc-outliers"), 4)
-        self.assertIn("Randomise jobs: 49; maximum concurrent: 24", sensitivity_randomise.stderr)
-        self.assertIn("Randomise jobs: 63; maximum concurrent: 24", sensitivity_randomise.stderr)
-        self.assertIn("Randomise jobs: 28; maximum concurrent: 24", sensitivity_randomise.stderr)
-        self.assertIn("Randomise jobs: 35; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 56; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 72; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 32; maximum concurrent: 24", sensitivity_randomise.stderr)
+        self.assertIn("Randomise jobs: 40; maximum concurrent: 24", sensitivity_randomise.stderr)
         self.assertIn("sensitivity-qc-outliers/component-0023_stat-beta", sensitivity_randomise.stderr)
 
         qa = subprocess.run(
@@ -579,7 +579,7 @@ class ShellScriptTests(unittest.TestCase):
             )
             self.assertIn("/ContrastName2\tNegative", (output / "design.con").read_text())
             randomise = (output / "run_randomise.sh").read_text()
-            self.assertEqual(randomise.count("randomise -i"), 7)
+            self.assertEqual(randomise.count("randomise -i"), 8)
             self.assertIn('-n "$nperm" "${tfce_args[@]}" -c "$cluster_threshold"', randomise)
             for contrast in (
                 "both-minus-sham",
@@ -589,6 +589,7 @@ class ShellScriptTests(unittest.TestCase):
                 "rtpj-minus-sham",
                 "vlpfc-minus-sham",
                 "both-minus-mean-rtpj-vlpfc",
+                "mean-stimulation-minus-sham",
             ):
                 group_input = output / contrast / (
                     "group_task-rest_component-0010_stat-beta_"

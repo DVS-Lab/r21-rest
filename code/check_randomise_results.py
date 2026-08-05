@@ -24,6 +24,7 @@ CONTRASTS = (
     "rtpj-minus-sham",
     "vlpfc-minus-sham",
     "both-minus-mean-rtpj-vlpfc",
+    "mean-stimulation-minus-sham",
 )
 PRIMARY_NETWORKS = {
     "default_mode": "dmn",
@@ -94,9 +95,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--analysis-set",
-        choices=("ica", "smith09", "all"),
+        choices=("ica", "smith09", "smith09-reward", "all"),
         default="all",
-        help="Audit data-derived ICA, direct Smith09 maps, or both (default: all).",
+        help=(
+            "Audit data-derived ICA, direct Smith09, the 11-map Smith09-plus-reward "
+            "analysis, or the original ICA plus Smith09 set (default: all)."
+        ),
     )
     parser.add_argument(
         "--include-tfce",
@@ -144,6 +148,7 @@ def parse_args() -> argparse.Namespace:
 def analysis_label(analysis: str) -> str:
     return {
         "smith09": "smith09_denoised",
+        "smith09-reward": "smith09-reward_denoised",
         "0": "denoised_dim-00_task-rest",
         "20": "denoised_dim-20_task-rest",
     }[analysis]
@@ -229,6 +234,37 @@ def build_component_plan(
         for network, component in smith09:
             plan.append(
                 {"analysis": "smith09", "component": component, "network": network}
+            )
+    if analysis_set == "smith09-reward":
+        reward_primary = (
+            ("dmn", 4),
+            ("ecn", 8),
+            ("right-fpn", 9),
+            ("left-fpn", 10),
+            ("brain-reward-signature", 11),
+        )
+        reward_secondary = (
+            ("primary-visual", 1),
+            ("occipital-pole", 2),
+            ("lateral-visual", 3),
+            ("sensorimotor", 6),
+            ("auditory", 7),
+        )
+        if network_set == "dmn":
+            reward_maps = reward_primary[:1]
+        elif network_set == "primary":
+            reward_maps = reward_primary
+        elif network_set == "secondary":
+            reward_maps = reward_secondary
+        else:
+            reward_maps = reward_primary + reward_secondary
+        for network, component in reward_maps:
+            plan.append(
+                {
+                    "analysis": "smith09-reward",
+                    "component": component,
+                    "network": network,
+                }
             )
     if not plan:
         raise ValueError("No randomise components matched the requested analysis set.")
@@ -533,6 +569,8 @@ def main() -> int:
         description_parts.append(camel_label(args.sensitivity_label))
     if args.network_set not in {"dmn", "primary"}:
         description_parts.append(f"{camel_label(args.network_set)}Networks")
+    if args.analysis_set == "smith09-reward":
+        description_parts.append("Smith09Reward")
     summary_description = (
         f"_desc-{''.join(description_parts)}" if description_parts else ""
     )

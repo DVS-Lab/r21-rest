@@ -17,6 +17,7 @@ CONTRASTS = (
     "rtpj-minus-sham",
     "vlpfc-minus-sham",
     "both-minus-mean-rtpj-vlpfc",
+    "mean-stimulation-minus-sham",
 )
 COVARIATE_ALIASES = {
     "fdmean": "delta_fd_mean",
