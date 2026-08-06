@@ -646,10 +646,8 @@ automatic-dimensionality components.
 
 ## Remaining Work
 
-The original 10-map DMN x ECN PPI batch did not include the mean-stimulation-
-minus-sham contrast. The coupling report marks it as not run. Completing that
-single test is optional and should not be represented as a null result in the
-meantime.
+The original 10-map DMN x ECN PPI analysis is complete for all three final
+contrasts, including mean stimulation minus sham.
 
 For interpretation, state whether each inferential claim is individual,
 conjunctive, or disjunctive. Following Rubin (2021), do not apply a blanket

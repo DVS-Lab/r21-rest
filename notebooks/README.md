@@ -34,9 +34,9 @@ voxelwise DMN x ECN physio-physio interaction analysis from the original
 10-map model. Significant PPI results include a static MNI brain image and a
 four-condition mean plus SEM plot.
 
-The original 10-map PPI run did not include the mean-stimulation-minus-sham
-contrast. The report marks that test as not run rather than treating it as a
-null result.
+The original 10-map PPI results now include all three final contrasts. The
+mean-stimulation-minus-sham test is complete and null; the other two contrasts
+have corrected maps and four-condition plots in the report.
 
 The executed notebook and standalone HTML are committed as:
 
