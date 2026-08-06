@@ -61,7 +61,7 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 |---|---|---|
 | `dual_regression` | Group maps plus ordered 4D BOLD inputs | Unmodified FSL v0.6 dual-regression script retained under its FSL license. |
 | `run_dual_regression.sh` | Denoised MELODIC dimension `0` or `20` | Runs stages 1 and 2 with design normalization and writes `input_order.tsv`. |
-| `run_dual_regression_smith09.sh` | Smoothed or denoised file list and Smith09 maps | Runs the same two stages using the published ten-network maps; `--include-reward` appends the Brain Reward Signature as component 11 in a separate analysis. |
+| `run_dual_regression_smith09.sh` | Smoothed or denoised file list and Smith09 maps | Runs the same two stages using the published 10-network maps. |
 | `make_dual_regression_contrasts.sh` | One completed dual-regression component | Builds eight paired condition differences, merged group inputs, and one-sample designs; `--resume --contrasts` adds a missing comparison. |
 | `randomise.sh` | One merged component/condition difference | Runs one one-sample cluster-extent test (`-c 3.1`); TFCE is available only with `--tfce`. |
 | `run_randomise.sh` | Completed dual regression and, for ICA, the Smith09 matching table | Runs primary or non-cerebellar secondary ICA matches or direct Smith09 maps with up to 24 concurrent jobs. |
@@ -70,13 +70,13 @@ main `README.md`, inputs come from the BIDS dataset or an earlier step under
 | `check_covariate_randomise_results.py` | Completed covariate-adjusted randomise model folders | Compiles C1-C4 covariate-model peaks, copies significant corrected maps, writes C3/C4 scatterplot-ready subject-contrast TSVs, and writes C1/C2 condition-level TSVs for bar plots to `derivatives/fsl/covariate_randomise_summary`. |
 | `check_covariate_model_integrity.py` | Completed covariate-adjusted randomise model folders | Audits model assumptions: mask voxels, demeaned covariates, design/audit row agreement, subject/image order, group input volume counts, and C3/C4 contrast vectors. |
 | `MakeNetworkCorrelationTables.py` | Dual-regression stage-1 timecourses and `network_labels.tsv` | Z-scores columns within run and writes full/partial correlations, condition deltas, and sign-flip summaries under `derivatives/fsl/network_correlation_summary`. |
-| `run_smith09_ppi.sh` | Completed 11-map Smith09-plus-reward dual regression | Builds standardized DMN x ECN/reward/left-FPN/right-FPN designs and reruns stage 2 with each interaction as component 12. |
-| `run_smith09_ppi_randomise.sh` | Completed component-12 PPI outputs | Builds eight condition contrasts and launches up to 35 randomise jobs concurrently. |
-| `run_smith09_dmn_ecn_ppi.sh` | Same input as `run_smith09_ppi.sh` | Compatibility wrapper for the DMN x ECN model. |
-| `check_ppi_randomise_results.py` | Completed legacy or 11-map PPI randomise outputs | Compiles interaction peaks, copies significant maps, and writes portable condition-level ROI TSVs under `derivatives/fsl/ppi_randomise_summary`. |
-| `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Participants whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; currently `sub-218`. |
+| `run_smith09_dmn_ecn_ppi.sh` | Completed 10-map Smith09 dual regression | Z-scores the DMN and ECN stage-1 timecourses, appends their centered product as component 11, and reruns stage 2. |
+| `run_smith09_dmn_ecn_ppi_randomise.sh` | Completed component-11 DMN x ECN PPI output | Builds and runs the three final condition contrasts, including mean stimulation minus sham. |
+| `check_ppi_randomise_results.py` | Completed component-11 DMN x ECN PPI randomise outputs | Compiles interaction peaks, copies significant maps, and writes portable condition-level ROI TSVs under `derivatives/fsl/ppi_randomise_summary`. |
+| `exclude_qc_outliers.txt` | Output from `select_qc_exclusions.py` | Diagnostic candidates whose average three-contrast magnitude is a boxplot outlier for both tSNR and mean FD; not applied to the final N=27 analysis. |
 | `check_randomise_results.py` | Selected randomise outputs | Verifies both design directions and cluster-extent corrp maps, then copies significant maps and compact participant-by-condition ROI-value TSVs to `derivatives/fsl/randomise_summary`. |
-| `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Interactively plots significant clusters on MNI anatomy and four-condition means with SEM on any computer. |
+| `../notebooks/plot_randomise_results.ipynb` | Tracked randomise summary, significant maps, and ROI-value TSVs | Reports final direct Smith09 DMN/ECN results with static MNI maps and four-condition means with SEM. |
+| `../notebooks/plot_network_correlation_ppi_results.ipynb` | Tracked network-correlation and PPI summaries | Reports DMN coupling with ECN and left/right FPN plus the secondary DMN x ECN PPI analysis. |
 
 Use the batch launcher first for DMN and then for the full primary set:
 
@@ -99,17 +99,6 @@ code/run_randomise.sh secondary --contrasts mean-stimulation-minus-sham --max-jo
 code/run_randomise.sh smith09-secondary --contrasts mean-stimulation-minus-sham --max-jobs 35
 ```
 
-Run and compile the separate 11-map Smith09-plus-reward analysis:
-
-```bash
-code/run_randomise.sh smith09-reward-primary --max-jobs 35
-code/run_randomise.sh smith09-reward-secondary --max-jobs 35
-python3 code/check_randomise_results.py \
-  --analysis-set smith09-reward \
-  --network-set all \
-  --fail-on-missing
-```
-
 Run the remaining non-cerebellar networks separately:
 
 ```bash
@@ -127,8 +116,8 @@ Regenerate the participant QC decisions with the adopted boxplot rule:
 python3 code/select_qc_exclusions.py
 ```
 
-The generated exclusion list currently contains `sub-218`. Treat an N=26 rerun
-as a sensitivity analysis; the preliminary N=27 outputs remain frozen.
+The generated exclusion list is a diagnostic sensitivity aid. The final N=27
+analysis does not apply data-quality exclusions.
 
 Build reviewable group-level covariate spreadsheets before creating FSL GUI
 design files:
@@ -194,58 +183,35 @@ follow the same participant order as the merged group input. The design/audit
 comparison allows small differences from FSL `.mat` values written in
 six-decimal scientific notation and reports the maximum difference in the TSV.
 
-Create the separate 11-map Smith09-plus-reward dual regression first:
-
-```bash
-code/run_dual_regression_smith09.sh denoised --include-reward --dry-run
-code/run_dual_regression_smith09.sh denoised --include-reward
-```
-
-Extract focused DMN coupling from the 11-map dual-regression stage-1
-timecourses, then broaden to all non-cerebellar maps:
+Extract focused DMN coupling from the original 10-map Smith09 dual-regression
+stage-1 timecourses:
 
 ```bash
 python3 code/MakeNetworkCorrelationTables.py \
-  --analysis smith09-reward_denoised \
+  --analysis smith09_denoised \
   --network-set dmn-targets \
-  --fail-on-missing
-python3 code/MakeNetworkCorrelationTables.py \
-  --analysis smith09-reward_denoised \
-  --network-set all-noncerebellar \
   --fail-on-missing
 ```
 
 The script writes run-level full and partial correlations, subject-level
 condition differences, and one-sample sign-flip summaries to
 `derivatives/fsl/network_correlation_summary`. Correlations are Fisher-z
-transformed before constructing condition contrasts. The output folder is
-GitHub-tracked by `.gitignore`, so add and push it after running the script:
+transformed before constructing condition contrasts.
+
+Build the secondary DMN x ECN physio-physio interaction model:
 
 ```bash
-git add derivatives/fsl/network_correlation_summary
-git commit -m "Add network correlation summaries"
-git push
+code/run_smith09_dmn_ecn_ppi.sh --dry-run
+code/run_smith09_dmn_ecn_ppi.sh --max-jobs 24
+code/run_smith09_dmn_ecn_ppi_randomise.sh --dry-run
+code/run_smith09_dmn_ecn_ppi_randomise.sh
+python3 code/check_ppi_randomise_results.py --fail-on-missing
 ```
 
-Build and test the four DMN physio-physio interaction models:
-
-```bash
-code/run_smith09_ppi.sh all --dry-run
-code/run_smith09_ppi.sh all --max-jobs 24
-code/run_smith09_ppi_randomise.sh all --max-jobs 35
-python3 code/check_ppi_randomise_results.py --ppi-set all --fail-on-missing
-```
-
-The source has 11 maps, including reward at component 11. Each PPI output has
-the standardized DMN interaction as component 12 and uses
-`fsl_glm --demean --des_norm`. The checker writes
-`derivatives/fsl/ppi_randomise_summary`, which is also GitHub-tracked:
-
-```bash
-git add derivatives/fsl/ppi_randomise_summary
-git commit -m "Add DMN ECN PPI randomise summaries"
-git push
-```
+The source has 10 Smith09 maps. The output appends the standardized DMN x ECN
+interaction as component 11 and uses `fsl_glm --demean --des_norm`. The
+checker writes compact tracked outputs under
+`derivatives/fsl/ppi_randomise_summary`.
 
 For the exact design matrix order used by a specific randomise stack, rerun the
 spreadsheet step with that stack's `subject_order.tsv`:

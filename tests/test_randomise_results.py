@@ -34,19 +34,19 @@ class RandomiseResultTests(unittest.TestCase):
         path.write_text("#!/bin/sh\n" + body)
         path.chmod(0o755)
 
-    def test_reward_analysis_has_portable_map_name(self):
+    def test_smith09_analysis_has_portable_map_name(self):
         name = CHECKER_MODULE.copied_name(
             "rest",
             "MNI152NLin6Asym",
-            "smith09-reward",
-            "brain-reward-signature",
-            11,
+            "smith09",
+            "default-mode",
+            4,
             "mean-stimulation-minus-sham",
             "positive",
             "cluster-extent",
             "",
         )
-        self.assertIn("smith09RewardBrainRewardSignatureComp0011", name)
+        self.assertIn("smith09DefaultModeComp0004", name)
         self.assertTrue(name.endswith("_stat-corrp_statmap.nii.gz"))
 
     def test_checks_both_directions_and_copies_significant_maps(self):

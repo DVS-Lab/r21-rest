@@ -5,7 +5,7 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/run_randomise.sh {dmn|primary|secondary|smith09|smith09-secondary|smith09-reward-primary|smith09-reward-secondary} [options]
+Usage: code/run_randomise.sh {dmn|primary|secondary|smith09|smith09-secondary} [options]
 
 Prepare selected dual-regression maps and launch condition contrasts.
 
@@ -14,8 +14,6 @@ Prepare selected dual-regression maps and launch condition contrasts.
   secondary  ICA matches for all remaining non-cerebellar Smith09 networks
   smith09  Direct Smith09 maps 4, 8, 9, and 10
   smith09-secondary  Direct Smith09 maps 1, 2, 3, 6, and 7
-  smith09-reward-primary  New 11-map model: DMN, ECN, FPNs, and reward
-  smith09-reward-secondary  New 11-map model: visual, sensorimotor, auditory
 
 Options:
   --max-jobs N              Concurrent randomise processes (default: 24)
@@ -38,7 +36,7 @@ if [[ -z "$network_set" || "$network_set" == "--help" || "$network_set" == "-h" 
 fi
 shift
 case "$network_set" in
-    dmn|primary|secondary|smith09|smith09-secondary|smith09-reward-primary|smith09-reward-secondary) ;;
+    dmn|primary|secondary|smith09|smith09-secondary) ;;
     *) echo "ERROR: Unknown network set: $network_set" >&2; usage >&2; exit 1 ;;
 esac
 
@@ -104,10 +102,6 @@ if [[ "$network_set" == "smith09" ]]; then
     printf 'smith09\tdmn\t4\nsmith09\tecn\t8\nsmith09\tright-fpn\t9\nsmith09\tleft-fpn\t10\n' >"$plan"
 elif [[ "$network_set" == "smith09-secondary" ]]; then
     printf 'smith09\tprimary-visual\t1\nsmith09\toccipital-pole\t2\nsmith09\tlateral-visual\t3\nsmith09\tsensorimotor\t6\nsmith09\tauditory\t7\n' >"$plan"
-elif [[ "$network_set" == "smith09-reward-primary" ]]; then
-    printf 'smith09-reward\tdmn\t4\nsmith09-reward\tecn\t8\nsmith09-reward\tright-fpn\t9\nsmith09-reward\tleft-fpn\t10\nsmith09-reward\tbrain-reward-signature\t11\n' >"$plan"
-elif [[ "$network_set" == "smith09-reward-secondary" ]]; then
-    printf 'smith09-reward\tprimary-visual\t1\nsmith09-reward\toccipital-pole\t2\nsmith09-reward\tlateral-visual\t3\nsmith09-reward\tsensorimotor\t6\nsmith09-reward\tauditory\t7\n' >"$plan"
 elif [[ ! -f "$comparison" ]]; then
     echo "ERROR: Smith09 comparison table not found: $comparison" >&2
     exit 1
@@ -231,7 +225,6 @@ component_path() {
     local analysis_label drdir component_padded
     case "$analysis" in
         smith09) analysis_label="smith09_denoised" ;;
-        smith09-reward) analysis_label="smith09-reward_denoised" ;;
         0) analysis_label="denoised_dim-00_task-rest" ;;
         20) analysis_label="denoised_dim-20_task-rest" ;;
         *) return 1 ;;

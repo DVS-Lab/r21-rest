@@ -5,7 +5,7 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/make_dual_regression_contrasts.sh {smith09|smith09-reward|0|20} COMPONENT [options]
+Usage: code/make_dual_regression_contrasts.sh {smith09|0|20} COMPONENT [options]
 
 Create within-participant condition contrasts for one 1-based
 dual-regression component, merge each contrast across participants, and write
@@ -40,10 +40,9 @@ shift 2
 
 case "$analysis" in
     smith09) analysis_label="smith09_denoised" ;;
-    smith09-reward) analysis_label="smith09-reward_denoised" ;;
     0) analysis_label="denoised_dim-00_task-rest" ;;
     20) analysis_label="denoised_dim-20_task-rest" ;;
-    *) echo "ERROR: Analysis must be smith09, smith09-reward, 0, or 20." >&2; usage >&2; exit 1 ;;
+    *) echo "ERROR: Analysis must be smith09, 0, or 20." >&2; usage >&2; exit 1 ;;
 esac
 
 map_type="beta"

@@ -5,7 +5,7 @@ set -euo pipefail
 
 usage() {
     cat <<'USAGE'
-Usage: code/randomise.sh {smith09|smith09-reward|0|20} NETWORK COMPONENT CONTRAST [options]
+Usage: code/randomise.sh {smith09|0|20} NETWORK COMPONENT CONTRAST [options]
 
 Run one randomise job on a component-wise condition-difference image prepared
 by make_dual_regression_contrasts.sh.
@@ -37,10 +37,9 @@ shift 4
 
 case "$analysis" in
     smith09) analysis_label="smith09_denoised" ;;
-    smith09-reward) analysis_label="smith09-reward_denoised" ;;
     0) analysis_label="denoised_dim-00_task-rest" ;;
     20) analysis_label="denoised_dim-20_task-rest" ;;
-    *) echo "ERROR: Analysis must be smith09, smith09-reward, 0, or 20." >&2; usage >&2; exit 1 ;;
+    *) echo "ERROR: Analysis must be smith09, 0, or 20." >&2; usage >&2; exit 1 ;;
 esac
 [[ "$network" =~ ^[a-z0-9][a-z0-9_-]*$ ]] || {
     echo "ERROR: NETWORK must contain only lowercase letters, numbers, _ or -." >&2

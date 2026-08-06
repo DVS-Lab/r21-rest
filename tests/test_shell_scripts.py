@@ -200,9 +200,24 @@ class ShellScriptTests(unittest.TestCase):
             capture_output=True,
             check=True,
         )
-        self.assertIn("dual-regression_smith09-reward_denoised.dr", ppi.stderr)
-        self.assertIn("dual-regression_smith09-reward_denoised_ppi-dmn-ecn.dr", ppi.stderr)
-        self.assertIn("component 12", ppi.stderr)
+        self.assertIn("dual-regression_smith09_denoised.dr", ppi.stderr)
+        self.assertIn("dual-regression_smith09_denoised_ppi-dmn-ecn.dr", ppi.stderr)
+        self.assertIn("component 11", ppi.stderr)
+
+        ppi_randomise = subprocess.run(
+            [
+                "bash",
+                str(REPO_ROOT / "code" / "run_smith09_dmn_ecn_ppi_randomise.sh"),
+                "--dry-run",
+            ],
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        self.assertIn("component-0011_stat-beta", ppi_randomise.stderr)
+        self.assertIn("mean-stimulation-minus-sham", ppi_randomise.stderr)
+        self.assertIn("both-minus-mean-rtpj-vlpfc", ppi_randomise.stderr)
+        self.assertIn("rtpj-minus-vlpfc", ppi_randomise.stderr)
 
         for dimension, label in (("0", "dim-00"), ("20", "dim-20")):
             melodic_dual = subprocess.run(

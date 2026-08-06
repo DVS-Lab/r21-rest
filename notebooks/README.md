@@ -1,50 +1,61 @@
-# Randomise Results Notebook
+# Results Notebooks
 
-`plot_randomise_results.ipynb` displays every significant N=27 primary,
-secondary, and Smith09-plus-reward cluster-extent result on MNI anatomy. Each
-result includes a plain-language description of the analysis, network, signed
-contrast, corrected peak p-value, and cluster size, followed by sham, RTPJ,
-VLPFC, and BOTH dual-regression stage-2 beta means with SEM. Every result has
-an orthogonal static brain panel; a whole-brain glass view is added only when
-the corrected map contains multiple disconnected clusters.
+The two final shareable reports use the original 10 Smith09 maps, the N=27
+sample, and three nonredundant condition contrasts:
 
-The notebook also correlates each extracted brain contrast with the matching
-signed pupil and blink-rate deltas from the primary N=27 subject set.
+1. mean(RTPJ, VLPFC, BOTH) - sham
+2. BOTH - mean(RTPJ, VLPFC)
+3. RTPJ - VLPFC
 
-The notebook also audits every planned contrast, so nonsignificant comparisons
-do not disappear. Its QC section uses only tSNR and mean FD. It shows centered
-condition boxplots, three orthogonal signed-contrast boxplots, and participant
-boxplots of mean absolute magnitude across those three contrasts. The Tukey
-rule identifies `sub-218` on both metrics as a sensitivity-analysis candidate.
+Only cluster-extent inference is reported (5,000 permutations,
+cluster-forming `t=3.1`). TFCE is intentionally omitted. Because FSL writes
+separate positive and negative one-tailed tests, the reports use the
+conservative two-sided value `min(1, 2 * p_best_tail)`.
 
-Run the result checker before opening the notebook. Then close any existing
-JupyterLab server and use the project launcher:
+## Primary Connectivity
 
-```bash
-python3 code/check_randomise_results.py --analysis-set all --fail-on-missing
-python3 code/check_randomise_results.py \
-  --network-set secondary \
-  --analysis-set all \
-  --fail-on-missing
-bash notebooks/run_randomise_notebook.sh
+`plot_randomise_results.ipynb` reports direct Smith09 DMN and ECN
+dual-regression results. It contains a complete audit of the planned
+network-by-contrast tests and displays each significant result with a static
+MNI brain image and four-condition mean plus SEM plot.
+
+The executed notebook and standalone HTML are committed as:
+
+```text
+notebooks/plot_randomise_results.ipynb
+notebooks/plot_randomise_results_rendered.html
 ```
 
-The result checker uses the Linux-side dual-regression images to write compact
-participant-by-condition `*_timeseries.tsv` files beside each significant map.
-Commit those TSVs with the updated summary, NIfTI maps, and JSON sidecars. The
-notebook reads only these tracked files and therefore does not require the
-large dual-regression directories, FSL, or Neurodesk on another computer.
+## Network Coupling and PPI
 
-The launcher installs `notebooks/requirements.txt` before starting JupyterLab.
-If Lab was already open during installation, stop it with `Ctrl-C`, rerun the
-launcher, and refresh the browser tab.
+`plot_network_correlation_ppi_results.ipynb` reports full and partial
+DMN coupling with ECN, left FPN, and right FPN. It also reports the secondary
+voxelwise DMN x ECN physio-physio interaction analysis from the original
+10-map model. Significant PPI results include a static MNI brain image and a
+four-condition mean plus SEM plot.
 
-## Sharing Rendered Output
+The original 10-map PPI run did not include the mean-stimulation-minus-sham
+contrast. The report marks that test as not run rather than treating it as a
+null result.
 
-Running every cell, saving the notebook, and committing the resulting `.ipynb`
-allows collaborators to view saved text, tables, bar plots, boxplots, and brain
-maps on GitHub without executing Python. A saved notebook can also be exported
-as a convenient standalone static HTML file:
+The executed notebook and standalone HTML are committed as:
+
+```text
+notebooks/plot_network_correlation_ppi_results.ipynb
+notebooks/plot_network_correlation_ppi_results_rendered.html
+```
+
+## Running Locally
+
+The reports read only compact, GitHub-tracked TSV, NIfTI, and JSON files. They
+do not require the large Linux dual-regression directories or FSL.
+
+```bash
+bash notebooks/run_randomise_notebook.sh
+bash notebooks/run_network_correlation_ppi_notebook.sh
+```
+
+To refresh the standalone HTML after executing and saving a notebook:
 
 ```bash
 python3 -m jupyter nbconvert \
@@ -52,78 +63,24 @@ python3 -m jupyter nbconvert \
   --HTMLExporter.embed_images=True \
   --output plot_randomise_results_rendered.html \
   notebooks/plot_randomise_results.ipynb
+
+python3 -m jupyter nbconvert \
+  --to html \
+  --HTMLExporter.embed_images=True \
+  --output plot_network_correlation_ppi_results_rendered.html \
+  notebooks/plot_network_correlation_ppi_results.ipynb
 ```
 
-Collaborators can download and open that HTML file directly without Python.
-Keep the executed notebook or rendered HTML only when intentionally publishing
-a result snapshot; the source notebook otherwise remains output-free for clean
-review.
+## Covariate Follow-Up
 
-Only cluster-extent results are displayed. The notebook reads both tracked
-randomise summary tables and intentionally ignores TFCE. The region is selected
-from the same group contrast summarized in the bar plot, so the condition means
-and SEM are descriptive and must not be treated as
-independent ROI inference. Each network/contrast is reported as an individual
-hypothesis. Following Rubin's inference-based framework, an across-job alpha
-adjustment is relevant to a disjunctive claim that at least one result exists,
-not automatically to separate inferences about each reported hypothesis.
-
-## Covariate Randomise Scatterplots
-
-`plot_covariate_randomise_scatterplots.ipynb` is separate from the main
-brain-map notebook. It reads
-`derivatives/fsl/covariate_randomise_summary/task-rest_covariate-randomise_peak_summary.tsv`
-and reviews both pieces of the covariate models: C3/C4, the blink or pupil
-covariate-effect contrasts, and C1/C2, the adjusted main-effect contrasts.
-The C1/C2 section compares the original 12 significant cluster-extent results
-against the FD+blink and FD+pupil adjusted versions.
-
-Launch it with:
+`plot_covariate_randomise_scatterplots.ipynb` remains a separate follow-up
+report for FD+blink and FD+pupil models. C1/C2 are shown as adjusted brain maps
+with four-condition bar plots; C3/C4 covariate effects use scatterplots when a
+corrected ROI is available.
 
 ```bash
 bash notebooks/run_covariate_randomise_notebook.sh
 ```
 
-The current covariate summary has complete C3/C4 rows, but no C3/C4 map crossed
-the `1-p > 0.95` corrected threshold, so no C3/C4 ROI-value TSVs were copied by
-the compiler. The notebook therefore shows the sorted C3/C4 peak audit and will
-automatically render scatterplots once C3/C4 ROI-value TSVs are available. In
-those scatterplots, the y axis is subject-level brain contrast beta from the
-corrected ROI and the x axis is the raw blink or pupil contrast delta; mean FD
-is included in the randomise model but is not plotted on the x axis.
-
-The C1/C2 displays are covariate-adjusted brain maps paired with
-four-condition bar plots, not scatterplots. They require the copied
-`copied_image` corrected maps and `condition_values_tsv` files written by
-`code/check_covariate_randomise_results.py` for significant C1/C2 maps. Each
-brain panel thresholds the adjusted corrp map at `1-p > 0.95`; each bar plot
-shows sham, RTPJ, VLPFC, and BOTH stage-2 beta means with SEM from that same
-adjusted main-effect ROI. The notebook also reads the optional
-`task-rest_covariate-randomise_integrity.tsv` file written by
-`code/check_covariate_model_integrity.py` when it is available.
-
-## Network Correlation and PPI Results
-
-`plot_network_correlation_ppi_results.ipynb` reviews the standardized
-Smith09-plus-reward stage-1 network correlations and the secondary DMN
-interaction randomise analyses. It reads the tracked summaries in
-`derivatives/fsl/network_correlation_summary` and
-`derivatives/fsl/ppi_randomise_summary`, so it can run on a local computer
-without the large Linux-side dual-regression folders.
-
-Launch it with:
-
-```bash
-bash notebooks/run_network_correlation_ppi_notebook.sh
-```
-
-The first section plots full and partial DMN coupling with ECN, left FPN, right
-FPN, and the Brain Reward Signature by condition. It includes all eight
-contrasts, including `mean(RTPJ,VLPFC,BOTH)-sham`, and then audits the broader
-non-cerebellar scan. The second section retains the legacy component-11 DMN x
-ECN result for provenance and adds the standardized component-12 DMN x ECN,
-DMN x reward, DMN x left-FPN, and DMN x right-FPN analyses when their tracked
-summary is present. Significant cluster-extent maps are shown with static brain
-panels and four-condition stage-2 beta means from the same corrected ROI. A
-whole-brain glass view is added only for maps with multiple disconnected
-clusters. TFCE is intentionally ignored.
+All ROI bar plots are descriptive summaries extracted from the same corrected
+cluster used to identify the result and are not independent ROI tests.

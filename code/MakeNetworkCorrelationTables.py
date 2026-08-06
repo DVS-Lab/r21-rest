@@ -42,7 +42,7 @@ DEFAULT_NETWORK_LABELS = (
     ("left-fpn", 10),
 )
 PRIMARY_NETWORKS = {"dmn", "ecn", "right-fpn", "left-fpn"}
-DMN_TARGETS = {"ecn", "right-fpn", "left-fpn", "brain-reward-signature"}
+DMN_TARGETS = {"ecn", "right-fpn", "left-fpn"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,8 +58,8 @@ def parse_args() -> argparse.Namespace:
         choices=("dmn-ecn", "dmn-targets", "primary", "all-noncerebellar", "all"),
         default="all-noncerebellar",
         help=(
-            "Network pairs to summarize. dmn-targets reports DMN coupling with ECN, "
-            "left/right FPN, and the reward signature when present."
+            "Network pairs to summarize. dmn-targets reports DMN coupling with ECN "
+            "and the left/right FPNs."
         ),
     )
     parser.add_argument(
@@ -225,7 +225,7 @@ def main() -> int:
             raise ValueError("The network-label table does not contain DMN")
         pairs = [
             (("dmn", by_name["dmn"]), (target, by_name[target]))
-            for target in ("ecn", "right-fpn", "left-fpn", "brain-reward-signature")
+            for target in ("ecn", "right-fpn", "left-fpn")
             if target in by_name
         ]
     if not pairs:
@@ -417,7 +417,10 @@ def main() -> int:
             "network timecourses. The condition-contrast table applies the same "
             "within-participant condition contrasts used for the randomise analyses "
             "to Fisher-z-transformed correlations. The summary table reports one-sample "
-            "means and deterministic Monte Carlo sign-flip p-values for each contrast.\n"
+            "means and deterministic Monte Carlo sign-flip p-values for each contrast.\n\n"
+            "The final shareable report uses the original 10-map model and focuses "
+            "on DMN coupling with ECN, left FPN, and right FPN across the three "
+            "prespecified nonredundant contrasts.\n"
         )
 
     print(f"Network pairs: {len(pairs)}")

@@ -18,6 +18,20 @@ MRIQC image      /ZPOOL/data/tools/mriqc-24.0.2.sif
 
 Set the corresponding environment variable only when a default path differs.
 
+## Final Shareable Reports
+
+The current N=27 results are summarized in two self-contained HTML reports:
+
+- [`notebooks/plot_randomise_results_rendered.html`](notebooks/plot_randomise_results_rendered.html): direct Smith09 DMN and ECN connectivity results.
+- [`notebooks/plot_network_correlation_ppi_results_rendered.html`](notebooks/plot_network_correlation_ppi_results_rendered.html): DMN coupling with ECN and left/right FPN, plus the secondary DMN x ECN interaction analysis.
+
+Both reports use the original 10 Smith09 maps and focus on three nonredundant
+contrasts: mean stimulation minus sham, BOTH minus the mean of the two
+single-site conditions, and RTPJ minus VLPFC. They report cluster-extent
+inference only and combine the inspected positive and negative directions into
+a conservative two-sided p-value. See
+[`notebooks/README.md`](notebooks/README.md) for scope and reproduction notes.
+
 ## Subject List
 
 Create `code/sublist.txt` from participants with task-rest BOLD data:
@@ -102,9 +116,9 @@ pattern for tSNR (`p=.58`) or mean FD (`p=.75`).
 
 `select_qc_exclusions.py` averages each participant's absolute magnitude across
 the three orthogonal contrasts separately for tSNR and mean FD, then applies
-the upper Tukey fence to each distribution. Requiring both metrics identifies
-`sub-218` as the sole QC exclusion candidate. This does not alter the frozen
-N=27 preliminary analysis; it defines a future N=26 sensitivity analysis.
+the upper Tukey fence to each distribution. This is retained as a diagnostic
+sensitivity rule; the final N=27 analysis does not exclude participants for
+data quality.
 
 Review the tracked output tables in `derivatives/qc`:
 
@@ -206,62 +220,37 @@ maximum design-vs-audit difference for each job.
 
 ## Network Correlations and PPI
 
-The current covariate-adjusted results are frozen as a follow-up extension of
-the N=27 preliminary randomise analyses. Use the new 11-map dual-regression
-timecourses to test whether DMN coupling with ECN, left/right FPN, and the Brain
-Reward Signature changes by stimulation condition:
+Use the original 10-map Smith09 dual-regression timecourses to test whether DMN
+coupling with ECN and left/right FPN changes by stimulation condition:
 
 ```bash
 python3 code/MakeNetworkCorrelationTables.py \
-  --analysis smith09-reward_denoised \
+  --analysis smith09_denoised \
   --network-set dmn-targets \
-  --fail-on-missing
-```
-
-Then generate the broader non-cerebellar Smith09 table:
-
-```bash
-python3 code/MakeNetworkCorrelationTables.py \
-  --analysis smith09-reward_denoised \
-  --network-set all-noncerebellar \
   --fail-on-missing
 ```
 
 Outputs are small TSVs under `derivatives/fsl/network_correlation_summary`.
 They include run-level Pearson and partial correlations from explicitly
-z-scored timecourses, Fisher-z
-condition-difference tables, and deterministic sign-flip summaries. This folder
-is explicitly GitHub-tracked, so add and push it after the script runs:
+z-scored timecourses, Fisher-z condition-difference tables, and deterministic
+sign-flip summaries.
+
+For the secondary physio-physio interaction analysis, reuse the 10-map stage-1
+timecourses and add the standardized DMN x ECN product as component 11. The FSL
+`dual_regression` file remains unmodified.
 
 ```bash
-git add derivatives/fsl/network_correlation_summary
-git commit -m "Add network correlation summaries"
-git push
+code/run_smith09_dmn_ecn_ppi.sh --dry-run
+code/run_smith09_dmn_ecn_ppi.sh
+code/run_smith09_dmn_ecn_ppi_randomise.sh --dry-run
+code/run_smith09_dmn_ecn_ppi_randomise.sh
+python3 code/check_ppi_randomise_results.py --fail-on-missing
 ```
 
-For the physio-physio interaction analyses, do not edit the FSL
-`dual_regression` file. Reuse the 11-map stage-1 timecourses and run four
-parallel models: DMN x ECN, DMN x reward, DMN x left FPN, and DMN x right FPN.
-
-```bash
-code/run_smith09_ppi.sh all --dry-run
-code/run_smith09_ppi.sh all --max-jobs 24
-code/run_smith09_ppi_randomise.sh all --max-jobs 35
-python3 code/check_ppi_randomise_results.py --ppi-set all --fail-on-missing
-```
-
-Components 1-11 are the explicitly z-scored Smith09-plus-reward timecourses;
-component 12 is the z-scored interaction. Stage 2 uses
-`fsl_glm --demean --des_norm`. The randomise launcher runs 32 jobs (four PPIs by
-eight contrasts) with at most 35 active processes. The checker writes compact
-GitHub-tracked summaries, copied significant maps, JSON sidecars, and
-condition-level ROI TSVs to `derivatives/fsl/ppi_randomise_summary`:
-
-```bash
-git add derivatives/fsl/ppi_randomise_summary
-git commit -m "Add Smith09 reward PPI summaries"
-git push
-```
+Components 1-10 are the explicitly z-scored Smith09 timecourses and component
+11 is the centered interaction. Stage 2 uses `fsl_glm --demean --des_norm`.
+The checker writes compact summaries, copied significant maps, JSON sidecars,
+and condition-level ROI TSVs to `derivatives/fsl/ppi_randomise_summary`.
 
 ## Verify Outputs
 
@@ -515,18 +504,6 @@ no `randomise` permutations are launched. Outputs are written to
 maps FSL's `subject00000` labels back to participant, acquired run, condition,
 and canonical condition order.
 
-Append the Brain Reward Signature as component 11 in a separate analysis so the
-frozen 10-map results remain intact:
-
-```bash
-code/run_dual_regression_smith09.sh denoised --include-reward --dry-run
-code/run_dual_regression_smith09.sh denoised --include-reward
-```
-
-This writes `derivatives/fsl/dual-regression_smith09-reward_denoised.dr` and a
-`network_labels.tsv` recording all 11 components. The launcher sets the source
-reward image's 163 non-finite voxels to zero in the generated analysis copy.
-
 FSL is called with `des_norm=1`, so stage-1 timecourses are variance-normalized
 when used as stage-2 regressors. The correlation compiler also z-scores each
 stage-1 column explicitly within run. Pearson and correlation-matrix partial
@@ -584,18 +561,6 @@ code/run_randomise.sh secondary --contrasts mean-stimulation-minus-sham --max-jo
 code/run_randomise.sh smith09-secondary --contrasts mean-stimulation-minus-sham --max-jobs 35
 ```
 
-For the new 11-map model, run all eight contrasts for the primary/reward and
-secondary non-cerebellar maps:
-
-```bash
-code/run_randomise.sh smith09-reward-primary --max-jobs 35
-code/run_randomise.sh smith09-reward-secondary --max-jobs 35
-python3 code/check_randomise_results.py \
-  --analysis-set smith09-reward \
-  --network-set all \
-  --fail-on-missing
-```
-
 The stable batch launcher in `code` reads the committed Smith09 matching table,
 prepares missing component contrasts, and runs 5,000 permutations with
 cluster-extent inference at a cluster-forming t threshold of 3.1 (`-c 3.1`).
@@ -622,9 +587,9 @@ bilateral FPN component because both lateralized Smith09 maps select component
 `8`. Completion markers prevent the primary batch from repeating finished DMN
 tests. Logs are written under `derivatives/logs/randomise`.
 
-The full-sample preliminary analysis did not exclude any of its 27 participants
-for motion. To cover every remaining non-cerebellar Smith09 network in secondary
-analyses, run the ICA-derived matches and direct atlas maps:
+The final N=27 analysis did not exclude participants for motion. The scripts
+also retain the ability to audit non-cerebellar Smith09 networks without
+including them in the final report:
 
 ```bash
 code/run_randomise.sh secondary
@@ -661,17 +626,14 @@ direction, inference method, permutation count, threshold, peak, and source.
 Compact participant-by-condition stage-2 beta TSVs make the result notebook
 portable across machines.
 
-The preliminary full-sample result is tagged
-`preliminary-results-2026-06-23` and documented in
-[`docs/preliminary-results-2026-06-23.md`](docs/preliminary-results-2026-06-23.md).
-Regenerate the QC decision table and exclusion list with:
+Regenerate the QC diagnostic table with:
 
 ```bash
 python3 code/select_qc_exclusions.py
 ```
 
-The current list contains `sub-218`, the only participant whose average
-three-contrast magnitude is a boxplot outlier for both tSNR and mean FD.
+The boxplot rule is retained for sensitivity review but is not used to exclude
+participants from the final N=27 analysis.
 
 `code/randomise.sh` runs one network/contrast job when a targeted rerun is
 needed. See [`code/README.md`](code/README.md) for concise input/output notes on
@@ -684,15 +646,15 @@ automatic-dimensionality components.
 
 ## Remaining Work
 
-1. Reconcile the 27-participant sample with the earlier 28- and 22-participant
-   analyses and resolve any stimulation-delivery exclusion.
-2. Review `sub-218`'s average three-contrast QC profile and source reports before
-   running the N=26 sensitivity analysis.
-3. Interpret primary and secondary network results in the portable notebook.
-4. State whether each inferential claim is individual, conjunctive, or
-   disjunctive. Following Rubin (2021), do not apply a blanket across-job alpha
-   adjustment to separate individual hypotheses; adjustment is relevant to an
-   "at least one" disjunctive claim.
+The original 10-map DMN x ECN PPI batch did not include the mean-stimulation-
+minus-sham contrast. The coupling report marks it as not run. Completing that
+single test is optional and should not be represented as a null result in the
+meantime.
+
+For interpretation, state whether each inferential claim is individual,
+conjunctive, or disjunctive. Following Rubin (2021), do not apply a blanket
+across-job alpha adjustment to separate individual hypotheses; adjustment is
+relevant to an "at least one" disjunctive claim.
 
 ## License
 

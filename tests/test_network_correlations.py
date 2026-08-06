@@ -99,14 +99,14 @@ class NetworkCorrelationTests(unittest.TestCase):
             self.assertEqual({row["n"] for row in summary_rows}, {"1"})
             self.assertTrue((output_dir / "README.md").is_file())
 
-    def test_reads_reward_label_and_reports_four_dmn_targets(self):
+    def test_reports_three_dmn_targets_from_original_smith09_maps(self):
         try:
             np = importlib.import_module("numpy")
         except ModuleNotFoundError:
             self.skipTest("numpy is not installed in this Python environment")
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            dr_dir = root / "dual-regression_smith09-reward_denoised.dr"
+            dr_dir = root / "dual-regression_smith09_denoised.dr"
             dr_dir.mkdir()
             (dr_dir / "network_labels.tsv").write_text(
                 "component\tnetwork\tsource\n"
@@ -120,7 +120,6 @@ class NetworkCorrelationTests(unittest.TestCase):
                 "8\tecn\tSmith09\n"
                 "9\tright-fpn\tSmith09\n"
                 "10\tleft-fpn\tSmith09\n"
-                "11\tbrain-reward-signature\tSpeer2023\n"
             )
             order = [
                 "dual_regression_index\tdual_regression_label\tparticipant\trun\tcondition\tcondition_order\tfile"
@@ -131,7 +130,7 @@ class NetworkCorrelationTests(unittest.TestCase):
                 order.append(
                     f"{index}\t{label}\tsub-001\t{index + 1:02d}\t{condition}\t{index + 1}\tinput.nii.gz"
                 )
-                np.savetxt(dr_dir / f"dr_stage1_{label}.txt", rng.normal(size=(60, 11)))
+                np.savetxt(dr_dir / f"dr_stage1_{label}.txt", rng.normal(size=(60, 10)))
             (dr_dir / "input_order.tsv").write_text("\n".join(order) + "\n")
             output_dir = root / "summary"
             subprocess.run(
@@ -141,7 +140,7 @@ class NetworkCorrelationTests(unittest.TestCase):
                     "--dr-dir",
                     str(dr_dir),
                     "--analysis",
-                    "smith09-reward_denoised",
+                    "smith09_denoised",
                     "--network-set",
                     "dmn-targets",
                     "--output-dir",
@@ -155,19 +154,18 @@ class NetworkCorrelationTests(unittest.TestCase):
                 check=True,
             )
             run_values = output_dir / (
-                "task-rest_analysis-smith09-reward_denoised_"
+                "task-rest_analysis-smith09_denoised_"
                 "network-correlation_run-values.tsv"
             )
             with run_values.open(newline="") as stream:
                 rows = list(csv.DictReader(stream, delimiter="\t"))
-            self.assertEqual(len(rows), 32)
+            self.assertEqual(len(rows), 24)
             self.assertEqual(
                 {row["network_pair"] for row in rows},
                 {
                     "dmn__ecn",
                     "dmn__right-fpn",
                     "dmn__left-fpn",
-                    "dmn__brain-reward-signature",
                 },
             )
             self.assertEqual({row["timecourse_scaling"] for row in rows}, {"within-run-zscore"})
